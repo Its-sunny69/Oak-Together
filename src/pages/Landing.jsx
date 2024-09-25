@@ -1,22 +1,14 @@
 import React from 'react'
 import Navbar from '../components/Navbar'
+import HeroSection from '../components/HeroSection'
+import Organizations from '../components/Organizations'
 
 function Landing() {
     return (
         <>
             <Navbar />
-
-            <div className='w-full flex'>
-                <div className='w-1/2'>
-                    <div className='flex justify-start items-center'>
-                        <img src="../src/assets/logo.png" alt="" className='w-10'/>
-                        <p>OAK TOGETHER</p>
-                    </div>
-                    <div></div>
-                    <div></div>
-                </div>
-                <div className='w-1/2 bg-blue-200'></div>
-            </div>
+            <HeroSection />
+            <Organizations />
         </>
     )
 }

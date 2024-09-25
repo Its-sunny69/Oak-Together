@@ -7,7 +7,6 @@ function App() {
     <>
       <div className=" mx-24 my-2">
         <Landing />
-        <div>Hello World..!!</div>
       </div>
     </>
   );
