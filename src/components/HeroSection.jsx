@@ -5,7 +5,7 @@ import SignUpButton from './SignUpButton'
 function HeroSection() {
     return (
         <>
-            <div className='w-full flex justify-center items-center my-5 py-24'>
+            <div className='w-full flex justify-center items-center my-5 mt-28'>
                 <div className='w-1/2'>
                     <div className='flex justify-start items-center'>
                         <img src="../src/assets/logo.png" alt="" className='w-10 mr-4' />
@@ -13,7 +13,7 @@ function HeroSection() {
                     </div>
 
                     <div className='my-4'>
-                        <p className='text-5xl font-bold tracking-widest'>
+                        <p className='text-4xl font-bold tracking-widest'>
                             CULTIVATE A <br />
                             GREENER WORLD,<br />
                             ONE PLANT AT A TIME.

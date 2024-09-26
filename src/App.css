@@ -1,0 +1,17 @@
+[data-component="carousel"] {
+	.entries {
+		scroll-timeline: --carousel x;
+	}
+
+	.markers a {
+		animation-timeline: --carousel;
+	}
+}
+
+[data-component="carousel"] {
+	timeline-scope: --carousel;
+}
+
+.markers a {
+	animation-range: calc((var(--i) - 1) * 20%) calc(var(--i) * 20% + 1px);
+}
