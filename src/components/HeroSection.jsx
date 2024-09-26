@@ -1,4 +1,6 @@
 import React from 'react'
+import LoginButton from './LoginButton'
+import SignUpButton from './SignUpButton'
 
 function HeroSection() {
     return (
@@ -25,12 +27,10 @@ function HeroSection() {
                     <div className='mt-20'>
                         <button>
                             <div className="rounded-lg bg-gradient-120 from-[#83E2C1] from-50% to-[#1566E7] to-100% p-[2px]">
-                                <div className="flex h-full w-full items-center justify-center rounded-md px-16 py-1.5 bg-white hover:bg-gradient-120 hover:from-[#83E2C1] hover:from-50% hover:to-[#1566E7] hover:to-100% hover:text-white back">
-                                    <p>LogIn</p>
-                                </div>
+                                <LoginButton />
                             </div>
                         </button>
-                        <button className='px-16 py-2 ml-4 rounded-lg bg-gradient-120 from-[#83E2C1] from-50% to-[#1566E7] to-100% text-white hover:opacity-50'>Sign Up</button>
+                        <SignUpButton />
                     </div>
                 </div>
                 <div className='w-1/2'>
