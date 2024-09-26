@@ -11,7 +11,7 @@ function HeroSection() {
                     </div>
 
                     <div className='my-4'>
-                        <p className='text-5xl font-bold tracking-widest'>
+                        <p className='text-4xl font-bold tracking-widest'>
                             CULTIVATE A <br />
                             GREENER WORLD,<br />
                             ONE PLANT AT A TIME.
