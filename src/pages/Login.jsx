@@ -3,8 +3,9 @@ import SideImageSection from "../components/SideImageSection"
 
 function Login() {
     return (
-        <div className="px-24 py-12">
-            <div className="grid grid-cols-2 shadow-lg rounded-lg">
+        <div className="w-full h-lvh flex flex-col justify-center items-center">
+            <p className="text-4xl font-extrabold mb-10 tracking-wider" >Login</p>
+            <div className="w-[80%] grid grid-cols-2 shadow-lg rounded-lg">
                 <LoginForm />
                 <SideImageSection />
             </div>

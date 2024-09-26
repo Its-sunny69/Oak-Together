@@ -10,7 +10,7 @@ function TestimonialCard() {
         </div>
 
         <div className="my-8 h-54 flex justify-center items-center">
-          <p>
+          <p className="text-sm opacity-80">
             Lorem ipsum dolor sit amet consectetur adipisicing elit. Culpa
             laborum eius laudantium ipsa quas modi commodi eligendi facere
             repudiandae aliquid!

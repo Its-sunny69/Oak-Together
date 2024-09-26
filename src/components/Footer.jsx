@@ -1,4 +1,4 @@
-import { LogoPng, InstagramLogoPng, WhatsAppLogoPng, FacebookLogoPng, TwitterLogoPng } from '../assets/assets'
+import { LogoPng, InstagramLogoPng, WhatsAppLogoPng, FacebookLogoPng, TwitterLogoPng } from '../assets/assets.js'
 
 function Footer() {
     return (
@@ -35,13 +35,13 @@ function Footer() {
             <div className="flex flex-col items-center justify-center gap-5">
                 <div className="flex justify-center">
                     <div className="flex gap-6">
-                        <img src={InstagramLogoPng} alt="" className="h-8" />
-                        <img src={WhatsAppLogoPng} alt="" className="h-8" />
-                        <img src={FacebookLogoPng} alt="" className="h-8" />
-                        <img src={TwitterLogoPng} alt="" className="h-8" />
+                        <img src={InstagramLogoPng} alt="" className="h-6" />
+                        <img src={WhatsAppLogoPng} alt="" className="h-6" />
+                        <img src={FacebookLogoPng} alt="" className="h-6" />
+                        <img src={TwitterLogoPng} alt="" className="h-6" />
                     </div>
                 </div>
-                <div className="text-gray-500 font-medium">@Copyright All Right Reserved</div>
+                <div className="text-gray-500 text-sm font-medium">@Copyright All Right Reserved</div>
             </div>
         </div>
     )

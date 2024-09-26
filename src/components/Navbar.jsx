@@ -16,19 +16,19 @@ function Navbar() {
           <div className="w-[30%] flex justify-between items-center">
             <li className="group cursor-pointer">
               Home
-              <div class="bg-gradient-120 from-[#83E2C1] from-50% to-[#1566E7] to-100% h-[2px] w-0 group-hover:w-full transition-all duration-500"></div>
+              <div className="bg-gradient-120 from-[#83E2C1] from-50% to-[#1566E7] to-100% h-[2px] w-0 group-hover:w-full transition-all duration-500"></div>
             </li>
             <li className="group cursor-pointer">
               Features
-              <div class="bg-gradient-120 from-[#83E2C1] from-50% to-[#1566E7] to-100% h-[2px] w-0 group-hover:w-full transition-all duration-500"></div>
+              <div className="bg-gradient-120 from-[#83E2C1] from-50% to-[#1566E7] to-100% h-[2px] w-0 group-hover:w-full transition-all duration-500"></div>
             </li>
             <li className="group cursor-pointer">
               Glimps
-              <div class="bg-gradient-120 from-[#83E2C1] from-50% to-[#1566E7] to-100% h-[2px] w-0 group-hover:w-full transition-all duration-500"></div>
+              <div className="bg-gradient-120 from-[#83E2C1] from-50% to-[#1566E7] to-100% h-[2px] w-0 group-hover:w-full transition-all duration-500"></div>
             </li>
             <li className="group cursor-pointer">
               About
-              <div class="bg-gradient-120 from-[#83E2C1] from-50% to-[#1566E7] to-100% h-[2px] w-0 group-hover:w-full transition-all duration-500"></div>
+              <div className="bg-gradient-120 from-[#83E2C1] from-50% to-[#1566E7] to-100% h-[2px] w-0 group-hover:w-full transition-all duration-500"></div>
             </li>
           </div>
 

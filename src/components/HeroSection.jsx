@@ -19,7 +19,7 @@ function HeroSection() {
                             ONE PLANT AT A TIME.
                         </p>
 
-                        <p className=' text-gray-500'>
+                        <p className=' text-gray-500 text-sm'>
                             Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.
                         </p>
                     </div>

@@ -22,7 +22,7 @@ export default function AboutUs(){
                 <h1 className="text-2xl md:text-2xl font-semibold mb-2  md:mb-14 tracking-wide">ABOUT US</h1>
                 {
                     text.map((item, index)=>(
-                        <h3 className="text-sm opacity-80 mb-2 md:mb-4">
+                        <h3 className="text-sm opacity-80 mb-2 md:mb-4" key={index}>
                             {item}
                         </h3>
                         

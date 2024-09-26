@@ -9,7 +9,7 @@ function SignUpForm() {
 
     return (
         <div className="flex items-center justify-center rounded-l-lg">
-            <form className="flex flex-col gap-5 items-start justify-center p-8 h-full w-full rounded-l-lg">
+            <form className="flex flex-col gap-5 items-start justify-center p-8 w-full rounded-l-lg">
                 <div className="flex flex-col">
                     <label htmlFor="firstname">First Name</label>
                     <input className="p-1 border-2 border-gray-500 rounded-lg" type="text" id="firstname" name="firstname" placeholder="Enter first name" />
@@ -49,21 +49,21 @@ function SignUpForm() {
                 <div className="flex flex-col">
                     <label htmlFor="country">Country</label>
                     <select className="p-1 border-2 border-gray-500 rounded-lg" name="country" id="country" >
-                        {countries.map(country => <option value={country}>{country}</option>)}
+                        {countries.map(country => <option value={country} key={country}>{country}</option>)}
                     </select>
                 </div>
 
                 <div className="flex flex-col">
                     <label htmlFor="state">State</label>
                     <select className="p-1 border-2 border-gray-500 rounded-lg" name="state" id="state" >
-                        {states.map(state => <option value={state}>{state}</option>)}
+                        {states.map(state => <option value={state} key={state}>{state}</option>)}
                     </select>
                 </div>
 
                 <div className="flex flex-col">
                     <label htmlFor="city">City</label>
                     <select className="p-1 border-2 border-gray-500 rounded-lg" name="city" id="city" >
-                        {cities.map(city => <option value={city}>{city}</option>)}
+                        {cities.map(city => <option value={city} key={city}>{city}</option>)}
                     </select>
                 </div>
 
