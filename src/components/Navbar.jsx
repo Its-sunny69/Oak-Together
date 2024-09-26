@@ -1,38 +1,49 @@
-import React from 'react'
-import LoginButton from './LoginButton'
-import SignUpButton from './SignUpButton'
+import React from "react";
+import LoginButton from "./LoginButton";
+import SignUpButton from "./SignUpButton";
 
 function Navbar() {
-    return (
-        <div>
-            <nav className=' flex justify-center items-center'>
-                <ul className='w-full flex justify-between items-center'>
-                    <div>
-                        <li>
-                            <img src="../src/assets/logo.png" alt="" className='w-14' />
-                        </li>
-                    </div>
+  return (
+    <div>
+      <nav className=" flex justify-center items-center">
+        <ul className="w-full flex justify-between items-center">
+          <div>
+            <li>
+              <img src="../src/assets/logo.png" alt="" className="w-14" />
+            </li>
+          </div>
 
-                    <div className='w-[30%] flex justify-between items-center'>
-                        <li>Home</li>
-                        <li>Features</li>
-                        <li>Glimps</li>
-                        <li>About</li>
-                    </div>
+          <div className="w-[30%] flex justify-between items-center">
+            <li className="group cursor-pointer">
+              Home
+              <div class="bg-gradient-120 from-[#83E2C1] from-50% to-[#1566E7] to-100% h-[2px] w-0 group-hover:w-full transition-all duration-500"></div>
+            </li>
+            <li className="group cursor-pointer">
+              Features
+              <div class="bg-gradient-120 from-[#83E2C1] from-50% to-[#1566E7] to-100% h-[2px] w-0 group-hover:w-full transition-all duration-500"></div>
+            </li>
+            <li className="group cursor-pointer">
+              Glimps
+              <div class="bg-gradient-120 from-[#83E2C1] from-50% to-[#1566E7] to-100% h-[2px] w-0 group-hover:w-full transition-all duration-500"></div>
+            </li>
+            <li className="group cursor-pointer">
+              About
+              <div class="bg-gradient-120 from-[#83E2C1] from-50% to-[#1566E7] to-100% h-[2px] w-0 group-hover:w-full transition-all duration-500"></div>
+            </li>
+          </div>
 
-                    <div className='flex justify-center items-center'>
-                        <button>
-                            <div class="rounded-lg bg-gradient-120 from-[#83E2C1] from-50% to-[#1566E7] to-100% p-[2px]">
-                                <LoginButton />
-                            </div>
-                        </button>
-                        <SignUpButton />
-                    </div>
-
-                </ul>
-            </nav>
-        </div>
-    )
+          <div className="flex justify-center items-center">
+            <button>
+              <div className="rounded-lg bg-gradient-120 from-[#83E2C1] from-50% to-[#1566E7] to-100% p-[2px]">
+                <LoginButton />
+              </div>
+            </button>
+            <SignUpButton />
+          </div>
+        </ul>
+      </nav>
+    </div>
+  );
 }
 
-export default Navbar
+export default Navbar;
