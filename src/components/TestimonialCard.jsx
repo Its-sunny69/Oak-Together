@@ -4,7 +4,7 @@ import { ProfilePng, QuotePng } from "../assets/assets";
 function TestimonialCard() {
   return (
     <>
-      <div className="w-60 bg-transparent backdrop-blur-sm shadow-lg mx-3 p-5 rounded-lg">
+      <div className="w-60 bg-transparent backdrop-blur-sm shadow-lg mx-3 p-5 rounded-lg hover:scale-110 transition-all">
         <div className=" flex justify-end items-center">
           <img src={QuotePng} alt="" className="w-[20%]" />
         </div>

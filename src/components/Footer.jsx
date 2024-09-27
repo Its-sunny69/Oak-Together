@@ -14,19 +14,19 @@ function Footer() {
                     </div>
                 </div>
                 <div className="flex flex-col gap-2 font-semibold text-gray-600">
-                    <div>Services</div>
-                    <div>Theme Tweak</div>
-                    <div>Showcase</div>
+                    <div><a href="" className='hover:opacity-60'>Services</a></div>
+                    <div><a href="" className='hover:opacity-60'>Theme Tweak</a></div>
+                    <div><a href="" className='hover:opacity-60'>Showcase</a></div>
                 </div>
                 <div className="flex flex-col gap-2 font-semibold text-gray-600">
-                    <div>Services</div>
-                    <div>Theme Tweak</div>
-                    <div>Showcase</div>
+                    <div><a href="" className='hover:opacity-60'>Services</a></div>
+                    <div><a href="" className='hover:opacity-60'>Theme Tweak</a></div>
+                    <div><a href="" className='hover:opacity-60'>Showcase</a></div>
                 </div>
                 <div className="flex flex-col gap-2 font-semibold text-gray-600">
-                    <div>Services</div>
-                    <div>Theme Tweak</div>
-                    <div>Showcase</div>
+                    <div><a href="" className='hover:opacity-60'>Services</a></div>
+                    <div><a href="" className='hover:opacity-60'>Theme Tweak</a></div>
+                    <div><a href="" className='hover:opacity-60'>Showcase</a></div>
                 </div>
             </div>
             <div className="flex justify-center">
@@ -35,13 +35,13 @@ function Footer() {
             <div className="flex flex-col items-center justify-center gap-5">
                 <div className="flex justify-center">
                     <div className="flex gap-6">
-                        <img src={InstagramLogoPng} alt="" className="h-6" />
-                        <img src={WhatsAppLogoPng} alt="" className="h-6" />
-                        <img src={FacebookLogoPng} alt="" className="h-6" />
-                        <img src={TwitterLogoPng} alt="" className="h-6" />
+                        <img src={InstagramLogoPng} alt="" className="h-6 cursor-pointer hover:opacity-60" />
+                        <img src={WhatsAppLogoPng} alt="" className="h-6 cursor-pointer hover:opacity-60" />
+                        <img src={FacebookLogoPng} alt="" className="h-6 cursor-pointer hover:opacity-60" />
+                        <img src={TwitterLogoPng} alt="" className="h-6 cursor-pointer hover:opacity-60" />
                     </div>
                 </div>
-                <div className="text-gray-500 text-sm font-medium">@Copyright All Right Reserved</div>
+                <div className="text-gray-500 text-sm font-medium"><a href="" className='hover:opacity-60'>@Copyright All Right Reserved</a></div>
             </div>
         </div>
     )

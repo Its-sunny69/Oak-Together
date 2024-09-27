@@ -68,7 +68,7 @@ function SignUpForm() {
                 </div>
 
                 <div className="flex w-full justify-end">
-                    <SignUpButton />
+                    <SignUpButton action={"/"} />
                 </div>
             </form>
         </div>

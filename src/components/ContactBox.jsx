@@ -3,7 +3,7 @@ import React from "react";
 function ContactBox({ icon, title, subTitle, contact, contactHref }) {
   return (
     <>
-      <div className="w-[22%] bg-blue-100 p-5 mx-12 rounded-lg drop-shadow-lg">
+      <div className="w-[22%] bg-blue-100 p-5 mx-12 rounded-lg drop-shadow-lg hover:scale-105 transition-all">
         <div className="w-fit p-4 bg-blue-200 rounded-lg flex justify-center items-center">
          {icon}
         </div>
@@ -16,7 +16,7 @@ function ContactBox({ icon, title, subTitle, contact, contactHref }) {
         </div>
 
         <div>
-          <a href={contactHref} className="text-sm font-semibold text-blue-600">
+          <a href={contactHref} className="text-sm font-semibold text-blue-600 hover:opacity-60">
             {contact}
           </a>
         </div>

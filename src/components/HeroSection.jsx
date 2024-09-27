@@ -27,10 +27,10 @@ function HeroSection() {
                     <div className='mt-20'>
                         <button>
                             <div className="rounded-lg bg-gradient-120 from-[#83E2C1] from-50% to-[#1566E7] to-100% p-[2px]">
-                                <LoginButton />
+                                <LoginButton action={"/login"}/>
                             </div>
                         </button>
-                        <SignUpButton />
+                        <SignUpButton action={"/signup"}/>
                     </div>
                 </div>
                 <div className='w-1/2'>
