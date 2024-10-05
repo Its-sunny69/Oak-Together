@@ -1,130 +1,90 @@
-// import LoginButton from './LoginButton'
-// import { useState } from 'react';
-
-// function LoginForm() {
-
-//     const [loginData, setLoginData] = useState({
-//         email: "",
-//         password: ""
-//     })
-
-//     const handleChange = (e) => {
-//         const { name, value } = e.target;
-//         setLoginData((prevData) => ({
-//             ...prevData,
-//             [name]: value
-//         }));
-//     };
-
-//     const handleSubmit = (e) => {
-//         e.preventDefault();
-//         console.log(loginData);
-//     }
-
-
-//     return (
-//         <div className="flex items-center justify-center rounded-l-lg">
-//             <form onSubmit={handleSubmit} className="flex flex-col gap-5 items-start justify-center p-8 h-full w-full rounded-l-lg">
-//                 <div className="flex flex-col">
-//                     <label htmlFor="email">Email</label>
-//                     <input className="p-1 border-2 border-gray-500 rounded-lg" type="email" placeholder="Enter email address" name="email" value={loginData.email} onChange={handleChange} />
-//                 </div>
-//                 <div className="flex flex-col">
-//                     <label htmlFor="password">Password</label>
-//                     <input className="p-1 border-2 border-gray-500 rounded-lg" type="password" id="password" placeholder="Enter password" name="password" value={loginData.password} onChange={handleChange} />
-//                 </div>
-//                 <div className="flex w-full justify-end">
-//                     <button type="submit">
-//                         <div className="rounded-lg bg-gradient-120 from-[#83E2C1] from-50% to-[#1566E7] to-100% p-[2px]">
-//                             <LoginButton action={"/"} />
-//                         </div>
-//                     </button>
-//                 </div>
-//             </form>
-//         </div >
-//     )
-// }
-
-// export default LoginForm;
-
-import React from 'react';
-import { useFormik } from 'formik';
-import * as Yup from 'yup'; // Optional: for validation
-import LoginButton from './LoginButton';
 import { useNavigate } from 'react-router-dom';
+import { loginSchema } from '../schemas';
+import { Formik, Form } from 'formik';
+import LoginButton from './LoginButton';
+import FormTextComponent from './FormTextComponent';
 
-const LoginForm = () => {
-
+function LoginForm({ setErrorMessage }) {
+    
     const navigate = useNavigate()
 
-    const formik = useFormik({
-        initialValues: {
-            email: '',
-            password: ''
-        },
-        validationSchema: Yup.object({
-            email: Yup.string()
-                .email('Invalid email address')
-                .required('Required'),
-            password: Yup.string()
-                .min(8, 'Password must be at least 8 characters')
-                .required('Required')
-        }),
-        onSubmit: (values) => {
-            console.log(values);
-            // Handle login logic here
-            navigate("/")
-        }
-    });
+    const defaultRowStyle = "p-1 border-2 border-gray-500 rounded-lg";
 
     return (
         <div className="flex items-center justify-center rounded-l-lg">
-            <form onSubmit={formik.handleSubmit} className="flex flex-col gap-5 items-start justify-center p-8 h-full w-full rounded-l-lg">
-                <div className="flex flex-col">
-                    <label htmlFor="email">Email</label>
-                    <input
-                        className={`p-1 border-2 rounded-lg ${formik.touched.email && formik.errors.email ? 'border-red-500' : 'border-gray-500'}`}
-                        type="email"
-                        placeholder="Enter email address"
-                        name="email"
-                        onChange={formik.handleChange}
-                        onBlur={formik.handleBlur}
-                        value={formik.values.email}
-                    />
-                    {formik.touched.email && formik.errors.email ? (
-                        <div className="text-red-500">{formik.errors.email}</div>
-                    ) : null}
-                </div>
-                <div className="flex flex-col">
-                    <label htmlFor="password">Password</label>
-                    <input
-                        className={`p-1 border-2 rounded-lg ${formik.touched.password && formik.errors.password ? 'border-red-500' : 'border-gray-500'}`}
-                        type="password"
-                        id="password"
-                        placeholder="Enter password"
-                        name="password"
-                        onChange={formik.handleChange}
-                        onBlur={formik.handleBlur}
-                        value={formik.values.password}
-                    />
-                    {formik.touched.password && formik.errors.password ? (
-                        <div className="text-red-500">{formik.errors.password}</div>
-                    ) : null}
-                </div>
-                <div className="flex w-full justify-end">
-                    <button type="submit">
-                        <div className="rounded-lg bg-gradient-120 from-[#83E2C1] from-50% to-[#1566E7] to-100% p-[2px]">
-                            <div className="flex h-full w-full items-center justify-center rounded-md px-6 py-1.5 bg-white shadow-md hover:bg-gradient-120 hover:from-[#83E2C1] hover:from-50% hover:to-[#1566E7] hover:to-100% hover:text-white back"
-                            >
-                                <p>Login</p>
-                            </div>
-                        </div>
-                    </button>
+            <Formik
+                initialValues={{
+                    email: "",
+                    password: "" // use hashing for password??
+                }}
+                validationSchema={loginSchema}
+                onSubmit={(values, { setSubmitting }) => {
+                    const apiUrl = import.meta.env.VITE_SERVER_API_URL;
+                    console.log(apiUrl)
 
-                </div>
-            </form>
+                    const postHeaders = new Headers();
+                    postHeaders.append("Content-Type", "application/json");
+                    console.log(JSON.stringify(values));
+                    fetch(apiUrl + "users/log-in", {
+                        method: "POST",
+                        body: JSON.stringify(values),
+                        headers: postHeaders
+                    })
+                        .then(async (response) => {
+                            const responseObj = await response.json();
+                            if (!response.ok) throw new Error(`${responseObj.message}`);
+                            return responseObj;
+                        })
+                        .then(data => {
+                            // might need to provide better response...
+                            alert(`User: ${data.firstName} ${data.lastName}, has been logged in successfully.`);
+                            navigate("/");
+                        })
+                        .catch(error => {
+                            // this might need improvement too
+                            setErrorMessage(error.message);
+                        })
+                        .finally(() => {
+                            setSubmitting(false);
+                        });
+                }}
+            >
+                <Form className="flex flex-col gap-5 items-start justify-center p-8 h-full w-full rounded-l-lg">
+
+                    <div className="flex flex-col items-start"  >
+                        <FormTextComponent
+                            label={"Email"}
+                            styleClasses={defaultRowStyle}
+                            id={"email"}
+                            name={"email"}
+                            type={"email"}
+                            placeholder={"Enter email address"}
+                        />
+                    </div>
+
+                    <div className="flex flex-col items-start"  >
+                        <FormTextComponent
+                            label={"Password"}
+                            styleClasses={defaultRowStyle}
+                            id={"password"}
+                            name={"password"}
+                            type={"password"}
+                            placeholder={"Enter password"}
+                        />
+                    </div>
+
+                    <div className="flex w-full justify-end">
+                        <button type="submit">
+                            <div className="rounded-lg bg-gradient-120 from-[#83E2C1] from-50% to-[#1566E7] to-100% p-[2px]">
+                                <LoginButton />
+                            </div>
+                        </button>
+                    </div>
+
+                </Form>
+            </Formik>
         </div>
     );
-};
+}
 
 export default LoginForm;
