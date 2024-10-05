@@ -1,11 +1,10 @@
 import { useNavigate } from 'react-router-dom';
 import { loginSchema } from '../schemas';
 import { Formik, Form } from 'formik';
-import LoginButton from './LoginButton';
-import FormTextComponent from './FormTextComponent';
+import { LoginButton, FormTextComponent } from "."
 
 function LoginForm({ setErrorMessage }) {
-    
+
     const navigate = useNavigate()
 
     const defaultRowStyle = "p-1 border-2 border-gray-500 rounded-lg";

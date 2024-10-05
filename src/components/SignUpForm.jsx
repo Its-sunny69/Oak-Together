@@ -1,12 +1,18 @@
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { useApi } from "../hooks";
-import { getAllCountries, getStatesByCountryName, getCitiesByStateName } from "../api";
+import {
+    getAllCountries,
+    getStatesByCountryName,
+    getCitiesByStateName
+} from "../api";
 import { signUpSchema } from "../schemas";
 import { Formik, Form } from "formik";
-import SignUpButton from "./SignUpButton";
-import FormTextComponent from "./FormTextComponent";
-import FormSelectComponent from "./FormSelectComponent";
+import {
+    SignUpButton,
+    FormTextComponent,
+    FormSelectComponent
+} from ".";
 
 
 function SignUpForm({ setErrorMessage }) {

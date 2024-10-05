@@ -2,6 +2,7 @@ import {useState, useEffect} from "react";
 import { useField } from "formik";
 
 function FormSelectComponent({ label, styleClasses, setSelected, ...props }) {
+    
     const [field, meta] = useField(props);
     const [hasError, setHasError] = useState(false);
 
