@@ -9,6 +9,37 @@ function LoginForm({ setErrorMessage }) {
 
     const defaultRowStyle = "p-1 border-2 border-gray-500 rounded-lg";
 
+    const handleFormSubmit = (values, { setSubmitting }) => {
+        const apiUrl = import.meta.env.VITE_SERVER_API_URL;
+        console.log(apiUrl)
+
+        const postHeaders = new Headers();
+        postHeaders.append("Content-Type", "application/json");
+        console.log(JSON.stringify(values));
+        fetch(apiUrl + "users/log-in", {
+            method: "POST",
+            body: JSON.stringify(values),
+            headers: postHeaders
+        })
+            .then(async (response) => {
+                const responseObj = await response.json();
+                if (!response.ok) throw new Error(`${responseObj.message}`);
+                return responseObj;
+            })
+            .then(data => {
+                // might need to provide better response...
+                alert(`User: ${data.firstName} ${data.lastName}, has been logged in successfully.`);
+                navigate("/");
+            })
+            .catch(error => {
+                // this might need improvement too
+                setErrorMessage(error.message);
+            })
+            .finally(() => {
+                setSubmitting(false);
+            });
+    }
+
     return (
         <div className="flex items-center justify-center rounded-l-lg">
             <Formik
@@ -17,36 +48,7 @@ function LoginForm({ setErrorMessage }) {
                     password: "" // use hashing for password??
                 }}
                 validationSchema={loginSchema}
-                onSubmit={(values, { setSubmitting }) => {
-                    const apiUrl = import.meta.env.VITE_SERVER_API_URL;
-                    console.log(apiUrl)
-
-                    const postHeaders = new Headers();
-                    postHeaders.append("Content-Type", "application/json");
-                    console.log(JSON.stringify(values));
-                    fetch(apiUrl + "users/log-in", {
-                        method: "POST",
-                        body: JSON.stringify(values),
-                        headers: postHeaders
-                    })
-                        .then(async (response) => {
-                            const responseObj = await response.json();
-                            if (!response.ok) throw new Error(`${responseObj.message}`);
-                            return responseObj;
-                        })
-                        .then(data => {
-                            // might need to provide better response...
-                            alert(`User: ${data.firstName} ${data.lastName}, has been logged in successfully.`);
-                            navigate("/");
-                        })
-                        .catch(error => {
-                            // this might need improvement too
-                            setErrorMessage(error.message);
-                        })
-                        .finally(() => {
-                            setSubmitting(false);
-                        });
-                }}
+                onSubmit={handleFormSubmit}
             >
                 <Form className="flex flex-col gap-5 items-start justify-center p-8 h-full w-full rounded-l-lg">
 

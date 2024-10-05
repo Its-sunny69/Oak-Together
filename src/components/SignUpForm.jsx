@@ -29,6 +29,7 @@ function SignUpForm({ setErrorMessage }) {
 
     useEffect(() => {
         setCountryResponse();
+        console.log(countryResponse)
     }, []); // renders country dropdown once, countryResponse will never change
 
     useEffect(() => {
@@ -60,6 +61,36 @@ function SignUpForm({ setErrorMessage }) {
         { id: "city", name: "city", label: "City", response: cityResponse, defaultOptions: ["Select City"] },
     ]
 
+    const handleFormSubmit = (values, { setSubmitting }) => {
+        const apiUrl = import.meta.env.VITE_SERVER_API_URL;
+
+        const postHeaders = new Headers();
+        postHeaders.append("Content-Type", "application/json");
+
+        fetch(apiUrl + "users/sign-up", {
+            method: "POST",
+            body: JSON.stringify(values),
+            headers: postHeaders
+        })
+            .then(async (response) => {
+                const responseObj = await response.json();
+                if (!response.ok) throw new Error(`${responseObj.message}`);
+                return responseObj;
+            })
+            .then(data => {
+                // might need to provide better response...
+                alert(`User: ${data.firstName} ${data.lastName}, has been registered successfully.`);
+                navigate("/");
+            })
+            .catch(error => {
+                // this might need improvement too
+                setErrorMessage(error.message);
+            })
+            .finally(() => {
+                setSubmitting(false);
+            });
+    }
+
     const defaultRowStyle = "p-1 border-2 border-gray-500 rounded-lg";
 
     return (
@@ -71,42 +102,14 @@ function SignUpForm({ setErrorMessage }) {
                     email: "",
                     password: "", // use hashing for password?
                     confirmPassword: "",
-                    age: "", // use date-picker and get age as calculated result from D.O.B?
+                    age: "", // use date-picker and get age as calculated result from D.O.B? //sunny
                     gender: "",
                     country: "",
                     state: "",
                     city: ""
                 }}
                 validationSchema={signUpSchema}
-                onSubmit={(values, { setSubmitting }) => {
-                    const apiUrl = import.meta.env.VITE_SERVER_API_URL;
-
-                    const postHeaders = new Headers();
-                    postHeaders.append("Content-Type", "application/json");
-
-                    fetch(apiUrl + "users/sign-up", {
-                        method: "POST",
-                        body: JSON.stringify(values),
-                        headers: postHeaders
-                    })
-                        .then(async (response) => {
-                            const responseObj = await response.json();
-                            if (!response.ok) throw new Error(`${responseObj.message}`);
-                            return responseObj;
-                        })
-                        .then(data => {
-                            // might need to provide better response...
-                            alert(`User: ${data.firstName} ${data.lastName}, has been registered successfully.`);
-                            navigate("/");
-                        })
-                        .catch(error => {
-                            // this might need improvement too
-                            setErrorMessage(error.message);
-                        })
-                        .finally(() => {
-                            setSubmitting(false);
-                        });
-                }}
+                onSubmit={handleFormSubmit}
             >
                 <Form className="flex flex-col gap-5 items-start justify-center p-8 w-full rounded-l-lg">
 
