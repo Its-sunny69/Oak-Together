@@ -1,76 +1,167 @@
-import SignUpButton from "./SignUpButton";
+import { useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
+import { useApi } from "../hooks";
+import {
+    getAllCountries,
+    getStatesByCountryName,
+    getCitiesByStateName
+} from "../api";
+import { signUpSchema } from "../schemas";
+import { Formik, Form } from "formik";
+import {
+    SignUpButton,
+    FormTextComponent,
+    FormSelectComponent
+} from ".";
 
-function SignUpForm() {
 
-    // Below lists are filled with dummy values, will need to change these later:
-    const countries = ["India", "China", "Japan", "Malaysia"];
-    const states = ["Maharashtra", "Karnataka", "Uttar Pradesh", "Uttarakhand"];
-    const cities = ["Thane", "Mumbai", "Delhi", "Calcutta", "Jaipur"];
+function SignUpForm({ setErrorMessage }) {
+
+    const navigate = useNavigate();
+
+    const [countryResponse, setCountryResponse] = useApi(() => getAllCountries());
+    const [selectedCountry, setSelectedCountry] = useState("");
+
+    const [stateResponse, setStateResponse] = useApi(() => getStatesByCountryName(selectedCountry));
+    const [selectedState, setSelectedState] = useState("");
+
+    const [cityResponse, setCityResponse] = useApi(() => getCitiesByStateName(selectedState));
+
+    useEffect(() => {
+        setCountryResponse();
+        console.log(countryResponse)
+    }, []); // renders country dropdown once, countryResponse will never change
+
+    useEffect(() => {
+        const defaultValue = (selectedCountry) ? null : [];
+        setSelectedState(""); // This step is important to update the city dropdown
+        setStateResponse(defaultValue);
+    }, [selectedCountry]);
+    // renders state dropdown every time selected Country changes
+    // also changes state for selectedState, so that below useEffect works
+
+    useEffect(() => {
+        const defaultValue = (selectedState) ? null : [];
+        setCityResponse(defaultValue);
+    }, [selectedState]); // renders city dropdown every time selected State changes
+
+    const formTextObjects = [
+        { id: "firstName", name: "firstName", label: "First Name", placeholder: "Enter first name", type: "text" },
+        { id: "lastName", name: "lastName", label: "Last Name", placeholder: "Enter last name", type: "text" },
+        { id: "email", name: "email", label: "Email", placeholder: "Enter email address", type: "email" },
+        { id: "password", name: "password", label: "Password", placeholder: "Enter password", type: "password" },
+        { id: "confirmPassword", name: "confirmPassword", label: "Confirm Password", placeholder: "Enter same password", type: "password" },
+        { id: "age", name: "age", label: "Age", placeholder: "Enter age", type: "number" }
+    ];
+
+    const formSelectObjects = [
+        { id: "gender", name: "gender", label: "Gender", defaultOptions: ["Select Gender", "Male", "Female", "Other"] },
+        { id: "country", name: "country", label: "Country", setSelected: setSelectedCountry, response: countryResponse, defaultOptions: ["Select Country"] },
+        { id: "state", name: "state", label: "State", setSelected: setSelectedState, response: stateResponse, defaultOptions: ["Select State"] },
+        { id: "city", name: "city", label: "City", response: cityResponse, defaultOptions: ["Select City"] },
+    ]
+
+    const handleFormSubmit = (values, { setSubmitting }) => {
+        const apiUrl = import.meta.env.VITE_SERVER_API_URL;
+
+        const postHeaders = new Headers();
+        postHeaders.append("Content-Type", "application/json");
+
+        fetch(apiUrl + "users/sign-up", {
+            method: "POST",
+            body: JSON.stringify(values),
+            headers: postHeaders
+        })
+            .then(async (response) => {
+                const responseObj = await response.json();
+                if (!response.ok) throw new Error(`${responseObj.message}`);
+                return responseObj;
+            })
+            .then(data => {
+                // might need to provide better response...
+                alert(`User: ${data.firstName} ${data.lastName}, has been registered successfully.`);
+                navigate("/");
+            })
+            .catch(error => {
+                // this might need improvement too
+                setErrorMessage(error.message);
+            })
+            .finally(() => {
+                setSubmitting(false);
+            });
+    }
+
+    const defaultRowStyle = "p-1 border-2 border-gray-500 rounded-lg";
 
     return (
         <div className="flex items-center justify-center rounded-l-lg">
-            <form className="flex flex-col gap-5 items-start justify-center p-8 w-full rounded-l-lg">
-                <div className="flex flex-col">
-                    <label htmlFor="firstname">First Name</label>
-                    <input className="p-1 border-2 border-gray-500 rounded-lg" type="text" id="firstname" name="firstname" placeholder="Enter first name" />
-                </div>
+            <Formik
+                initialValues={{
+                    firstName: "",
+                    lastName: "",
+                    email: "",
+                    password: "", // use hashing for password?
+                    confirmPassword: "",
+                    age: "", // use date-picker and get age as calculated result from D.O.B? //sunny
+                    gender: "",
+                    country: "",
+                    state: "",
+                    city: ""
+                }}
+                validationSchema={signUpSchema}
+                onSubmit={handleFormSubmit}
+            >
+                <Form className="flex flex-col gap-5 items-start justify-center p-8 w-full rounded-l-lg">
 
-                <div className="flex flex-col">
-                    <label htmlFor="lastname">Last Name</label>
-                    <input className="p-1 border-2 border-gray-500 rounded-lg" type="text" id="lastname" name="lastname" placeholder="Enter last name" />
-                </div>
+                    {
+                        formTextObjects.map(({ id, name, label, placeholder, type }) =>
+                            <div className="flex flex-col items-start" key={label} >
+                                <FormTextComponent
+                                    label={label}
+                                    styleClasses={defaultRowStyle}
+                                    id={id}
+                                    name={name}
+                                    type={type}
+                                    placeholder={placeholder}
+                                />
+                            </div>
+                        )
+                    }
 
-                <div className="flex flex-col">
-                    <label htmlFor="email">Email</label>
-                    <input className="p-1 border-2 border-gray-500 rounded-lg" type="email" id="email" name="email" placeholder="Enter email address" />
-                </div>
+                    {
+                        formSelectObjects.map(({ id, name, label, setSelected, response, defaultOptions }) =>
+                            <div className="flex flex-col items-start" key={label}>
+                                <FormSelectComponent
+                                    label={label}
+                                    id={id}
+                                    name={name}
+                                    setSelected={setSelected}
+                                    styleClasses={defaultRowStyle}
+                                >
+                                    <option value="">{defaultOptions[0]}</option>
 
-                <div className="flex flex-col">
-                    <label htmlFor="password">Password</label>
-                    <input className="p-1 border-2 border-gray-500 rounded-lg" type="password" name="password" id="password" placeholder="Enter password" />
-                </div>
+                                    {defaultOptions?.slice(1).map((option) => <option key={option} value={option}>{option}</option>)}
 
-                <div className="flex flex-col">
-                    <label htmlFor="age">Age</label>
-                    <input className="p-1 border-2 border-gray-500 rounded-lg" type="number" name="age" id="age" placeholder="Enter age" />
-                </div>
+                                    {
+                                        response
+                                        && response.isSuccess
+                                        &&
+                                        response.data?.map(({ name }) =>
+                                            <option key={name} value={name}>{name}</option>
+                                        )
 
-                <div className="flex flex-col">
-                    <label htmlFor="gender">Gender</label>
-                    <select className="p-1 border-2 border-gray-500 rounded-lg" name="gender" id="gender" >
-                        <option value="male">Male</option>
-                        <option value="female">Female</option>
-                        <option value="transgender">Transgender</option>
-                        <option value="non-binary">Non-binary</option>
-                        <option value="no-response">Prefer not to respond</option>
-                    </select>
-                </div>
+                                    }
+                                </FormSelectComponent>
+                            </div>
+                        )
+                    }
 
-                <div className="flex flex-col">
-                    <label htmlFor="country">Country</label>
-                    <select className="p-1 border-2 border-gray-500 rounded-lg" name="country" id="country" >
-                        {countries.map(country => <option value={country} key={country}>{country}</option>)}
-                    </select>
-                </div>
+                    <div className="flex w-full justify-end">
+                        <SignUpButton />
+                    </div>
 
-                <div className="flex flex-col">
-                    <label htmlFor="state">State</label>
-                    <select className="p-1 border-2 border-gray-500 rounded-lg" name="state" id="state" >
-                        {states.map(state => <option value={state} key={state}>{state}</option>)}
-                    </select>
-                </div>
-
-                <div className="flex flex-col">
-                    <label htmlFor="city">City</label>
-                    <select className="p-1 border-2 border-gray-500 rounded-lg" name="city" id="city" >
-                        {cities.map(city => <option value={city} key={city}>{city}</option>)}
-                    </select>
-                </div>
-
-                <div className="flex w-full justify-end">
-                    <SignUpButton action={"/"} />
-                </div>
-            </form>
+                </Form>
+            </Formik>
         </div>
     )
 }

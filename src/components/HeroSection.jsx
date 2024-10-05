@@ -1,6 +1,5 @@
-import React from 'react'
-import LoginButton from './LoginButton'
-import SignUpButton from './SignUpButton'
+import React from 'react';
+import { LoginButton, SignUpButton } from ".";
 
 function HeroSection() {
     return (
@@ -27,14 +26,14 @@ function HeroSection() {
                     <div className='mt-20'>
                         <button>
                             <div className="rounded-lg bg-gradient-120 from-[#83E2C1] from-50% to-[#1566E7] to-100% p-[2px]">
-                                <LoginButton action={"/login"}/>
+                                <LoginButton action={"/login"} />
                             </div>
                         </button>
-                        <SignUpButton action={"/signup"}/>
+                        <SignUpButton action={"/signup"} />
                     </div>
                 </div>
                 <div className='w-1/2'>
-                <img src="../src/assets/gradient-people-planting-tree-illustration.png" alt="" />
+                    <img src="../src/assets/gradient-people-planting-tree-illustration.png" alt="" />
                 </div>
             </div>
         </>
