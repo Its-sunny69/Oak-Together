@@ -4,11 +4,7 @@ import { useField } from "formik";
 function FormSelectComponent({ label, styleClasses, setSelected, ...props }) {
     
     const [field, meta] = useField(props);
-    const [hasError, setHasError] = useState(false);
-
-    useEffect(() => {
-        setHasError(meta.touched && meta.error);
-    }, [meta.touched, meta.error]);
+    const hasError = meta.error && meta.touched;
 
     useEffect(() => {
         if (setSelected) setSelected(meta.value);

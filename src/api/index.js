@@ -1,9 +1,9 @@
-import getAllCountries from "./getAllCountries";
-import getStatesByCountryName from "./getStatesByCountryName";
-import getCitiesByStateName from "./getCitiesByStateName";
+import getAllCountryNames from "./getAllCountryNames";
+import getStateNamesByCountryName from "./getStateNamesByCountryName";
+import getCityNamesByStateName from "./getCityNamesByStateName";
 
 export {
-    getAllCountries,
-    getStatesByCountryName,
-    getCitiesByStateName
+    getAllCountryNames,
+    getStateNamesByCountryName,
+    getCityNamesByStateName
 }

@@ -4,11 +4,7 @@ import { useField } from "formik";
 function FormTextComponent({ label, styleClasses, ...props }) {
     
     const [field, meta] = useField(props);
-    const [hasError, setHasError] = useState(false);
-
-    useEffect(() => {
-        setHasError(meta.touched && meta.error);
-    }, [meta.touched, meta.error]);
+    const hasError = meta.error && meta.touched;
 
     return (
         <>

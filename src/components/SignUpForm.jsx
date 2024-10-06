@@ -2,9 +2,9 @@ import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { useApi } from "../hooks";
 import {
-    getAllCountries,
-    getStatesByCountryName,
-    getCitiesByStateName
+    getAllCountryNames,
+    getStateNamesByCountryName,
+    getCityNamesByStateName
 } from "../api";
 import { signUpSchema } from "../schemas";
 import { Formik, Form } from "formik";
@@ -19,17 +19,16 @@ function SignUpForm({ setErrorMessage }) {
 
     const navigate = useNavigate();
 
-    const [countryResponse, setCountryResponse] = useApi(() => getAllCountries());
+    const [countryResponse, setCountryResponse] = useApi(() => getAllCountryNames());
     const [selectedCountry, setSelectedCountry] = useState("");
 
-    const [stateResponse, setStateResponse] = useApi(() => getStatesByCountryName(selectedCountry));
+    const [stateResponse, setStateResponse] = useApi(() => getStateNamesByCountryName(selectedCountry));
     const [selectedState, setSelectedState] = useState("");
 
-    const [cityResponse, setCityResponse] = useApi(() => getCitiesByStateName(selectedState));
+    const [cityResponse, setCityResponse] = useApi(() => getCityNamesByStateName(selectedState));
 
     useEffect(() => {
         setCountryResponse();
-        console.log(countryResponse)
     }, []); // renders country dropdown once, countryResponse will never change
 
     useEffect(() => {
@@ -146,7 +145,7 @@ function SignUpForm({ setErrorMessage }) {
                                         response
                                         && response.isSuccess
                                         &&
-                                        response.data?.map(({ name }) =>
+                                        response.data?.map((name) =>
                                             <option key={name} value={name}>{name}</option>
                                         )
 
