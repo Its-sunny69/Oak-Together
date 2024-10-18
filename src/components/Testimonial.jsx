@@ -1,5 +1,5 @@
 import TestimonialCard from "./TestimonialCard";
-import { Tree1Png } from "../assets/assets";
+import { Tree1Png } from "../assets";
 import "../App";  // <- this import does what??
 
 function Testimonial() {

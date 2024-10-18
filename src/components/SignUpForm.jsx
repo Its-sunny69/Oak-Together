@@ -79,7 +79,7 @@ function SignUpForm({ setErrorMessage }) {
             .then(data => {
                 // might need to provide better response...
                 alert(`User: ${data.firstName} ${data.lastName}, has been registered successfully.`);
-                navigate("/");
+                navigate("/login");
             })
             .catch(error => {
                 // this might need improvement too

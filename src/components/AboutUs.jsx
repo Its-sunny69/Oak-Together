@@ -1,4 +1,4 @@
-import { People2 } from "../assets/assets";
+import { People2 } from "../assets";
 
 export default function AboutUs(){
     const aboutUsText = "Oak Together is an innovative online platform revolutionizing urban forestry. " 

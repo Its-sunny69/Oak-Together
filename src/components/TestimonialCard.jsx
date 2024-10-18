@@ -1,5 +1,5 @@
 import React from "react";
-import { ProfilePng, QuotePng } from "../assets/assets";
+import { ProfilePng, QuotePng } from "../assets";
 
 function TestimonialCard() {
   return (

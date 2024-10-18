@@ -1,4 +1,4 @@
-import { LogoPng, InstagramLogoPng, WhatsAppLogoPng, FacebookLogoPng, TwitterLogoPng } from '../assets/assets.js'
+import { LogoPng, InstagramLogoPng, WhatsAppLogoPng, FacebookLogoPng, TwitterLogoPng } from '../assets/index.js'
 
 function Footer() {
     return (

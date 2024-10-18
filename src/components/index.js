@@ -10,6 +10,7 @@ import LoginForm from './LoginForm';
 import Navbar from './Navbar';
 import Organizations from './Organizations';
 import SideImageSection from './SideImageSection';
+import SideNavBar from './SideNavBar';
 import SignUpButton from './SignUpButton';
 import SignUpForm from './SignUpForm';
 import Testimonial from './Testimonial';
@@ -28,6 +29,7 @@ export {
   Navbar,
   Organizations,
   SideImageSection,
+  SideNavBar,
   SignUpButton,
   SignUpForm,
   Testimonial,

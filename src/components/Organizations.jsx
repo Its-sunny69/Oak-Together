@@ -4,7 +4,7 @@ import {
   GlobalRecyclePng,
   MobileLegendPng,
   TrustPilotPng,
-} from "../assets/assets.js";
+} from "../assets/index.js";
 
 function Organizations() {
   return (
