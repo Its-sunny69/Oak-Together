@@ -11,7 +11,13 @@ import FacebookLogoPng from "./facebook_logo.png"
 import InstagramLogoPng from "./instagram_logo.png"
 import WhatsAppLogoPng from "./whatsapp_logo.png"
 import TwitterLogoPng from "./twitter_logo.png"
-
+import ProfileImg from "./profile_img.png"
+import DoorBellPng from "./doorbell.png"
+import BadgePng from "./stamp.png"
+import TrophyPng from "./trophy.png"
+import MapImg from "./map_image.png"
+import WalletIcon from "./wallet_icon.png"
+import PlantPng from "./plant.png"
 
 export {
   LogoPng,
@@ -27,4 +33,11 @@ export {
   InstagramLogoPng,
   WhatsAppLogoPng,
   TwitterLogoPng,
+  ProfileImg,
+  DoorBellPng, 
+  BadgePng,
+  TrophyPng,
+  MapImg,
+  WalletIcon,
+  PlantPng,
 };

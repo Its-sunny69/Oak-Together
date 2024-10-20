@@ -1,12 +1,13 @@
 import React from 'react'
-import { SideNavBar } from "../components"
+import { SideNavBar, HomePageContent} from "../components"
 
 function Home() {
 
   return (
-    <>
+    <div className="flex">
       <SideNavBar />
-    </>
+      <HomePageContent />
+    </div>
   )
 }
 

@@ -12,7 +12,7 @@ import {
 function Landing() {
   return (
     <>
-      <div className="my-2">
+      <div className="mx-24 my-2">
         <Navbar />
         <HeroSection />
         <Organizations />

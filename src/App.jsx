@@ -7,7 +7,7 @@ function App() {
 
   return (
     <>
-      <div className="mx-24">
+      <div>
         <BrowserRouter>
           <Routes>
             <Route path="/" element={<Landing />} />
