@@ -1,14 +1,29 @@
 import React from "react";
 import "./App.css";
-import {Landing, Login, SignUp, Home } from "./pages";
+import { Landing, Login, SignUp, Home } from "./pages";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
+import { Toaster } from "react-hot-toast";
+import { duration } from "@mui/material";
 
 function App() {
-
   return (
     <>
       <div>
         <BrowserRouter>
+          <Toaster
+            position="top-center"
+            toastOptions={{
+              duration: 3000,
+
+              success: {
+                duration: 3000,
+              },
+
+              error: {
+                duration: 3000,
+              },
+            }}
+          />
           <Routes>
             <Route path="/" element={<Landing />} />
             <Route path="/login" element={<Login />} />

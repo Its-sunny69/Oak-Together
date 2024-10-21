@@ -2,8 +2,9 @@ import { useNavigate } from 'react-router-dom';
 import { loginSchema } from '../schemas';
 import { Formik, Form } from 'formik';
 import { LoginButton, FormTextComponent } from "."
+import toast from 'react-hot-toast';
 
-function LoginForm({ setErrorMessage }) {
+function LoginForm() {
 
     const navigate = useNavigate()
 
@@ -27,13 +28,14 @@ function LoginForm({ setErrorMessage }) {
                 return responseObj;
             })
             .then(data => {
-                // might need to provide better response...
-                alert(`User: ${data.firstName} ${data.lastName}, has been logged in successfully.`);
+                // might need to provide better response... //sunny msg - in improvement we can add some loading effect untill the data is arrvied
+
+                toast.success(`Welcome back ${data.firstName} 🥳`, "success")
                 navigate("/home");
             })
             .catch(error => {
-                // this might need improvement too
-                setErrorMessage(error.message);
+                // this might need improvement too //sunny msg - in improvement we can give short error msg instead of long error msg
+                toast.error(error.message, "error")
             })
             .finally(() => {
                 setSubmitting(false);

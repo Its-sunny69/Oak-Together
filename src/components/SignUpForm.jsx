@@ -13,9 +13,10 @@ import {
     FormTextComponent,
     FormSelectComponent
 } from ".";
+import toast from "react-hot-toast";
 
 
-function SignUpForm({ setErrorMessage }) {
+function SignUpForm() {
 
     const navigate = useNavigate();
 
@@ -77,13 +78,13 @@ function SignUpForm({ setErrorMessage }) {
                 return responseObj;
             })
             .then(data => {
-                // might need to provide better response...
-                alert(`User: ${data.firstName} ${data.lastName}, has been registered successfully.`);
+                // might need to provide better response...//sunny msg - in improvement we can add some loading effect untill the data is arrvied
+                toast.success(`Welcome ${data.firstName} 🎉`, "success");
                 navigate("/login");
             })
             .catch(error => {
-                // this might need improvement too
-                setErrorMessage(error.message);
+                 // this might need improvement too //sunny msg - in improvement we can give short error msg instead of long error msg
+                toast.error(error.message, "error");
             })
             .finally(() => {
                 setSubmitting(false);
