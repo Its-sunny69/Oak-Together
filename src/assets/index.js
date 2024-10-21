@@ -18,6 +18,9 @@ import TrophyPng from "./trophy.png"
 import MapImg from "./map_image.png"
 import WalletIcon from "./wallet_icon.png"
 import PlantPng from "./plant.png"
+import RocketPng from "./rocket.png"
+import CartPng from "./cart.png"
+import SettingsPng from "./settings.png"
 
 export {
   LogoPng,
@@ -40,4 +43,7 @@ export {
   MapImg,
   WalletIcon,
   PlantPng,
+  RocketPng,
+  CartPng,
+  SettingsPng,
 };
