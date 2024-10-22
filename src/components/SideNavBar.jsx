@@ -1,11 +1,16 @@
 import { LogoPng } from "../assets";
-
+import { useNavigate } from "react-router-dom";
 
 function SideNavBar() {
+    
+    const navigate = useNavigate();
 
     const NavbarListItem = ({ item }) => {
         return (
-            <li className="mt-2.5 py-4  text-center hover:bg-[#60D6D9] rounded-xl cursor-pointer text-sm">
+            <li
+                className="mt-2.5 py-4  text-center hover:bg-[#60D6D9] rounded-xl cursor-pointer text-sm"
+                onClick={() => navigate("../" + item.toLowerCase())}
+            >
                 {item}
             </li>
         )

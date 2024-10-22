@@ -10,6 +10,8 @@ import HomeListSection from './HomeListSection';
 import HomePageContent from './HomePageContent';
 import LoginButton from './LoginButton';
 import LoginForm from './LoginForm';
+import MapComponent from './MapComponent';
+import MapPageContent from './MapPageContent';
 import Navbar from './Navbar';
 import Organizations from './Organizations';
 import ProfileHeader from './ProfileHeader';
@@ -34,6 +36,8 @@ export {
   HomePageContent, 
   LoginButton,
   LoginForm,
+  MapComponent, 
+  MapPageContent,
   Navbar,
   Organizations,
   ProfileHeader, 

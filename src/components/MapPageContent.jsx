@@ -1,0 +1,12 @@
+import { ProfileHeader, MapComponent } from "./";
+
+function MapPageContent() {
+    return (
+        <div className="flex flex-col gap-8 py-6 pr-4 w-full">
+            <ProfileHeader />
+            <MapComponent />
+        </div>
+    )
+}
+
+export default MapPageContent;

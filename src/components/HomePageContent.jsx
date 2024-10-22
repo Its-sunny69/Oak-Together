@@ -1,4 +1,4 @@
-import { ProfileHeader, HomeHeroSection, PriceCardList, HomeListSection } from "../components"
+import { ProfileHeader, HomeHeroSection, PriceCardList, HomeListSection } from "./"
 
 function HomePageContent() {
     return (
