@@ -22,6 +22,8 @@ import SignUpForm from './SignUpForm';
 import Testimonial from './Testimonial';
 import TestimonialCard from './TestimonialCard';
 import PriceCardList from './PriceCardList';
+import GeminiAI from './geminiAI';
+import AskAIPageContent from './AskAIPageContent';
 
 export {
   AboutUs,
@@ -48,4 +50,6 @@ export {
   Testimonial,
   TestimonialCard,
   PriceCardList, 
+  GeminiAI,
+  AskAIPageContent,
 };

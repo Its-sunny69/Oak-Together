@@ -19,6 +19,7 @@ function SideNavBar() {
     const navbarItems = [
         "Home",
         "Map",
+        "AskAI",
         "Events",
         "Oaks",
         "Learnings",

@@ -1,8 +1,8 @@
 import { configureStore } from "@reduxjs/toolkit";
-import authReducers from "./features/authSlice";
+import geminiReducers from "./features/geminiSlice";
 
 export default configureStore({
     reducer: {
-        auth: authReducers,
+        gemini: geminiReducers,
     }
 })

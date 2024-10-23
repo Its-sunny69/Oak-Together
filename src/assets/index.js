@@ -1,4 +1,5 @@
 import LogoPng from "./logo.png"
+import LogoSvg from "./logo.svg"
 import MobileLegendPng from "./mobile-legends-bang-bang-removebg-preview.png";
 import GeminiPng from "./google-ai-gemini-removebg-preview.png";
 import GlobalRecyclePng from "./global-recycle-standard-removebg-preview.png";
@@ -27,6 +28,7 @@ import LocateIcon from "./locate.png"
 
 export {
   LogoPng,
+  LogoSvg,
   MobileLegendPng,
   GeminiPng,
   GlobalRecyclePng,
