@@ -21,6 +21,9 @@ import PlantPng from "./plant.png"
 import RocketPng from "./rocket.png"
 import CartPng from "./cart.png"
 import SettingsPng from "./settings.png"
+import LargeTreePng from "./large_tree.png"
+import DeadTreePng from "./dead_tree.png"
+import LocateIcon from "./locate.png"
 
 export {
   LogoPng,
@@ -46,4 +49,7 @@ export {
   RocketPng,
   CartPng,
   SettingsPng,
+  LargeTreePng,
+  DeadTreePng,
+  LocateIcon,
 };
