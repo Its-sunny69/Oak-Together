@@ -22,7 +22,10 @@ function GeminiAI() {
 
   return (
     <div>
-      <p>hello world</p>
+      <div>
+      <p>Ask AI</p>
+      <p></p>
+      </div>
 
       <input
         type="text"

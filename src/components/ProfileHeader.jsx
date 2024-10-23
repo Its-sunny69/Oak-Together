@@ -16,7 +16,7 @@ function ProfileHeader({mapPageActive}) {
     let unseenNotifs = true
 
     const bellIcon = (
-        <button className="relative rounded-lg py-1 px-2 shadow-md shadow-[#60D6D9]/30">
+        <button className="relative rounded-lg py-1 px-4 shadow-md shadow-[#60D6D9]/30 hover:shadow-inherit hover:opacity-50">
             {unseenNotifs && <div className="absolute top-0 right-0 bg-red-600 h-2 w-2 rounded-full animate-ping"></div>}
             <img src={DoorBellPng} className="w-8 h-8"/>
         </button>
