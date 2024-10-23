@@ -4,7 +4,7 @@ import { AskAIPageContent, SideNavBar } from "../components/index";
 function AskAIPage() {
   return (
     <div className="flex">
-      <SideNavBar />
+      <SideNavBar selectedPageName="AskAI"/>
       <AskAIPageContent />
     </div>
   );

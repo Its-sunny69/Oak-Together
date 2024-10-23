@@ -5,7 +5,7 @@ function Home() {
 
   return (
     <div className="flex">
-      <SideNavBar />
+      <SideNavBar selectedPageName="Home" />
       <HomePageContent />
     </div>
   )

@@ -22,7 +22,11 @@ function Navbar() {
               <li
                 key={index}
                 className="group cursor-pointer"
-                onClick={() => navigate("/" + item.toLowerCase())}
+                onClick={() => {
+                  const lowerCased = item.toLowerCase();
+                  const pathEndPoint = (lowerCased === "home")? "": lowerCased;
+                  navigate("/" + pathEndPoint)
+                }}
               >
                 {item}
                 <div className="bg-gradient-120 from-[#83E2C1] from-50% to-[#1566E7] to-100% h-[2px] w-0 group-hover:w-full transition-all duration-500"></div>

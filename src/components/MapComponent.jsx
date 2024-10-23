@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { APIProvider, Map, AdvancedMarker } from '@vis.gl/react-google-maps';
 import { DeadTreePng, EventMarkerPng, LargeTreePng, LocateIcon } from '../assets';
-import { LocationDetailComponent } from './';
+import { LocationDetailComponent, LocationPostComponent } from './';
 
 // Dummy Data for Markers:
 const dummyCoordinates = [
@@ -64,7 +64,7 @@ const revertStyle = (styleProp) => {
   styleProp.border = "none";
 }
 
-const Markers = ({ locationsList, type, lastMarkerDiv, setLastMarkerDiv, setSelectedLocationId }) => {
+const Markers = ({ locationsList, type, lastMarkerDiv, setLastMarkerDiv, setSelectedLocationId, showPostInterface }) => {
 
   const markerIcons = {
     "planted": LargeTreePng,
@@ -86,6 +86,9 @@ const Markers = ({ locationsList, type, lastMarkerDiv, setLastMarkerDiv, setSele
       >
         <div
           onClick={(e) => {
+
+            if (showPostInterface) return; // might need to handle this differently later...
+
             const markerDiv = e.target;
             if (lastMarkerDiv) revertStyle(lastMarkerDiv.style);
             setSelectedLocationId(id);
@@ -101,10 +104,10 @@ const Markers = ({ locationsList, type, lastMarkerDiv, setLastMarkerDiv, setSele
 
 }
 
-function MapComponent({ setShowPostInterface }) {
+function MapComponent() {
 
-  // Position for the residence location marker
-  const position = { lat: 19.120198, lng: 72.997773 }; // will need to replace it with user's residence coords
+  const position = { lat: 19.120198, lng: 72.997773 }; // Position for the residence location marker
+  // will need to replace position with user's residence coords later...
 
   const [changeCenter, setChangeCenter] = useState(false);
 
@@ -148,16 +151,6 @@ function MapComponent({ setShowPostInterface }) {
           className="p-3 whitespace-nowrap text-sm z-10 bg-black bg-opacity-80 font-medium text-white rounded-md font-[Arial] absolute -bottom-12 -right-2.5">
           Recenter map to residence location
         </div>}
-    </button>
-  )
-
-  // Mark a Location Button
-  const markLocationButton = (
-    <button
-      className='py-2 w-full rounded-lg bg-gradient-120 shadow-md from-[#83E2C1] from-50% to-[#1566E7] to-100% hover:from-[#1566E7] hover:to-[#83E2C1] text-white'
-      onClick={() => setShowPostInterface(true)}
-    >
-      Mark a Location
     </button>
   )
 
@@ -212,6 +205,21 @@ function MapComponent({ setShowPostInterface }) {
     </ul>
   )
 
+  // Mark a Location Button
+  const markLocationButton = (
+    <button
+      className='py-2 w-full rounded-lg bg-gradient-120 shadow-md from-[#83E2C1] from-50% to-[#1566E7] to-100% hover:from-[#1566E7] hover:to-[#83E2C1] text-white'
+      onClick={() => {
+        plantedMarkerState[1](true);
+        barrenMarkerState[1](true);
+        eventMarkerState[1](true);
+        setShowPostInterface(true);
+      }}
+    >
+      Mark a Location
+    </button>
+  )
+
   // Map controls container
   const mapControlsDiv = (
     <div className="absolute bottom-6 right-20 flex flex-col gap-2 items-start">
@@ -224,76 +232,90 @@ function MapComponent({ setShowPostInterface }) {
   const [selectedLocationId, setSelectedLocationId] = useState(null);
   const [lastMarkerDiv, setLastMarkerDiv] = useState(null);
 
+  // For Marking/Posting locations:
+  const [showPostInterface, setShowPostInterface] = useState(false);
+  const styleClasses = showPostInterface ? "flex gap-4 w-full" : "";
+  const mapWidth = showPostInterface ? "48%" : "100%";
+  const mapHeight = showPostInterface ? "70vh" : "100vh";
 
   return (
 
-    <div
-      style={{
-        width: '100%',
-        height: '100vh',
-        borderRadius: '10px',
-        overflow: 'hidden',
-        boxShadow: '2px 2px 20px rgba(0, 0, 0, 0.2)',
-        position: "relative"
-      }}
-    >
-      <APIProvider apiKey={import.meta.env.VITE_GMAP_API_KEY} >
-        <Map
-          center={changeCenter && position}
-          defaultCenter={position}
-          defaultZoom={17}
-          mapId={import.meta.env.VITE_GMAP_MAP_STYLE_ID}
-          onCenterChanged={() => setChangeCenter(false)}
-        >
-          {/* Residence Location Marker: */}
-          {residenceLocationMarker}
+    <div className={styleClasses}>
+      {showPostInterface && <LocationPostComponent setShowPostInterface={setShowPostInterface} />}
+      <div
+        style={{
+          width: mapWidth,
+          height: mapHeight,
+          borderRadius: '10px',
+          overflow: 'hidden',
+          boxShadow: '2px 2px 20px rgba(0, 0, 0, 0.2)',
+          position: "relative",
+        }}
+      >
+        <APIProvider apiKey={import.meta.env.VITE_GMAP_API_KEY} >
+          <Map
+            center={changeCenter && position}
+            defaultCenter={position}
+            defaultZoom={17}
+            mapId={import.meta.env.VITE_GMAP_MAP_STYLE_ID}
+            onCenterChanged={(e) => {
+              setChangeCenter(false);
+              // can make use of 'e.detail' later !! It has properties like center, bounds and zoom !!
+            }}
+          >
+            {/* Residence Location Marker: */}
+            {residenceLocationMarker}
 
-          {/* Planted Location Markers:*/}
-          {plantedMarkerState[0] &&
-            <Markers
-              locationsList={plantedCoordinates}
-              type="planted"
-              lastMarkerDiv={lastMarkerDiv}
-              setLastMarkerDiv={setLastMarkerDiv}
-              setSelectedLocationId={setSelectedLocationId}
-            />
-          }
+            {/* Planted Location Markers:*/}
+            {plantedMarkerState[0] &&
+              <Markers
+                locationsList={plantedCoordinates}
+                type="planted"
+                lastMarkerDiv={lastMarkerDiv}
+                setLastMarkerDiv={setLastMarkerDiv}
+                setSelectedLocationId={setSelectedLocationId}
+                showPostInterface={showPostInterface}
+              />
+            }
 
-          {/* Barren Location Markers: */}
-          {barrenMarkerState[0] &&
-            <Markers
-              locationsList={barrenCoordinates}
-              type="barren"
-              lastMarkerDiv={lastMarkerDiv}
-              setLastMarkerDiv={setLastMarkerDiv}
-              setSelectedLocationId={setSelectedLocationId}
-            />
-          }
+            {/* Barren Location Markers: */}
+            {barrenMarkerState[0] &&
+              <Markers
+                locationsList={barrenCoordinates}
+                type="barren"
+                lastMarkerDiv={lastMarkerDiv}
+                setLastMarkerDiv={setLastMarkerDiv}
+                setSelectedLocationId={setSelectedLocationId}
+                showPostInterface={showPostInterface}
+              />
+            }
 
-          {/* Event Location Markers: */}
-          {eventMarkerState[0] &&
-            <Markers
-              locationsList={eventCoordinates}
-              type="event"
-              lastMarkerDiv={lastMarkerDiv}
-              setLastMarkerDiv={setLastMarkerDiv}
-              setSelectedLocationId={setSelectedLocationId}
-            />
-          }
+            {/* Event Location Markers: */}
+            {eventMarkerState[0] &&
+              <Markers
+                locationsList={eventCoordinates}
+                type="event"
+                lastMarkerDiv={lastMarkerDiv}
+                setLastMarkerDiv={setLastMarkerDiv}
+                setSelectedLocationId={setSelectedLocationId}
+                showPostInterface={showPostInterface}
+              />
+            }
 
-        </Map>
-      </APIProvider>
-      {recenterButton}
-      {mapControlsDiv}
-      {selectedLocationId != null &&
-        <LocationDetailComponent
-          lastMarkerDiv={lastMarkerDiv}
-          setLastMarkerDiv={setLastMarkerDiv}
-          selectedLocationId={selectedLocationId}
-          setSelectedLocationId={setSelectedLocationId}
-          revertStyle={revertStyle}
-        />
-      }
+          </Map>
+        </APIProvider>
+        {recenterButton}
+        {!showPostInterface && mapControlsDiv}
+        {selectedLocationId != null &&
+          <LocationDetailComponent
+            lastMarkerDiv={lastMarkerDiv}
+            setLastMarkerDiv={setLastMarkerDiv}
+            selectedLocationId={selectedLocationId}
+            setSelectedLocationId={setSelectedLocationId}
+            revertStyle={revertStyle}
+          />
+        }
+      </div>
     </div>
   );
 }

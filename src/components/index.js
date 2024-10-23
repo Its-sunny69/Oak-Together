@@ -5,7 +5,7 @@ import ContactUs from './ContactUs';
 import Footer from './Footer';
 import FormSelectComponent from './FormSelectComponent';
 import FormTextComponent from './FormTextComponent';
-import GeminiAI from './geminiAI';
+import GeminiAI from './GeminiAI';
 import HeroSection from './HeroSection';
 import HomeHeroSection from './HomeHeroSection';
 import HomeListSection from './HomeListSection';

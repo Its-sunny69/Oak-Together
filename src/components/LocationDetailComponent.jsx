@@ -21,10 +21,11 @@ function LocationDetailComponent({ lastMarkerDiv, setLastMarkerDiv, selectedLoca
         { imageSrc: IrrigationPng, metaData: "last watered:", data: "October 16, 2024" },
     ]
 
+    let shortDetailsId = 0;
     const shortDetailsRow = (
         <div className="flex justify-between w-full">
             {shortDetailsList.map(({ imageSrc, metaData, data }) =>
-                <ShortDetailBox imageSrc={imageSrc} metaData={metaData} data={data} />
+                <ShortDetailBox key={shortDetailsId++} imageSrc={imageSrc} metaData={metaData} data={data} />
             )}
         </div>
     )
@@ -46,11 +47,11 @@ function LocationDetailComponent({ lastMarkerDiv, setLastMarkerDiv, selectedLoca
         { imageSrc: SeasonPng, title: "Current Season", description: randomText },
     ]
 
-
+    let descriptiveDetailsId = 0;
     const descriptiveDetailsRow = (
         <div className="flex p-4 gap-8 overflow-x-auto">
             {descriptiveDetailsList.map(({ imageSrc, title, description }) => (
-                <DescriptiveDetailsBox imageSrc={imageSrc} title={title} description={description} />
+                <DescriptiveDetailsBox key={descriptiveDetailsId++} imageSrc={imageSrc} title={title} description={description} />
             ))}
         </div>
     )

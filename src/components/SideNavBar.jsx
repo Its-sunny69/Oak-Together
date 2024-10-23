@@ -1,7 +1,7 @@
 import { LogoPng } from "../assets";
 import { useNavigate } from "react-router-dom";
 
-function SideNavBar() {
+function SideNavBar({selectedPageName}) {
     
     const navigate = useNavigate();
 
@@ -9,6 +9,7 @@ function SideNavBar() {
         return (
             <li
                 className="mt-2.5 py-4  text-center hover:bg-[#60D6D9] rounded-xl cursor-pointer text-sm"
+                style={{backgroundColor: selectedPageName === item? "#60D6D9": ""}}
                 onClick={() => navigate("../" + item.toLowerCase())}
             >
                 {item}
