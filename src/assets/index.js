@@ -1,4 +1,5 @@
 import LogoPng from "./logo.png"
+import LogoSvg from "./logo.svg"
 import MobileLegendPng from "./mobile-legends-bang-bang-removebg-preview.png";
 import GeminiPng from "./google-ai-gemini-removebg-preview.png";
 import GlobalRecyclePng from "./global-recycle-standard-removebg-preview.png";
@@ -24,9 +25,18 @@ import SettingsPng from "./settings.png"
 import LargeTreePng from "./large_tree.png"
 import DeadTreePng from "./dead_tree.png"
 import LocateIcon from "./locate.png"
+import EventMarkerPng from "./event_marker.png"
+import HandWithPenPng from "./hand_with_pen.png"
+import IrrigationPng from "./irrigation.png"
+import ConfettiPng from "./confetti.png"
+import UserPng from "./user.png"
+import Calendar1Png from "./calendar_1.png"
+import MultiplyPng from "./multiply.png"
+import SeasonPng from "./season.png"
 
 export {
   LogoPng,
+  LogoSvg,
   MobileLegendPng,
   GeminiPng,
   GlobalRecyclePng,
@@ -52,4 +62,12 @@ export {
   LargeTreePng,
   DeadTreePng,
   LocateIcon,
+  EventMarkerPng,
+  HandWithPenPng,
+  IrrigationPng,
+  ConfettiPng,
+  UserPng,
+  Calendar1Png,
+  MultiplyPng,
+  SeasonPng,
 };

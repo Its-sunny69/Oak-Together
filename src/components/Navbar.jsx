@@ -1,7 +1,12 @@
 import React from "react";
 import { LoginButton, SignUpButton } from ".";
+import { useNavigate } from "react-router-dom";
 
 function Navbar() {
+  const navigate = useNavigate();
+
+  const navList = ["Home", "Features", "Glimps", "About"];
+
   return (
     <div>
       <nav className=" flex justify-center items-center">
@@ -13,7 +18,17 @@ function Navbar() {
           </div>
 
           <div className="w-[30%] flex justify-between items-center">
-            <li className="group cursor-pointer">
+            {navList.map((item, index) => (
+              <li
+                key={index}
+                className="group cursor-pointer"
+                onClick={() => navigate("/" + item.toLowerCase())}
+              >
+                {item}
+                <div className="bg-gradient-120 from-[#83E2C1] from-50% to-[#1566E7] to-100% h-[2px] w-0 group-hover:w-full transition-all duration-500"></div>
+              </li>
+            ))}
+            {/* <li className="group cursor-pointer">
               Home
               <div className="bg-gradient-120 from-[#83E2C1] from-50% to-[#1566E7] to-100% h-[2px] w-0 group-hover:w-full transition-all duration-500"></div>
             </li>
@@ -28,7 +43,7 @@ function Navbar() {
             <li className="group cursor-pointer">
               About
               <div className="bg-gradient-120 from-[#83E2C1] from-50% to-[#1566E7] to-100% h-[2px] w-0 group-hover:w-full transition-all duration-500"></div>
-            </li>
+            </li> */}
           </div>
 
           <div className="flex justify-center items-center">

@@ -8,6 +8,8 @@ import HeroSection from './HeroSection';
 import HomeHeroSection from './HomeHeroSection';
 import HomeListSection from './HomeListSection';
 import HomePageContent from './HomePageContent';
+import LocationDetailComponent from './LocationDetailComponent';
+import LocationPostComponent from './LocationPostComponent';
 import LoginButton from './LoginButton';
 import LoginForm from './LoginForm';
 import MapComponent from './MapComponent';
@@ -22,24 +24,31 @@ import SignUpForm from './SignUpForm';
 import Testimonial from './Testimonial';
 import TestimonialCard from './TestimonialCard';
 import PriceCardList from './PriceCardList';
+import GeminiAI from './geminiAI';
+import AskAIPageContent from './AskAIPageContent';
 
 export {
   AboutUs,
+  AskAIPageContent,
   ContactBox,
   ContactUs,
   Footer,
   FormSelectComponent,
   FormTextComponent,
+  GeminiAI,
   HeroSection,
   HomeHeroSection,
   HomeListSection,
   HomePageContent, 
+  LocationDetailComponent,
+  LocationPostComponent, 
   LoginButton,
   LoginForm,
   MapComponent, 
   MapPageContent,
   Navbar,
   Organizations,
+  PriceCardList,
   ProfileHeader, 
   SideImageSection,
   SideNavBar,
@@ -47,5 +56,4 @@ export {
   SignUpForm,
   Testimonial,
   TestimonialCard,
-  PriceCardList, 
 };
