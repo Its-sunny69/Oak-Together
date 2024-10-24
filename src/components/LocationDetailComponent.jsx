@@ -10,7 +10,7 @@ function LocationDetailComponent({ lastMarkerDiv, setLastMarkerDiv, selectedLoca
                 <img src={imageSrc} />
                 <span className="text-gray-500 text-sm">{metaData}</span>
             </div>
-            <span className="font-medium">{data}</span>
+            <span className="font-medium text-sm">{data}</span>
         </div>
     )
 

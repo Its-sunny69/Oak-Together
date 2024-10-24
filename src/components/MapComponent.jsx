@@ -1,7 +1,11 @@
 import { useState } from 'react';
-import { APIProvider, Map, AdvancedMarker } from '@vis.gl/react-google-maps';
+import { APIProvider, Map, AdvancedMarker, useMap } from '@vis.gl/react-google-maps';
 import { DeadTreePng, EventMarkerPng, LargeTreePng, LocateIcon } from '../assets';
 import { LocationDetailComponent, LocationPostComponent } from './';
+
+/*
+  Adding marker clusterer: https://developers.google.com/maps/documentation/javascript/marker-clustering
+*/
 
 // Dummy Data for Markers:
 const dummyCoordinates = [
@@ -64,6 +68,7 @@ const revertStyle = (styleProp) => {
   styleProp.border = "none";
 }
 
+
 const Markers = ({ locationsList, type, lastMarkerDiv, setLastMarkerDiv, setSelectedLocationId, showPostInterface }) => {
 
   const markerIcons = {
@@ -81,7 +86,6 @@ const Markers = ({ locationsList, type, lastMarkerDiv, setLastMarkerDiv, setSele
       <AdvancedMarker
         key={markerId++}
         position={{ lat: lat, lng: lng }}
-
         onClick={() => { }}
       >
         <div
@@ -101,15 +105,65 @@ const Markers = ({ locationsList, type, lastMarkerDiv, setLastMarkerDiv, setSele
       </AdvancedMarker>
     )
   )
+}
 
+// Custom Recenter button control for the map:
+
+const RecenterButton = ({ locationCoords }) => {
+  const [recenterTooltipVisible, setRecenterTooltipVisible] = useState(false);
+  const map = useMap();
+
+  return (
+    <button
+      className="bg-white absolute right-2.5 bottom-52 hover:bg-gray-300 transition rounded-sm shadow-md"
+      onClick={() => map.setCenter(locationCoords)}
+      onMouseEnter={() => setRecenterTooltipVisible(true)}
+      onMouseOut={() => setRecenterTooltipVisible(false)}
+    >
+      <img src={LocateIcon} className="h-10 w-10" />
+      {recenterTooltipVisible &&
+        <div
+          className="p-3 whitespace-nowrap text-sm z-10 bg-black bg-opacity-80 font-medium text-white rounded-md font-[Arial] absolute -bottom-12 -right-2.5">
+          Recenter map to residence location
+        </div>
+      }
+    </button>
+  )
+}
+
+// Map filter checkbox
+const FilterCheckBox = ({ id, text, checked, setChecked }) => {
+  const checkBoxID = "checkbox-" + id;
+
+  return (
+    <li className='flex items-center gap-8 px-6 text-sm'>
+      <div className="relative w-8 h-8">
+        <input
+          id={checkBoxID}
+          type="checkbox"
+          className="appearance-none w-8 h-8 border-2 border-teal-300 rounded-lg checked:border-transparent checked:bg-teal-400 cursor-pointer"
+          checked={checked}
+          onChange={() => {
+            setChecked((checked) => !checked);
+            console.log(text, ": ", checked)
+          }}
+        />
+        {checked &&
+          <span
+            className="absolute top-1.5 left-1 text-[30px] pointer-events-none text-white font-extrabold"
+          >
+            ✓
+          </span>}
+      </div>
+      <label htmlFor={checkBoxID} className="text-sm font-medium cursor-pointer">{text}</label>
+    </li>
+  )
 }
 
 function MapComponent() {
 
   const position = { lat: 19.120198, lng: 72.997773 }; // Position for the residence location marker
   // will need to replace position with user's residence coords later...
-
-  const [changeCenter, setChangeCenter] = useState(false);
 
   // Marker for Residence Locations
   const [residenceTooltipVisible, setResidenceTooltipVisible] = useState(false);
@@ -132,56 +186,6 @@ function MapComponent() {
       </div>
     </AdvancedMarker>
   )
-
-  // Custom Recenter button for the map:
-  const [recenterTooltipVisible, setRecenterTooltipVisible] = useState(false);
-
-  const recenterButton = (
-    <button
-      className="bg-white absolute right-2.5 bottom-52 hover:bg-gray-300 transition rounded-sm"
-      onClick={() => {
-        setChangeCenter(true)
-      }}
-      onMouseEnter={() => setRecenterTooltipVisible(true)}
-      onMouseOut={() => setRecenterTooltipVisible(false)}
-    >
-      <img src={LocateIcon} className="h-10 w-10" />
-      {recenterTooltipVisible &&
-        <div
-          className="p-3 whitespace-nowrap text-sm z-10 bg-black bg-opacity-80 font-medium text-white rounded-md font-[Arial] absolute -bottom-12 -right-2.5">
-          Recenter map to residence location
-        </div>}
-    </button>
-  )
-
-  // Map filter checkbox
-  const FilterCheckBox = ({ id, text, checked, setChecked }) => {
-    const checkBoxID = "checkbox-" + id;
-
-    return (
-      <li className='flex items-center gap-8 px-6 text-sm'>
-        <div className="relative w-8 h-8">
-          <input
-            id={checkBoxID}
-            type="checkbox"
-            className="appearance-none w-8 h-8 border-2 border-teal-300 rounded-lg checked:border-transparent checked:bg-teal-400 cursor-pointer"
-            checked={checked}
-            onChange={() => {
-              setChecked((checked) => !checked);
-              console.log(text, ": ", checked)
-            }}
-          />
-          {checked &&
-            <span
-              className="absolute top-1.5 left-1 text-[30px] pointer-events-none text-white font-extrabold"
-            >
-              ✓
-            </span>}
-        </div>
-        <label htmlFor={checkBoxID} className="text-sm font-medium cursor-pointer">{text}</label>
-      </li>
-    )
-  }
 
   // Map filter checkbox collection
   let filterID = 0;
@@ -213,7 +217,12 @@ function MapComponent() {
         plantedMarkerState[1](true);
         barrenMarkerState[1](true);
         eventMarkerState[1](true);
+
         setShowPostInterface(true);
+        setSelectedLocationId(null);
+
+        revertStyle(lastMarkerDiv.style);
+        setLastMarkerDiv(null);
       }}
     >
       Mark a Location
@@ -253,15 +262,11 @@ function MapComponent() {
         }}
       >
         <APIProvider apiKey={import.meta.env.VITE_GMAP_API_KEY} >
+
           <Map
-            center={changeCenter && position}
             defaultCenter={position}
             defaultZoom={17}
             mapId={import.meta.env.VITE_GMAP_MAP_STYLE_ID}
-            onCenterChanged={(e) => {
-              setChangeCenter(false);
-              // can make use of 'e.detail' later !! It has properties like center, bounds and zoom !!
-            }}
           >
             {/* Residence Location Marker: */}
             {residenceLocationMarker}
@@ -303,9 +308,12 @@ function MapComponent() {
             }
 
           </Map>
+
+          <RecenterButton locationCoords={position} />
         </APIProvider>
-        {recenterButton}
+
         {!showPostInterface && mapControlsDiv}
+
         {selectedLocationId != null &&
           <LocationDetailComponent
             lastMarkerDiv={lastMarkerDiv}
@@ -315,6 +323,7 @@ function MapComponent() {
             revertStyle={revertStyle}
           />
         }
+
       </div>
     </div>
   );

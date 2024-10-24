@@ -1,5 +1,8 @@
 import MapComponent from "./MapComponent"
 
+/*
+    For autocomplete: https://developers.google.com/maps/documentation/javascript/examples/rgm-autocomplete#maps_rgm_autocomplete-javascript
+*/
 
 function LocationPostComponent({ setShowPostInterface }) {
     return (
