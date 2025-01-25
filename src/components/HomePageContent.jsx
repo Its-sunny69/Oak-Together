@@ -5,7 +5,7 @@ function HomePageContent() {
         <div className="pt-6 pr-4 w-full">
             <ProfileHeader />
             <HomeHeroSection />
-            <PriceCardList />
+            {/* <PriceCardList /> */}
             <HomeListSection />
         </div>
     )

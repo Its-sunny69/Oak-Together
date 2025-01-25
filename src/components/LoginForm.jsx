@@ -7,16 +7,16 @@ import toast from "react-hot-toast";
 function LoginForm() {
   const navigate = useNavigate();
 
-  const defaultRowStyle = "p-1 border-2 border-[#60d6d9] rounded-lg focus:outline-[#2572CF]";
+  const defaultRowStyle =
+    "p-1 border-2 border-[#60d6d9] rounded-lg focus:outline-[#2572CF]";
 
   const handleFormSubmit = (values, { setSubmitting }) => {
     const apiUrl = import.meta.env.VITE_SERVER_API_URL;
-    console.log(apiUrl);
 
     const postHeaders = new Headers();
     postHeaders.append("Content-Type", "application/json");
-    console.log(JSON.stringify(values));
-    fetch(apiUrl + "users/log-in", {
+
+    fetch(apiUrl + "/user-profiles/login", {
       method: "POST",
       body: JSON.stringify(values),
       headers: postHeaders,
@@ -27,13 +27,10 @@ function LoginForm() {
         return responseObj;
       })
       .then((data) => {
-        // might need to provide better response... //sunny msg - in improvement we can add some loading effect untill the data is arrvied
-
         toast.success(`Welcome back ${data.firstName} 🥳`, "success");
         navigate("/home");
       })
       .catch((error) => {
-        // this might need improvement too //sunny msg - in improvement we can give short error msg instead of long error msg
         toast.error(error.message, "error");
       })
       .finally(() => {
