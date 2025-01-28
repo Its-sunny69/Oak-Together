@@ -122,7 +122,7 @@ function SignUpForm() {
   ];
 
   const handleFormSubmit = (values, { setSubmitting }) => {
-    
+
     const apiUrl = import.meta.env.VITE_SERVER_API_URL;
 
     const postHeaders = new Headers();
@@ -150,7 +150,8 @@ function SignUpForm() {
       });
   };
 
-  const defaultRowStyle =
+  const defaultContainerStyle = "flex flex-col w-full";
+  const defaultInputStyle =
     "p-1 w-[80%] border-2 rounded-lg border-[#60d6d9]  focus:outline-[#2572CF]";
 
   return (
@@ -172,7 +173,8 @@ function SignUpForm() {
             <div className="flex w-full flex-col items-start" key={label}>
               <FormTextComponent
                 label={label}
-                styleClasses={defaultRowStyle}
+                containerStyleClasses={defaultContainerStyle}
+                inputStyleClasses={defaultInputStyle}
                 id={id}
                 name={name}
                 type={type}
@@ -189,8 +191,9 @@ function SignUpForm() {
                   label={label}
                   id={id}
                   name={name}
-                  setSelected={setSelected}
-                  styleClasses={defaultRowStyle}
+                  containerStyleClasses={defaultContainerStyle}
+                  inputStyleClasses={defaultInputStyle}
+                  // setSelected={setSelected}
                 >
                   <option value="">{defaultOptions[0]}</option>
 

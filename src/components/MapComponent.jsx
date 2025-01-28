@@ -243,9 +243,9 @@ function MapComponent() {
 
   // For Marking/Posting locations:
   const [showPostInterface, setShowPostInterface] = useState(false);
-  const styleClasses = showPostInterface ? "flex gap-4 w-full" : "";
   const mapWidth = showPostInterface ? "48%" : "100%";
-  const mapHeight = showPostInterface ? "70vh" : "100vh";
+  const mapHeight = showPostInterface ? "100%": "100vh";
+  const styleClasses = showPostInterface ? `flex gap-4 w-full h-4/6` : "";
 
   return (
 

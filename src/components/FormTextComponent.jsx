@@ -1,24 +1,29 @@
 import { useState, useEffect } from "react";
 import { useField } from "formik";
 
-function FormTextComponent({ label, isTextArea, styleClasses, ...props }) {
+function FormTextComponent({ label, isTextArea, containerStyleClasses, labelStyleClasses, inputStyleClasses, ...props }) {
   const [field, meta] = useField(props);
   const hasError = meta.error && meta.touched;
 
+  if(isTextArea) {
+    console.log(Object.entries(field));
+    console.log(Object.entries(props));
+  }
+
   return (
-    <>
-      <label htmlFor={props.id || props.name}>{label}</label>
+    <div className={containerStyleClasses}>
+      <label className={labelStyleClasses} htmlFor={props.id || props.name}>{label}</label>
 
       {isTextArea ? (
         <textarea
-          className={styleClasses + " min-h-16" + (hasError ? " border-red-600" : "")}
+          className={inputStyleClasses + " min-h-16" + (hasError ? " border-red-600" : "")}
           {...field}
           {...props}
           maxLength={200}
         />
       ) : (
         <input
-          className={styleClasses + (hasError ? " border-red-600" : "")}
+          className={inputStyleClasses + (hasError ? " border-red-600" : "")}
           {...field}
           {...props}
         />
@@ -27,7 +32,7 @@ function FormTextComponent({ label, isTextArea, styleClasses, ...props }) {
       {hasError ? (
         <div className="text-red-600 text-sm">{meta.error}</div>
       ) : null}
-    </>
+    </div>
   );
 }
 

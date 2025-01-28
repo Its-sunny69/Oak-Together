@@ -7,7 +7,8 @@ import toast from "react-hot-toast";
 function LoginForm() {
   const navigate = useNavigate();
 
-  const defaultRowStyle =
+  const defaultContainerStyle = "flex flex-col w-full";
+  const defaultInputStyle =
     "p-1 border-2 border-[#60d6d9] rounded-lg focus:outline-[#2572CF]";
 
   const handleFormSubmit = (values, { setSubmitting }) => {
@@ -52,7 +53,8 @@ function LoginForm() {
           <div className="flex flex-col items-start">
             <FormTextComponent
               label={"Email"}
-              styleClasses={defaultRowStyle}
+              containerStyleClasses={defaultContainerStyle}
+              inputStyleClasses={defaultInputStyle}
               id={"email"}
               name={"email"}
               type={"email"}
@@ -63,7 +65,8 @@ function LoginForm() {
           <div className="flex flex-col items-start">
             <FormTextComponent
               label={"Password"}
-              styleClasses={defaultRowStyle}
+              containerStyleClasses={defaultContainerStyle}
+              inputStyleClasses={defaultInputStyle}
               id={"password"}
               name={"password"}
               type={"password"}
