@@ -22,7 +22,7 @@ function LocationPostComponent({ setShowPostInterface }) {
         const postHeaders = new Headers();
         postHeaders.append("Content-Type", "application/json");
 
-        fetch(apiUrl + "/api/v1/user-profiles/user-id/1/locations", {
+        fetch(apiUrl + "/user-profiles/user-id/1/locations", {
             method: "POST",
             body: JSON.stringify(postLocationObj),
             headers: postHeaders
