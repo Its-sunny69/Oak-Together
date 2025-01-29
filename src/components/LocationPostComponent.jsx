@@ -3,6 +3,7 @@ import { Formik, Form } from "formik";
 import { postLocationSchema } from "../schemas";
 import FormTextComponent from "./FormTextComponent";
 import FormSelectComponent from "./FormSelectComponent";
+import toast from "react-hot-toast";
 
 /*
     For autocomplete: https://developers.google.com/maps/documentation/javascript/examples/rgm-autocomplete#maps_rgm_autocomplete-javascript
@@ -10,15 +11,47 @@ import FormSelectComponent from "./FormSelectComponent";
 
 function LocationPostComponent({ setShowPostInterface }) {
 
-    const handleSubmit = () => {
+    const handleSubmit = (values, { setSubmitting }) => {
+        console.log(values);
 
+        const apiUrl = import.meta.env.VITE_SERVER_API_URL;
+        const postLocationObj = Object.assign({}, values);
+        delete postLocationObj.address;
+        postLocationObj["position"] = {address: values.address};
+
+        const postHeaders = new Headers();
+        postHeaders.append("Content-Type", "application/json");
+
+        fetch(apiUrl + "/api/v1/user-profiles/user-id/1/locations", {
+            method: "POST",
+            body: JSON.stringify(postLocationObj),
+            headers: postHeaders
+        })
+        .then(async (response) => {
+            const responseObj = await response.json();
+            if (!response.ok) throw new Error(`${responseObj.message}`);
+            console.log("Response: ");
+            console.log(responseObj);
+            return responseObj;
+          })
+          .then((data) => {
+            toast.success(`Location ${data.name}`, " marked successfully!");
+          })
+          .catch((error) => {
+            toast.error(error.message, "error");
+            console.log("What was sent? :");
+            console.log(postLocationObj);
+          })
+          .finally(() => {
+            setSubmitting(false);
+          });
     }
 
     const defaultContainerStyle = "flex flex-col gap-1 w-full";
     const defaultLabelStyle = "text-sm";
     const defaultInputStyle = "p-1 w-full border-[1px] rounded-lg border-[#60d6d9]  focus:outline-[#2572CF]";
 
-    const locationTypeOptions = ["Select location type", "Barren", "Planted"];
+    const locationTypeOptions = ["Select location type", "PLANTED", "BARREN"];
     const waterAvailabilityOptions = ["Select water availability", "PLENTY", "MODERATE", "SCARCE"];
     const spaceOptions = ["Select space type", "PLAINS", "SLOPE", "HILL", "SPACIOUS", "CONJUSTED", "RIVERBANK"];
 
@@ -50,7 +83,7 @@ function LocationPostComponent({ setShowPostInterface }) {
                             placeholder="Enter location name"
                         />
                         <FormTextComponent
-                            label="Description"
+                            label="Description (Optional)"
                             id="description"
                             name="description"
                             containerStyleClasses={defaultContainerStyle}
@@ -77,8 +110,8 @@ function LocationPostComponent({ setShowPostInterface }) {
                         </FormSelectComponent>
                         <FormTextComponent
                             label="Address"
-                            id="position"
-                            name="position"
+                            id="address"
+                            name="address"
                             containerStyleClasses={defaultContainerStyle}
                             labelStyleClasses={defaultLabelStyle}
                             inputStyleClasses={defaultInputStyle}

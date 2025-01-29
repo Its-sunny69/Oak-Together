@@ -5,11 +5,6 @@ function FormTextComponent({ label, isTextArea, containerStyleClasses, labelStyl
   const [field, meta] = useField(props);
   const hasError = meta.error && meta.touched;
 
-  if(isTextArea) {
-    console.log(Object.entries(field));
-    console.log(Object.entries(props));
-  }
-
   return (
     <div className={containerStyleClasses}>
       <label className={labelStyleClasses} htmlFor={props.id || props.name}>{label}</label>
