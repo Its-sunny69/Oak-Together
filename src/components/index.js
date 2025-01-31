@@ -18,6 +18,7 @@ import MapComponent from './MapComponent';
 import MapPageContent from './MapPageContent';
 import Navbar from './Navbar';
 import Organizations from './Organizations';
+import PlaceAutocomplete from "./PlaceAutocomplete";
 import PriceCardList from './PriceCardList';
 import ProfileHeader from './ProfileHeader';
 import SideImageSection from './SideImageSection';
@@ -48,6 +49,7 @@ export {
   MapPageContent,
   Navbar,
   Organizations,
+  PlaceAutocomplete, 
   PriceCardList,
   ProfileHeader, 
   SideImageSection,

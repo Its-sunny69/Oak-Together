@@ -6,7 +6,7 @@ const postLocationSchema = Yup.object({
         Yup.string().trim()
             .min(1, "Name should contain between 1 and 100 characters.")
             .max(100, "Name should contain between 1 and 100 characters.")
-            .required("Name is a required field."),
+            .required("Required"),
     type:
         Yup.string().required("Required"),
     address:

@@ -221,7 +221,7 @@ function MapComponent() {
         setShowPostInterface(true);
         setSelectedLocationId(null);
 
-        revertStyle(lastMarkerDiv.style);
+        if(lastMarkerDiv) revertStyle(lastMarkerDiv.style);
         setLastMarkerDiv(null);
       }}
     >
@@ -244,24 +244,24 @@ function MapComponent() {
   // For Marking/Posting locations:
   const [showPostInterface, setShowPostInterface] = useState(false);
   const mapWidth = showPostInterface ? "48%" : "100%";
-  const mapHeight = showPostInterface ? "100%": "100vh";
+  const mapHeight = showPostInterface ? "100%" : "100vh";
   const styleClasses = showPostInterface ? `flex gap-4 w-full h-4/6` : "";
 
   return (
 
     <div className={styleClasses}>
-      {showPostInterface && <LocationPostComponent setShowPostInterface={setShowPostInterface} />}
-      <div
-        style={{
-          width: mapWidth,
-          height: mapHeight,
-          borderRadius: '10px',
-          overflow: 'hidden',
-          boxShadow: '2px 2px 20px rgba(0, 0, 0, 0.2)',
-          position: "relative",
-        }}
-      >
-        <APIProvider apiKey={import.meta.env.VITE_GMAP_API_KEY} >
+      <APIProvider apiKey={import.meta.env.VITE_GMAP_API_KEY}>
+        {showPostInterface && <LocationPostComponent setShowPostInterface={setShowPostInterface} />}
+        <div
+          style={{
+            width: mapWidth,
+            height: mapHeight,
+            borderRadius: '10px',
+            overflow: 'hidden',
+            boxShadow: '2px 2px 20px rgba(0, 0, 0, 0.2)',
+            position: "relative",
+          }}
+        >
 
           <Map
             defaultCenter={position}
@@ -310,21 +310,21 @@ function MapComponent() {
           </Map>
 
           <RecenterButton locationCoords={position} />
-        </APIProvider>
 
-        {!showPostInterface && mapControlsDiv}
+          {!showPostInterface && mapControlsDiv}
 
-        {selectedLocationId != null &&
-          <LocationDetailComponent
-            lastMarkerDiv={lastMarkerDiv}
-            setLastMarkerDiv={setLastMarkerDiv}
-            selectedLocationId={selectedLocationId}
-            setSelectedLocationId={setSelectedLocationId}
-            revertStyle={revertStyle}
-          />
-        }
+          {selectedLocationId != null &&
+            <LocationDetailComponent
+              lastMarkerDiv={lastMarkerDiv}
+              setLastMarkerDiv={setLastMarkerDiv}
+              selectedLocationId={selectedLocationId}
+              setSelectedLocationId={setSelectedLocationId}
+              revertStyle={revertStyle}
+            />
+          }
 
-      </div>
+        </div>
+      </APIProvider>
     </div>
   );
 }
