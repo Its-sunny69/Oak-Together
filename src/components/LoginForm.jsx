@@ -28,7 +28,7 @@ function LoginForm() {
         return responseObj;
       })
       .then((data) => {
-        toast.success(`Welcome back ${data.firstName} 🥳`, "success");
+        toast.success(`Welcome back ${data.name} 🥳`, "success");
         navigate("/home");
       })
       .catch((error) => {

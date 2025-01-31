@@ -12,7 +12,7 @@ function GeminiAI() {
   const handleSubmit = () => {
     const inputData =
       input +
-      "Keep your response clear and only filled with actual names without unnecessary words, phrases and disclaimers and also without any formating, keep the response small of 2-3 lines";
+      " ,Keep your response clear and only filled with actual names without unnecessary words, phrases and disclaimers and also without any formating, keep the response small of 2-3 lines";
 
     dispatch(geminiApi(inputData)).then((response) => {
       console.log(response);
