@@ -33,6 +33,7 @@ import UserPng from "./user.png"
 import Calendar1Png from "./calendar_1.png"
 import MultiplyPng from "./multiply.png"
 import SeasonPng from "./season.png"
+import SuccessMessagePng from "./success_message.png"
 
 export {
   LogoPng,
@@ -70,4 +71,5 @@ export {
   Calendar1Png,
   MultiplyPng,
   SeasonPng,
+  SuccessMessagePng,
 };

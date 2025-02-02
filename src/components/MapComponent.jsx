@@ -160,7 +160,7 @@ const FilterCheckBox = ({ id, text, checked, setChecked }) => {
   )
 }
 
-function MapComponent() {
+function MapComponent({setIsModalVisible}) {
 
   const position = { lat: 19.120198, lng: 72.997773 }; // Position for the residence location marker
   // will need to replace position with user's residence coords later...
@@ -251,7 +251,7 @@ function MapComponent() {
 
     <div className={styleClasses}>
       <APIProvider apiKey={import.meta.env.VITE_GMAP_API_KEY}>
-        {showPostInterface && <LocationPostComponent setShowPostInterface={setShowPostInterface} />}
+        {showPostInterface && <LocationPostComponent setShowPostInterface={setShowPostInterface} setIsModalVisible={setIsModalVisible} />}
         <div
           style={{
             width: mapWidth,
