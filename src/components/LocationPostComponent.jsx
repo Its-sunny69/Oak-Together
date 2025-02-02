@@ -17,30 +17,13 @@ function LocationPostComponent({ setShowPostInterface, setIsModalVisible }) {
   const handleSubmit = (values, { setSubmitting }) => {
     console.log(values);
 
-    const apiUrl = import.meta.env.VITE_SERVER_API_URL;
-
     const postLocationObj = Object.assign({}, values);
     delete postLocationObj.address;
     postLocationObj["position"] = { address: values.address };
 
-    const postHeaders = new Headers();
-    postHeaders.append("Content-Type", "application/json");
-
-    fetch(`${apiUrl}/user-profiles/user-id/1/locations`, {
-      method: "POST",
-      body: JSON.stringify(postLocationObj),
-      headers: postHeaders,
-    })
-      .then(async (response) => {
-        const responseObj = await response.json();
-        if (!response.ok) throw new Error(`${responseObj.message}`);
-        console.log("Response: ");
-        console.log(responseObj);
-        return responseObj;
-      })
-      .then((data) => {
-        toast.success(`Location ${data.name}`, " marked successfully!");
-        setIsModalVisible(true)
+    dispatch(postLocation(postLocationObj)).unwrap()
+      .then(() => {
+        setIsModalVisible(true);
       })
       .catch((error) => {
         toast.error(error.message, "error");
