@@ -1,21 +1,26 @@
-import { useRef } from "react";
+import { useState, useRef } from "react";
 import { Formik, Form } from "formik";
 import { postLocationSchema } from "../schemas";
 import { FormTextComponent, FormSelectComponent, PlaceAutocomplete } from ".";
 import toast from "react-hot-toast";
 import { useDispatch } from "react-redux";
 import { postLocation } from "../features/locationSlice";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { faXmark } from "@fortawesome/free-solid-svg-icons";
 
 /*
     For autocomplete: https://developers.google.com/maps/documentation/javascript/examples/rgm-autocomplete#maps_rgm_autocomplete-javascript
 */
 
-function LocationPostComponent({ setShowPostInterface, setIsModalVisible }) {
+function LocationPostComponent({ setShowPostInterface, setIsModalVisible, locationCoords, setLocationCoords }) {
+
   const addressInputRef = useRef(null);
   const dispatch = useDispatch();
 
   const handleSubmit = (values, { setSubmitting }) => {
     console.log(values);
+
+    if(!locationCoords) return;
 
     const postLocationObj = Object.assign({}, values);
     delete postLocationObj.address;
@@ -38,8 +43,9 @@ function LocationPostComponent({ setShowPostInterface, setIsModalVisible }) {
 
   const defaultContainerStyle = "flex flex-col gap-1 w-full";
   const defaultLabelStyle = "text-sm";
-  const defaultInputStyle =
-    "p-1 w-full border-[1px] rounded-lg border-[#60d6d9]  focus:outline-[#2572CF]";
+  const defaultInputStyle = "p-1 w-full border-[1px] rounded-lg border-[#60d6d9] focus:outline-[#2572CF]";
+
+  const [showClearIcon, setShowClearIcon] = useState(false);
 
   const locationTypeOptions = ["Select location type", "PLANTED", "BARREN"];
   const waterAvailabilityOptions = [
@@ -84,101 +90,143 @@ function LocationPostComponent({ setShowPostInterface, setIsModalVisible }) {
           validationSchema={postLocationSchema}
           onSubmit={handleSubmit}
         >
-          <Form className="flex flex-col gap-4">
-            <FormTextComponent
-              label="Name"
-              id="name"
-              name="name"
-              containerStyleClasses={defaultContainerStyle}
-              labelStyleClasses={defaultLabelStyle}
-              inputStyleClasses={defaultInputStyle}
-              type="text"
-              placeholder="Enter location name"
-            />
-            <FormTextComponent
-              label="Description (Optional)"
-              id="description"
-              name="description"
-              containerStyleClasses={defaultContainerStyle}
-              labelStyleClasses={defaultLabelStyle}
-              inputStyleClasses={defaultInputStyle}
-              isTextArea
-              type="text"
-              placeholder="Describe the location"
-            />
-            <FormSelectComponent
-              label="Location Type"
-              id="type"
-              name="type"
-              containerStyleClasses={defaultContainerStyle}
-              labelStyleClasses={defaultLabelStyle}
-              inputStyleClasses={defaultInputStyle}
-            >
-              <option value="">{locationTypeOptions[0]}</option>
-              {locationTypeOptions.slice(1).map((option, index) => (
-                <option key={index} value={option}>
-                  {option}
-                </option>
-              ))}
-            </FormSelectComponent>
-            <PlaceAutocomplete customInputRef={addressInputRef}>
+          {({ errors, touched, values, setFieldValue, setFieldTouched }) => (
+            <Form className="flex flex-col gap-4">
               <FormTextComponent
-                label="Address"
-                id="address"
-                name="address"
-                inpRef={addressInputRef}
+                label="Name"
+                id="name"
+                name="name"
                 containerStyleClasses={defaultContainerStyle}
                 labelStyleClasses={defaultLabelStyle}
                 inputStyleClasses={defaultInputStyle}
                 type="text"
-                placeholder="Enter location address"
+                placeholder="Enter location name"
               />
-            </PlaceAutocomplete>
-            <FormSelectComponent
-              label="Water Availability"
-              id="waterAvailability"
-              name="waterAvailability"
-              containerStyleClasses={defaultContainerStyle}
-              labelStyleClasses={defaultLabelStyle}
-              inputStyleClasses={defaultInputStyle}
-            >
-              <option value="">{waterAvailabilityOptions[0]}</option>
-              {waterAvailabilityOptions.slice(1).map((option, index) => (
-                <option key={index} value={option}>
-                  {option}
-                </option>
-              ))}
-            </FormSelectComponent>
-            <FormSelectComponent
-              label="Space"
-              id="space"
-              name="space"
-              containerStyleClasses={defaultContainerStyle}
-              labelStyleClasses={defaultLabelStyle}
-              inputStyleClasses={defaultInputStyle}
-            >
-              <option value="">{spaceOptions[0]}</option>
-              {spaceOptions.slice(1).map((option, index) => (
-                <option key={index} value={option}>
-                  {option}
-                </option>
-              ))}
-            </FormSelectComponent>
-            <div className="flex flex-col gap-2 p-4 justify-center items-center">
-              <button
-                className="px-[15%] py-2 rounded-lg bg-gradient-120 shadow-md from-[#83E2C1] from-50% to-[#1566E7] to-100% hover:from-[#1566E7] hover:to-[#83E2C1] text-white"
-                type="submit"
+              <FormTextComponent
+                label="Description (Optional)"
+                id="description"
+                name="description"
+                containerStyleClasses={defaultContainerStyle}
+                labelStyleClasses={defaultLabelStyle}
+                inputStyleClasses={defaultInputStyle}
+                isTextArea
+                type="text"
+                placeholder="Describe the location"
+              />
+              <FormSelectComponent
+                label="Location Type"
+                id="type"
+                name="type"
+                containerStyleClasses={defaultContainerStyle}
+                labelStyleClasses={defaultLabelStyle}
+                inputStyleClasses={defaultInputStyle}
               >
-                Save
-              </button>
-              <span
-                className="text-red-600 text-center cursor-pointer"
-                onClick={() => setShowPostInterface(false)}
+                <option value="">{locationTypeOptions[0]}</option>
+                {locationTypeOptions.slice(1).map((option, index) => (
+                  <option key={index} value={option}>
+                    {option}
+                  </option>
+                ))}
+              </FormSelectComponent>
+
+              <PlaceAutocomplete
+                onPlaceSelect={(coords) => setLocationCoords(coords)}
+                customInputRef={addressInputRef}
+                setInputValue={(value) => setFieldValue("address", value)}
               >
-                Cancel
-              </span>
-            </div>
-          </Form>
+                <div className={defaultContainerStyle}>
+                  <label className={defaultLabelStyle} htmlFor="address">Address</label>
+                  <div className="relative flex items-center">
+                    <input
+                      className={
+                        defaultInputStyle +
+                        ((touched.address && (errors.address || locationCoords == null)) ?
+                          " border-red-600" : "")
+                      }
+                      id="address"
+                      name="address"
+                      type="text"
+                      placeholder="Enter location address"
+                      ref={addressInputRef}
+                      value={values.address}
+                      onBlur={() => setFieldTouched("address", true)}
+                      onChange={(e) => {
+                        setFieldValue("address", e.target.value);
+                        setShowClearIcon(e.target.value.length > 0);
+                        setLocationCoords(null);
+                      }}
+                    />
+                    {showClearIcon &&
+                      <div
+                        className="h-3/4 absolute right-1 flex items-center px-2 rounded-r-lg text-[14px] cursor-pointer bg-white"
+                        onClick={() => {
+                          // addressInputRef.current.value = "";
+                          // addressInputRef.current.focus();
+                          setShowClearIcon(false);
+                          setFieldValue("address", "");
+                          setLocationCoords(null);
+                        }}
+                      >
+                        <FontAwesomeIcon icon={faXmark} />
+                      </div>
+                    }
+                  </div>
+                  {(touched.address && (errors.address || locationCoords == null)) ?
+                    <div className="text-red-600 text-sm">
+                      {errors.address ? errors.address : "Select a location from suggestion list"}
+                    </div>
+                    : null
+                  }
+                </div>
+              </PlaceAutocomplete>
+
+              <FormSelectComponent
+                label="Water Availability"
+                id="waterAvailability"
+                name="waterAvailability"
+                containerStyleClasses={defaultContainerStyle}
+                labelStyleClasses={defaultLabelStyle}
+                inputStyleClasses={defaultInputStyle}
+              >
+                <option value="">{waterAvailabilityOptions[0]}</option>
+                {waterAvailabilityOptions.slice(1).map((option, index) => (
+                  <option key={index} value={option}>
+                    {option}
+                  </option>
+                ))}
+              </FormSelectComponent>
+              <FormSelectComponent
+                label="Space"
+                id="space"
+                name="space"
+                containerStyleClasses={defaultContainerStyle}
+                labelStyleClasses={defaultLabelStyle}
+                inputStyleClasses={defaultInputStyle}
+              >
+                <option value="">{spaceOptions[0]}</option>
+                {spaceOptions.slice(1).map((option, index) => (
+                  <option key={index} value={option}>
+                    {option}
+                  </option>
+                ))}
+              </FormSelectComponent>
+              <div className="flex flex-col gap-2 p-4 justify-center items-center">
+                <button
+                  className="px-[15%] py-2 rounded-lg bg-gradient-120 shadow-md from-[#83E2C1] from-50% to-[#1566E7] to-100% hover:from-[#1566E7] hover:to-[#83E2C1] text-white"
+                  type="submit"
+                >
+                  Save
+                </button>
+                <span
+                  className="text-red-600 text-center cursor-pointer"
+                  onClick={() => setShowPostInterface(false)}
+                >
+                  Cancel
+                </span>
+              </div>
+            </Form>
+          )
+          }
         </Formik>
       </div>
     </div>

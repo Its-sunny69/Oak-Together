@@ -1,7 +1,10 @@
-import { useState } from 'react';
-import { APIProvider, Map, AdvancedMarker, useMap } from '@vis.gl/react-google-maps';
+import { useState, useRef } from 'react';
+import { APIProvider, Map, AdvancedMarker, useMap, MapControl, ControlPosition } from '@vis.gl/react-google-maps';
 import { DeadTreePng, EventMarkerPng, LargeTreePng, LocateIcon } from '../assets';
-import { LocationDetailComponent, LocationPostComponent } from './';
+import { LocationDetailComponent, LocationPostComponent, PlaceAutocomplete } from './';
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { faMagnifyingGlass, faLocationDot } from "@fortawesome/free-solid-svg-icons";
+import { faCircleXmark } from "@fortawesome/free-regular-svg-icons";
 
 /*
   Adding marker clusterer: https://developers.google.com/maps/documentation/javascript/marker-clustering
@@ -124,7 +127,7 @@ const RecenterButton = ({ locationCoords }) => {
       {recenterTooltipVisible &&
         <div
           className="p-3 whitespace-nowrap text-sm z-10 bg-black bg-opacity-80 font-medium text-white rounded-md font-[Arial] absolute -bottom-12 -right-2.5">
-          Recenter map to residence location
+          Recenter map to current location
         </div>
       }
     </button>
@@ -145,7 +148,7 @@ const FilterCheckBox = ({ id, text, checked, setChecked }) => {
           checked={checked}
           onChange={() => {
             setChecked((checked) => !checked);
-            console.log(text, ": ", checked)
+            // console.log(text, ": ", checked)
           }}
         />
         {checked &&
@@ -160,27 +163,32 @@ const FilterCheckBox = ({ id, text, checked, setChecked }) => {
   )
 }
 
-function MapComponent({setIsModalVisible}) {
+function MapComponent({ currLocationCoords, setIsModalVisible }) {
 
-  const position = { lat: 19.120198, lng: 72.997773 }; // Position for the residence location marker
-  // will need to replace position with user's residence coords later...
+  // console.log(currLocationCoords);
 
-  // Marker for Residence Locations
-  const [residenceTooltipVisible, setResidenceTooltipVisible] = useState(false);
+  // For Marking/Posting locations:
+  const [showPostInterface, setShowPostInterface] = useState(false);
+  const mapWidth = showPostInterface ? "48%" : "100%";
+  const mapHeight = showPostInterface ? "100%" : "100vh";
+  const styleClasses = showPostInterface ? `flex gap-4 w-full h-5/6` : "";
 
-  const residenceLocationMarker = (
+  // Marker for Current Locations
+  const [currentTooltipVisible, setCurrentTooltipVisible] = useState(false);
+
+  const currentLocationMarker = (
     <AdvancedMarker
-      position={position}
+      position={currLocationCoords}
       onClick
-      onMouseEnter={() => setResidenceTooltipVisible(true)}
-      onMouseLeave={() => setResidenceTooltipVisible(false)}
+      onMouseEnter={() => setCurrentTooltipVisible(true)}
+      onMouseLeave={() => setCurrentTooltipVisible(false)}
     >
       <div className="relative">
-        <span className="text-2xl font-extrabold rounded-full p-4 shadow-sm shadow-emerald-400 bg-blue-200 bg-opacity-45 border-blue-700 border-[1px] ">📍</span>
-        {residenceTooltipVisible &&
+        <span className="text-2xl font-extrabold rounded-full py-2 px-3 shadow-sm shadow-emerald-400 bg-blue-200 bg-opacity-45 border-blue-700 border-[1px] ">📍</span>
+        {currentTooltipVisible &&
           <div
             className="p-3 whitespace-nowrap text-sm z-10 bg-black bg-opacity-80 font-medium text-white rounded-md font-[Arial] absolute -top-12 -right-2.5">
-            Residence Location
+            Current Location
           </div>
         }
       </div>
@@ -220,8 +228,9 @@ function MapComponent({setIsModalVisible}) {
 
         setShowPostInterface(true);
         setSelectedLocationId(null);
+        setSearchedLocationCoords(null);
 
-        if(lastMarkerDiv) revertStyle(lastMarkerDiv.style);
+        if (lastMarkerDiv) revertStyle(lastMarkerDiv.style);
         setLastMarkerDiv(null);
       }}
     >
@@ -237,21 +246,96 @@ function MapComponent({setIsModalVisible}) {
     </div>
   )
 
+  // Marker for Searched Location
+  const [searchedTooltipVisible, setSearchedTooltipVisible] = useState(false);
+  const [searchedLocationCoords, setSearchedLocationCoords] = useState(null);
+  const searchedLocationMarker = (
+    <AdvancedMarker
+      position={searchedLocationCoords}
+      onClick
+      onMouseEnter={() => setSearchedTooltipVisible(true)}
+      onMouseLeave={() => setSearchedTooltipVisible(false)}
+    >
+      <div className="relative">
+        <FontAwesomeIcon
+          icon={faLocationDot}
+          className="text-xl text-red-700 pointer-events-none"
+        />
+        {searchedTooltipVisible &&
+          <div
+            className="p-3 whitespace-nowrap text-sm z-10 bg-black bg-opacity-80 font-medium text-white rounded-md font-[Arial] absolute -top-12 -right-2.5">
+            {showPostInterface? "Marked": "Searched"} Location
+          </div>
+        }
+      </div>
+    </AdvancedMarker>
+  )
+
+  // PlaceAutocomplete search box
+  const [showClearIcon, setShowClearIcon] = useState(false);
+  const autocompleteInputRef = useRef(null);
+  const autocompleteInput = (
+    <input
+      className="p-3 w-[30vw] h-[100%] rounded-r-xl text-[14px] outline-none"
+      ref={autocompleteInputRef}
+      placeholder="Search Location"
+      onFocus={() => {
+        const searchControlsDiv = autocompleteInputRef.current.parentNode;
+        searchControlsDiv.style.border = "3px solid #60D6D9";
+      }}
+      onBlur={() => {
+        const searchControlsDiv = autocompleteInputRef.current.parentNode;
+        searchControlsDiv.style.border = "1px solid #187BEC";
+      }}
+      onInput={() => {
+        setShowClearIcon(autocompleteInputRef.current.value.length > 0);
+      }}
+    />
+  )
+  const searchControls = (
+    <div className="relative flex items-center h-9 mt-3 rounded-xl shadow-lg border-[1px] border-[#187BEC] bg-white">
+      <div className="h-full flex items-center pl-2 text-lg">
+        <FontAwesomeIcon icon={faMagnifyingGlass} />
+      </div>
+      {autocompleteInput}
+      {showClearIcon &&
+        <div
+          className="h-full absolute right-0 flex items-center px-2 rounded-r-xl text-lg text-red-500 cursor-pointer bg-white"
+          onClick={() => {
+            autocompleteInputRef.current.value = "";
+            autocompleteInputRef.current.focus();
+            setShowClearIcon(false);
+            setSearchedLocationCoords(null);
+          }}
+        >
+          <FontAwesomeIcon icon={faCircleXmark} />
+        </div>
+      }
+    </div>
+  );
+
+  // Handling place selection via PlaceAutocomplete
+  const handlePlaceSelect = (coords) => {
+    setSearchedLocationCoords(coords);
+  }
+
   // For keeping track of Selected Locations via Marker Clicks
   const [selectedLocationId, setSelectedLocationId] = useState(null);
   const [lastMarkerDiv, setLastMarkerDiv] = useState(null);
 
-  // For Marking/Posting locations:
-  const [showPostInterface, setShowPostInterface] = useState(false);
-  const mapWidth = showPostInterface ? "48%" : "100%";
-  const mapHeight = showPostInterface ? "100%" : "100vh";
-  const styleClasses = showPostInterface ? `flex gap-4 w-full h-4/6` : "";
 
   return (
 
     <div className={styleClasses}>
       <APIProvider apiKey={import.meta.env.VITE_GMAP_API_KEY}>
-        {showPostInterface && <LocationPostComponent setShowPostInterface={setShowPostInterface} setIsModalVisible={setIsModalVisible} />}
+        {showPostInterface && 
+        <LocationPostComponent 
+        setShowPostInterface={setShowPostInterface} 
+        setIsModalVisible={setIsModalVisible}
+        setLocationCoords={setSearchedLocationCoords}
+        locationCoords={searchedLocationCoords} 
+        />
+        }
         <div
           style={{
             width: mapWidth,
@@ -264,12 +348,13 @@ function MapComponent({setIsModalVisible}) {
         >
 
           <Map
-            defaultCenter={position}
+            defaultCenter={currLocationCoords}
             defaultZoom={17}
             mapId={import.meta.env.VITE_GMAP_MAP_STYLE_ID}
+            draggableCursor={showPostInterface? "default": "grab"}
           >
-            {/* Residence Location Marker: */}
-            {residenceLocationMarker}
+            {/* Current Location Marker: */}
+            {currentLocationMarker}
 
             {/* Planted Location Markers:*/}
             {plantedMarkerState[0] &&
@@ -307,9 +392,20 @@ function MapComponent({setIsModalVisible}) {
               />
             }
 
+            {/* Searched Location Marker: */}
+            {searchedLocationCoords && searchedLocationMarker}
+
           </Map>
 
-          <RecenterButton locationCoords={position} />
+          {!showPostInterface &&
+            <MapControl position={ControlPosition.TOP_CENTER}>
+              <PlaceAutocomplete onPlaceSelect={handlePlaceSelect} customInputRef={autocompleteInputRef}>
+                {searchControls}
+              </PlaceAutocomplete>
+            </MapControl>
+          }
+
+          <RecenterButton locationCoords={currLocationCoords} />
 
           {!showPostInterface && mapControlsDiv}
 

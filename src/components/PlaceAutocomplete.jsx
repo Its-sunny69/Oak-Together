@@ -1,9 +1,10 @@
 import { useState, useEffect } from "react";
-import { useMapsLibrary } from "@vis.gl/react-google-maps";
+import { useMap, useMapsLibrary } from "@vis.gl/react-google-maps";
 
-function PlaceAutocomplete ({ onPlaceSelect, children, customInputRef }) {
+function PlaceAutocomplete({ onPlaceSelect, children, customInputRef, setInputValue }) {
     const [placeAutocomplete, setPlaceAutocomplete] = useState(null);
     const places = useMapsLibrary("places");
+    const map = useMap();
 
     useEffect(() => {
         if (!places || !customInputRef.current) return;
@@ -19,8 +20,15 @@ function PlaceAutocomplete ({ onPlaceSelect, children, customInputRef }) {
 
         placeAutocomplete.addListener("place_changed", () => {
             const selectedPlace = placeAutocomplete.getPlace();
-            customInputRef.current.value = selectedPlace.formatted_address;
-            // onPlaceSelect(placeAutocomplete.getPlace()); // will look into this later when setting selected location marker
+            setInputValue == null?
+                customInputRef.current.value = selectedPlace.formatted_address :
+                setInputValue(selectedPlace.formatted_address);
+
+            const locationCoords = selectedPlace.geometry.location;
+            const coords = { lat: locationCoords.lat(), lng: locationCoords.lng() };
+
+            map.setCenter(coords);
+            onPlaceSelect(coords);
         });
     }, [onPlaceSelect, placeAutocomplete]);
     return (
