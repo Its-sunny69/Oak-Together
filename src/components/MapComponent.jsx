@@ -5,6 +5,8 @@ import { LocationDetailComponent, LocationPostComponent, PlaceAutocomplete } fro
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faMagnifyingGlass, faLocationDot } from "@fortawesome/free-solid-svg-icons";
 import { faCircleXmark } from "@fortawesome/free-regular-svg-icons";
+import { getLocationUsingFilter } from '../features/locationSlice';
+import { useDispatch } from 'react-redux';
 
 /*
   Adding marker clusterer: https://developers.google.com/maps/documentation/javascript/marker-clustering
@@ -44,20 +46,19 @@ const dummyCoordinates = [
   { id: 30, lat: 19.119123, lng: 72.994876 }
 ]
 
-const plantedCoordinates = [], barrenCoordinates = [], eventCoordinates = [];
-let i = 0;
-while (i < 14) {
-  plantedCoordinates.push(dummyCoordinates[i]);
-  i++;
-}
-while (i < 25) {
-  barrenCoordinates.push(dummyCoordinates[i]);
-  i++;
-}
-while (i < dummyCoordinates.length) {
-  eventCoordinates.push(dummyCoordinates[i]);
-  i++;
-}
+// let i = 0;
+// while (i < 14) {
+//   plantedCoordinates.push(dummyCoordinates[i]);
+//   i++;
+// }
+// while (i < 25) {
+//   barrenCoordinates.push(dummyCoordinates[i]);
+//   i++;
+// }
+// while (i < dummyCoordinates.length) {
+//   eventCoordinates.push(dummyCoordinates[i]);
+//   i++;
+// }
 
 const applyStyle = (styleProp) => {
   styleProp.backgroundColor = "#83E2C1"
@@ -179,7 +180,7 @@ function MapComponent({ currLocationCoords, setIsModalVisible }) {
   const currentLocationMarker = (
     <AdvancedMarker
       position={currLocationCoords}
-      onClick
+      onClick={() => { }}
       onMouseEnter={() => setCurrentTooltipVisible(true)}
       onMouseLeave={() => setCurrentTooltipVisible(false)}
     >
@@ -252,19 +253,19 @@ function MapComponent({ currLocationCoords, setIsModalVisible }) {
   const searchedLocationMarker = (
     <AdvancedMarker
       position={searchedLocationCoords}
-      onClick
+      onClick={() => { }}
       onMouseEnter={() => setSearchedTooltipVisible(true)}
       onMouseLeave={() => setSearchedTooltipVisible(false)}
     >
       <div className="relative">
         <FontAwesomeIcon
           icon={faLocationDot}
-          className="text-xl text-red-700 pointer-events-none"
+          className="text-3xl text-red-700 drop-shadow-[0_1.2px_3px_rgba(200,0,0,0.8)] pointer-events-none"
         />
         {searchedTooltipVisible &&
           <div
             className="p-3 whitespace-nowrap text-sm z-10 bg-black bg-opacity-80 font-medium text-white rounded-md font-[Arial] absolute -top-12 -right-2.5">
-            {showPostInterface? "Marked": "Searched"} Location
+            {showPostInterface ? "Marked" : "Searched"} Location
           </div>
         }
       </div>
@@ -324,105 +325,165 @@ function MapComponent({ currLocationCoords, setIsModalVisible }) {
   const [lastMarkerDiv, setLastMarkerDiv] = useState(null);
 
 
-  return (
+  const [markerCoordinates, setMarkerCoordinates] = useState({
+    plantedCoordinates: [], barrenCoordinates: [], eventCoordinates: []
+  });
+  const dispatch = useDispatch();
 
-    <div className={styleClasses}>
-      <APIProvider apiKey={import.meta.env.VITE_GMAP_API_KEY}>
-        {showPostInterface && 
-        <LocationPostComponent 
-        setShowPostInterface={setShowPostInterface} 
-        setIsModalVisible={setIsModalVisible}
-        setLocationCoords={setSearchedLocationCoords}
-        locationCoords={searchedLocationCoords} 
-        />
+  const setAllMarkers = () => {
+    dispatch(getLocationUsingFilter("")).then((response) => {
+      const plantedCoords = [], barrenCoords = [];
+
+      response.payload.forEach((locationObj) => {
+        const coordinateObj = { 
+          id: locationObj.id,
+          lat: locationObj.position.locations.latitude,
+          lng: locationObj.position.locations.longitude
+        };
+
+        switch (locationObj.type) {
+          case "PLANTED":
+            plantedCoords.push(coordinateObj);
+            break;
+          case "BARREN":
+            barrenCoords.push(coordinateObj);
+            break;
         }
-        <div
-          style={{
-            width: mapWidth,
-            height: mapHeight,
-            borderRadius: '10px',
-            overflow: 'hidden',
-            boxShadow: '2px 2px 20px rgba(0, 0, 0, 0.2)',
-            position: "relative",
+      });
+
+      setMarkerCoordinates({
+        ...markerCoordinates,
+        plantedCoordinates: plantedCoords,
+        barrenCoordinates: barrenCoords
+      });
+
+    });
+
+    // Uncomment and/or update after 'eventSlice' is developed in src/features
+    // dispatch(getEventsByFilter("")).then((response) => {
+    //   const eventCoords = [];
+
+    //   response.payload.forEach((eventObj) => {
+    //     const coordinateObj = { 
+    //       id: eventObj.id, 
+    //       lat: eventObj.position.locations.latitude, 
+    //       lng: eventObj.position.locations.longitude
+    //     };
+
+    //     eventCoords.push(coordinateObj);
+    //   });
+
+    //   setMarkerCoordinates({
+    //     ...markerCoordinates,
+    //     eventCoordinates: eventCoords
+    //   })
+    // });
+  }
+
+return (
+
+  <div className={styleClasses}>
+    <APIProvider apiKey={import.meta.env.VITE_GMAP_API_KEY}>
+      {showPostInterface &&
+        <LocationPostComponent
+          setShowPostInterface={setShowPostInterface}
+          setIsModalVisible={setIsModalVisible}
+          setLocationCoords={setSearchedLocationCoords}
+          locationCoords={searchedLocationCoords}
+        />
+      }
+      <div
+        style={{
+          width: mapWidth,
+          height: mapHeight,
+          borderRadius: '10px',
+          overflow: 'hidden',
+          boxShadow: '2px 2px 20px rgba(0, 0, 0, 0.2)',
+          position: "relative",
+        }}
+      >
+
+        <Map
+          defaultCenter={currLocationCoords}
+          defaultZoom={17}
+          mapId={import.meta.env.VITE_GMAP_MAP_STYLE_ID}
+          draggableCursor={showPostInterface ? "default" : "grab"}
+          onClick={(e) => {
+            if (!showPostInterface) return;
+            setSearchedLocationCoords(e.detail.latLng);
           }}
+          onIdle={() => setAllMarkers()}
         >
+          {/* Current Location Marker: */}
+          {currentLocationMarker}
 
-          <Map
-            defaultCenter={currLocationCoords}
-            defaultZoom={17}
-            mapId={import.meta.env.VITE_GMAP_MAP_STYLE_ID}
-            draggableCursor={showPostInterface? "default": "grab"}
-          >
-            {/* Current Location Marker: */}
-            {currentLocationMarker}
-
-            {/* Planted Location Markers:*/}
-            {plantedMarkerState[0] &&
-              <Markers
-                locationsList={plantedCoordinates}
-                type="planted"
-                lastMarkerDiv={lastMarkerDiv}
-                setLastMarkerDiv={setLastMarkerDiv}
-                setSelectedLocationId={setSelectedLocationId}
-                showPostInterface={showPostInterface}
-              />
-            }
-
-            {/* Barren Location Markers: */}
-            {barrenMarkerState[0] &&
-              <Markers
-                locationsList={barrenCoordinates}
-                type="barren"
-                lastMarkerDiv={lastMarkerDiv}
-                setLastMarkerDiv={setLastMarkerDiv}
-                setSelectedLocationId={setSelectedLocationId}
-                showPostInterface={showPostInterface}
-              />
-            }
-
-            {/* Event Location Markers: */}
-            {eventMarkerState[0] &&
-              <Markers
-                locationsList={eventCoordinates}
-                type="event"
-                lastMarkerDiv={lastMarkerDiv}
-                setLastMarkerDiv={setLastMarkerDiv}
-                setSelectedLocationId={setSelectedLocationId}
-                showPostInterface={showPostInterface}
-              />
-            }
-
-            {/* Searched Location Marker: */}
-            {searchedLocationCoords && searchedLocationMarker}
-
-          </Map>
-
-          {!showPostInterface &&
-            <MapControl position={ControlPosition.TOP_CENTER}>
-              <PlaceAutocomplete onPlaceSelect={handlePlaceSelect} customInputRef={autocompleteInputRef}>
-                {searchControls}
-              </PlaceAutocomplete>
-            </MapControl>
-          }
-
-          <RecenterButton locationCoords={currLocationCoords} />
-
-          {!showPostInterface && mapControlsDiv}
-
-          {selectedLocationId != null &&
-            <LocationDetailComponent
+          {/* Planted Location Markers:*/}
+          {plantedMarkerState[0] &&
+            <Markers
+              locationsList={markerCoordinates.plantedCoordinates}
+              type="planted"
               lastMarkerDiv={lastMarkerDiv}
               setLastMarkerDiv={setLastMarkerDiv}
-              selectedLocationId={selectedLocationId}
               setSelectedLocationId={setSelectedLocationId}
-              revertStyle={revertStyle}
+              showPostInterface={showPostInterface}
             />
           }
 
-        </div>
-      </APIProvider>
-    </div>
-  );
+          {/* Barren Location Markers: */}
+          {barrenMarkerState[0] &&
+            <Markers
+              locationsList={markerCoordinates.barrenCoordinates}
+              type="barren"
+              lastMarkerDiv={lastMarkerDiv}
+              setLastMarkerDiv={setLastMarkerDiv}
+              setSelectedLocationId={setSelectedLocationId}
+              showPostInterface={showPostInterface}
+            />
+          }
+
+          {/* Event Location Markers: */}
+          {eventMarkerState[0] &&
+            <Markers
+              locationsList={markerCoordinates.eventCoordinates}
+              type="event"
+              lastMarkerDiv={lastMarkerDiv}
+              setLastMarkerDiv={setLastMarkerDiv}
+              setSelectedLocationId={setSelectedLocationId}
+              showPostInterface={showPostInterface}
+            />
+          }
+
+          {/* Searched Location Marker: */}
+          {searchedLocationCoords && searchedLocationMarker}
+
+        </Map>
+
+        {!showPostInterface &&
+          <MapControl position={ControlPosition.TOP_CENTER}>
+            <PlaceAutocomplete onPlaceSelect={handlePlaceSelect} customInputRef={autocompleteInputRef}>
+              {searchControls}
+            </PlaceAutocomplete>
+          </MapControl>
+        }
+
+        <RecenterButton locationCoords={currLocationCoords} />
+
+        {!showPostInterface && mapControlsDiv}
+
+        {selectedLocationId != null &&
+          <LocationDetailComponent
+            lastMarkerDiv={lastMarkerDiv}
+            setLastMarkerDiv={setLastMarkerDiv}
+            selectedLocationId={selectedLocationId}
+            setSelectedLocationId={setSelectedLocationId}
+            revertStyle={revertStyle}
+          />
+        }
+
+      </div>
+    </APIProvider>
+  </div>
+);
 }
 
 export default MapComponent;
