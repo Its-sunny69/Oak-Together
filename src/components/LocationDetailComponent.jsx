@@ -15,8 +15,8 @@ function LocationDetailComponent({ lastMarkerDiv, setLastMarkerDiv, selectedLoca
             const responseObj = {};
             for(let detail in response.payload) {
                 let value = response.payload[detail]?? "NA";
-                if(detail === "relatedEvents") {
-                    value = (value.length > 0)? value.map((eventObj) => eventObj.name).join(", "): "NA";
+                if(detail === "relatedEvents" && value != "NA") {
+                    value = (value && value.length > 0)? value.map((eventObj) => eventObj.name).join(", "): "NA";
                 }
                 if(detail === "intelligence") {
                     // Might be required later
@@ -26,7 +26,7 @@ function LocationDetailComponent({ lastMarkerDiv, setLastMarkerDiv, selectedLoca
             }
             setLocationObj(responseObj);
         });
-    }, []);
+    }, [selectedLocationId]);
 
     const ShortDetailBox = ({ imageSrc, metaData, data }) => (
         <div className="flex flex-col">
@@ -95,7 +95,7 @@ function LocationDetailComponent({ lastMarkerDiv, setLastMarkerDiv, selectedLoca
             className="absolute left-6 bottom-6 right-[33%] max-h-[58%] flex flex-col gap-8 py-8 px-6 rounded-xl shadow-lg bg-white"
         >
             <span className="text-lg font-medium">
-                {"Ghansoli Railway Station"}
+                {locationObj.name}
             </span>
             {shortDetailsRow}
             {descriptiveDetailsRow}

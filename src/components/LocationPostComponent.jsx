@@ -23,7 +23,7 @@ const getFormattedAddress = async (lat, lng, setFormattedAddress, setShowClearIc
     if (status === "OK" && results[0]) {
       setFormattedAddress("address", results[0].formatted_address);
       setShowClearIcon(true);
-    } 
+    }
     else {
       console.error("Geocoder failed due to: " + status);
     }
@@ -42,7 +42,10 @@ function LocationPostComponent({ setShowPostInterface, setIsModalVisible, locati
 
     const postLocationObj = Object.assign({}, values);
     delete postLocationObj.address;
-    postLocationObj["position"] = { address: values.address };
+    postLocationObj["position"] = {
+      locations: { latitude: locationCoords.lat, longitude: locationCoords.lng },
+      address: values.address
+    };
 
     dispatch(postLocation(postLocationObj)).unwrap()
       .then(() => {

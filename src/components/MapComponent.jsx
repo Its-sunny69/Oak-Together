@@ -81,14 +81,13 @@ const Markers = ({ locationsList, type, lastMarkerDiv, setLastMarkerDiv, setSele
     "event": EventMarkerPng
   }
 
-  let markerId = 0;
-
   {/* onClick is required to detect events in Advanced Markers... */ }
 
   return (
-    locationsList.map(({ id, lat, lng }) =>
-      <AdvancedMarker
-        key={markerId++}
+    locationsList.map(({ id, lat, lng }) => {
+      return (
+        <AdvancedMarker
+        key={id}
         position={{ lat: lat, lng: lng }}
         onClick={() => { }}
       >
@@ -103,10 +102,13 @@ const Markers = ({ locationsList, type, lastMarkerDiv, setLastMarkerDiv, setSele
             setLastMarkerDiv(markerDiv);
             applyStyle(markerDiv.style)
           }}
+          id={`location-marker-${id}`}
         >
           <img src={markerIcons[type]} className="w-8" />
         </div>
       </AdvancedMarker>
+      )
+    }
     )
   )
 }
@@ -167,6 +169,7 @@ const FilterCheckBox = ({ id, text, checked, setChecked }) => {
 function MapComponent({ currLocationCoords, setIsModalVisible }) {
 
   // console.log(currLocationCoords);
+  const mapRef = useRef(null);
 
   // For Marking/Posting locations:
   const [showPostInterface, setShowPostInterface] = useState(false);
@@ -330,12 +333,24 @@ function MapComponent({ currLocationCoords, setIsModalVisible }) {
   });
   const dispatch = useDispatch();
 
-  const setAllMarkers = () => {
-    dispatch(getLocationUsingFilter("")).then((response) => {
+  const setAllMarkers = (mapInstance) => {
+    const mapCenter = mapInstance.getCenter();
+    const centerCoords = {lat: mapCenter.lat(), lng: mapCenter.lng()}
+
+    const mapNE = mapInstance.getBounds().getNorthEast();
+    const radius = google.maps.geometry.spherical.computeDistanceBetween(mapCenter, mapNE);
+
+    const filterText =
+      centerCoords ?
+        `entityStatus=ACTIVE&latitudeCenter=${centerCoords.lat}&longitudeCenter=${centerCoords.lng}&radius=${radius}`
+        : "";
+
+    // console.log(filterText);
+    dispatch(getLocationUsingFilter(filterText)).then((response) => {
       const plantedCoords = [], barrenCoords = [];
 
       response.payload.forEach((locationObj) => {
-        const coordinateObj = { 
+        const coordinateObj = {
           id: locationObj.id,
           lat: locationObj.position.locations.latitude,
           lng: locationObj.position.locations.longitude
@@ -349,6 +364,7 @@ function MapComponent({ currLocationCoords, setIsModalVisible }) {
             barrenCoords.push(coordinateObj);
             break;
         }
+
       });
 
       setMarkerCoordinates({
@@ -380,110 +396,114 @@ function MapComponent({ currLocationCoords, setIsModalVisible }) {
     // });
   }
 
-return (
+  return (
 
-  <div className={styleClasses}>
-    <APIProvider apiKey={import.meta.env.VITE_GMAP_API_KEY}>
-      {showPostInterface &&
-        <LocationPostComponent
-          setShowPostInterface={setShowPostInterface}
-          setIsModalVisible={setIsModalVisible}
-          setLocationCoords={setSearchedLocationCoords}
-          locationCoords={searchedLocationCoords}
-        />
-      }
-      <div
-        style={{
-          width: mapWidth,
-          height: mapHeight,
-          borderRadius: '10px',
-          overflow: 'hidden',
-          boxShadow: '2px 2px 20px rgba(0, 0, 0, 0.2)',
-          position: "relative",
-        }}
-      >
-
-        <Map
-          defaultCenter={currLocationCoords}
-          defaultZoom={17}
-          mapId={import.meta.env.VITE_GMAP_MAP_STYLE_ID}
-          draggableCursor={showPostInterface ? "default" : "grab"}
-          onClick={(e) => {
-            if (!showPostInterface) return;
-            setSearchedLocationCoords(e.detail.latLng);
-          }}
-          onIdle={() => setAllMarkers()}
-        >
-          {/* Current Location Marker: */}
-          {currentLocationMarker}
-
-          {/* Planted Location Markers:*/}
-          {plantedMarkerState[0] &&
-            <Markers
-              locationsList={markerCoordinates.plantedCoordinates}
-              type="planted"
-              lastMarkerDiv={lastMarkerDiv}
-              setLastMarkerDiv={setLastMarkerDiv}
-              setSelectedLocationId={setSelectedLocationId}
-              showPostInterface={showPostInterface}
-            />
-          }
-
-          {/* Barren Location Markers: */}
-          {barrenMarkerState[0] &&
-            <Markers
-              locationsList={markerCoordinates.barrenCoordinates}
-              type="barren"
-              lastMarkerDiv={lastMarkerDiv}
-              setLastMarkerDiv={setLastMarkerDiv}
-              setSelectedLocationId={setSelectedLocationId}
-              showPostInterface={showPostInterface}
-            />
-          }
-
-          {/* Event Location Markers: */}
-          {eventMarkerState[0] &&
-            <Markers
-              locationsList={markerCoordinates.eventCoordinates}
-              type="event"
-              lastMarkerDiv={lastMarkerDiv}
-              setLastMarkerDiv={setLastMarkerDiv}
-              setSelectedLocationId={setSelectedLocationId}
-              showPostInterface={showPostInterface}
-            />
-          }
-
-          {/* Searched Location Marker: */}
-          {searchedLocationCoords && searchedLocationMarker}
-
-        </Map>
-
-        {!showPostInterface &&
-          <MapControl position={ControlPosition.TOP_CENTER}>
-            <PlaceAutocomplete onPlaceSelect={handlePlaceSelect} customInputRef={autocompleteInputRef}>
-              {searchControls}
-            </PlaceAutocomplete>
-          </MapControl>
-        }
-
-        <RecenterButton locationCoords={currLocationCoords} />
-
-        {!showPostInterface && mapControlsDiv}
-
-        {selectedLocationId != null &&
-          <LocationDetailComponent
-            lastMarkerDiv={lastMarkerDiv}
-            setLastMarkerDiv={setLastMarkerDiv}
-            selectedLocationId={selectedLocationId}
-            setSelectedLocationId={setSelectedLocationId}
-            revertStyle={revertStyle}
+    <div className={styleClasses}>
+      <APIProvider apiKey={import.meta.env.VITE_GMAP_API_KEY} libraries={["geometry"]}>
+        {showPostInterface &&
+          <LocationPostComponent
+            setShowPostInterface={setShowPostInterface}
+            setIsModalVisible={setIsModalVisible}
+            setLocationCoords={setSearchedLocationCoords}
+            locationCoords={searchedLocationCoords}
           />
         }
+        <div
+          style={{
+            width: mapWidth,
+            height: mapHeight,
+            borderRadius: '10px',
+            overflow: 'hidden',
+            boxShadow: '2px 2px 20px rgba(0, 0, 0, 0.2)',
+            position: "relative",
+          }}
+        >
 
-      </div>
-    </APIProvider>
-  </div>
-);
+          <Map
+            defaultCenter={currLocationCoords}
+            defaultZoom={17}
+            mapId={import.meta.env.VITE_GMAP_MAP_STYLE_ID}
+            draggableCursor={showPostInterface ? "default" : "grab"}
+            onClick={(e) => {
+              if (!showPostInterface) return;
+              setSearchedLocationCoords(e.detail.latLng);
+            }}
+            onIdle={(e) => setAllMarkers(e.map)}
+            onCenterChanged={(e) => {
+              console.log("On Center Change:");
+              setAllMarkers(e.map);
+            }}
+          >
+            {/* Current Location Marker: */}
+            {currentLocationMarker}
+
+            {/* Planted Location Markers:*/}
+            {plantedMarkerState[0] &&
+              <Markers
+                locationsList={markerCoordinates.plantedCoordinates}
+                type="planted"
+                lastMarkerDiv={lastMarkerDiv}
+                setLastMarkerDiv={setLastMarkerDiv}
+                setSelectedLocationId={setSelectedLocationId}
+                showPostInterface={showPostInterface}
+              />
+            }
+
+            {/* Barren Location Markers: */}
+            {barrenMarkerState[0] &&
+              <Markers
+                locationsList={markerCoordinates.barrenCoordinates}
+                type="barren"
+                lastMarkerDiv={lastMarkerDiv}
+                setLastMarkerDiv={setLastMarkerDiv}
+                setSelectedLocationId={setSelectedLocationId}
+                showPostInterface={showPostInterface}
+              />
+            }
+
+            {/* Event Location Markers: */}
+            {eventMarkerState[0] &&
+              <Markers
+                locationsList={markerCoordinates.eventCoordinates}
+                type="event"
+                lastMarkerDiv={lastMarkerDiv}
+                setLastMarkerDiv={setLastMarkerDiv}
+                setSelectedLocationId={setSelectedLocationId}
+                showPostInterface={showPostInterface}
+              />
+            }
+
+            {/* Searched Location Marker: */}
+            {searchedLocationCoords && searchedLocationMarker}
+
+          </Map>
+
+          {!showPostInterface &&
+            <MapControl position={ControlPosition.TOP_CENTER}>
+              <PlaceAutocomplete onPlaceSelect={handlePlaceSelect} customInputRef={autocompleteInputRef}>
+                {searchControls}
+              </PlaceAutocomplete>
+            </MapControl>
+          }
+
+          <RecenterButton locationCoords={currLocationCoords} />
+
+          {!showPostInterface && mapControlsDiv}
+
+          {selectedLocationId != null &&
+            <LocationDetailComponent
+              lastMarkerDiv={lastMarkerDiv}
+              setLastMarkerDiv={setLastMarkerDiv}
+              selectedLocationId={selectedLocationId}
+              setSelectedLocationId={setSelectedLocationId}
+              revertStyle={revertStyle}
+            />
+          }
+
+        </div>
+      </APIProvider>
+    </div>
+  );
 }
 
 export default MapComponent;
