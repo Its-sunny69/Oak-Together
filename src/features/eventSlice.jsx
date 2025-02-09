@@ -453,7 +453,7 @@ const eventSlice = createSlice({
           };
         }
       })
-      .addCase(enrollInEventById, (state, action) => {
+      .addCase(enrollInEventById.fulfilled, (state, action) => {
         const index = state.allEvents.findIndex(
           (event) => event.id == action.payload.id
         );
@@ -465,7 +465,7 @@ const eventSlice = createSlice({
           };
         }
       })
-      .addCase(withdrawFromEventById, (state, action) => {
+      .addCase(withdrawFromEventById.fulfilled, (state, action) => {
         const index = state.allEvents.findIndex(
           (event) => event.id == action.payload.id
         );
@@ -477,7 +477,7 @@ const eventSlice = createSlice({
           };
         }
       })
-      .addCase(sponsorEvent, (state, action) => {
+      .addCase(sponsorEvent.fulfilled, (state, action) => {
         const index = state.allEvents.findIndex(
           (event) => event.id == action.payload.id
         );
@@ -489,7 +489,7 @@ const eventSlice = createSlice({
           };
         }
       })
-      .addCase(startEventById, (state, action) => {
+      .addCase(startEventById.fulfilled, (state, action) => {
         const index = state.allEvents.findIndex(
           (event) => event.id == action.payload.id
         );
@@ -501,7 +501,7 @@ const eventSlice = createSlice({
           };
         }
       })
-      .addCase(endEventById, (state, action) => {
+      .addCase(endEventById.fulfilled, (state, action) => {
         const index = state.allEvents.findIndex(
           (event) => event.id == action.payload.id
         );
@@ -513,7 +513,7 @@ const eventSlice = createSlice({
           };
         }
       })
-      .addCase(markAttendance, (state, action) => {
+      .addCase(markAttendance.fulfilled, (state, action) => {
         const index = state.allEvents.findIndex(
           (event) => event.id == action.payload.id
         );
@@ -525,7 +525,7 @@ const eventSlice = createSlice({
           };
         }
       })
-      .addCase(verifyEvent, (state, action) => {
+      .addCase(verifyEvent.fulfilled, (state, action) => {
         const index = state.allEvents.findIndex(
           (event) => event.id == action.payload.id
         );

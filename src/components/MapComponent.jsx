@@ -5,7 +5,7 @@ import { LocationDetailComponent, LocationPostComponent, PlaceAutocomplete } fro
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faMagnifyingGlass, faLocationDot } from "@fortawesome/free-solid-svg-icons";
 import { faCircleXmark } from "@fortawesome/free-regular-svg-icons";
-import { getLocationUsingFilter } from '../features/locationSlice';
+import { getLocationsUsingFilter } from '../features/locationSlice';
 import { useDispatch } from 'react-redux';
 
 /*
@@ -346,7 +346,7 @@ function MapComponent({ currLocationCoords, setIsModalVisible }) {
         : "";
 
     // console.log(filterText);
-    dispatch(getLocationUsingFilter(filterText)).then((response) => {
+    dispatch(getLocationsUsingFilter(filterText)).then((response) => {
       const plantedCoords = [], barrenCoords = [];
 
       response.payload.forEach((locationObj) => {
