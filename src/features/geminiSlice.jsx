@@ -1,49 +1,83 @@
 import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
 
-export const geminiApi = createAsyncThunk("gemini/response", async (input) => {
-  try {
-    const response = await fetch("http://localhost:8080/gemini", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify(input),
-    });
+const apiUrl = import.meta.env.VITE_SERVER_API_URL;
 
-    if (response.ok) {
+export const geminiApi = createAsyncThunk(
+  "gemini/response",
+  async (params, { rejectWithValue }) => {
+    try {
+      const response = await fetch(
+        `${apiUrl}/user-profiles/user-id/1/intel/prompt?${params}`,
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+        }
+      );
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        return rejectWithValue({
+          message: errorData.message || "Failed to get gemini response",
+        });
+      }
+
       const data = await response.json();
       console.log("gemini res:", data);
-
       return data;
+    } catch (error) {
+      console.error(error);
+      return rejectWithValue(error);
     }
-  } catch (error) {
-    console.error(error);
-    return error;
   }
-});
+);
+
+export const intelligenceApi = createAsyncThunk(
+  "intelligence/response",
+  async (params, { rejectWithValue }) => {
+    try {
+      const response = await fetch(
+        `${apiUrl}/user-profiles/user-id/1/intel/position?${params}`,
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+        }
+      );
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        return rejectWithValue({
+          message: errorData.message || "Failed to get intelligence response",
+        });
+      }
+
+      const data = await response.json();
+      console.log("gemini res:", data);
+      return data;
+    } catch (error) {
+      console.error(error);
+      return rejectWithValue(error);
+    }
+  }
+);
 
 const geminiSlice = createSlice({
   name: "gemini",
   initialState: {
-    output: "",
-    loading: null,
-    error: null,
+    geminiResponse: "",
+    intelligenceResponse: "",
   },
   reducers: {},
   extraReducers: (builder) => {
     builder
-      .addCase(geminiApi.pending, (state) => {
-        state.loading = true;
-        state.error = null;
-      })
       .addCase(geminiApi.fulfilled, (state, action) => {
-        state.loading = false;
         state.output = action.payload;
-        state.error = null;
       })
-      .addCase(geminiApi.rejected, (state, action) => {
-        state.loading = false;
-        state.error = action.payload;
+      .addCase(intelligenceApi.fulfilled, (state, action) => {
+        state.output = action.payload;
       });
   },
 });

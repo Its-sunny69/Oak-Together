@@ -2,8 +2,8 @@ import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
 
 const apiUrl = import.meta.env.VITE_SERVER_API_URL;
 
-export const getAllLocation = createAsyncThunk(
-  `location/getAllLocation`,
+export const getAllLocations = createAsyncThunk(
+  "location/getAllLocations",
   async (_, { rejectWithValue }) => {
     try {
       const response = await fetch(
@@ -18,7 +18,7 @@ export const getAllLocation = createAsyncThunk(
       }
 
       const data = await response.json();
-      console.log("getAllLocation res:", data);
+      console.log("getAllLocations res:", data);
       return data;
     } catch (error) {
       console.error(error);
@@ -28,7 +28,7 @@ export const getAllLocation = createAsyncThunk(
 );
 
 export const getLocationById = createAsyncThunk(
-  `location/getLocationById`,
+  "location/getLocationById",
   async (id, { rejectWithValue }) => {
     try {
       const response = await fetch(
@@ -52,8 +52,8 @@ export const getLocationById = createAsyncThunk(
   }
 );
 
-export const getLocationUsingFilter = createAsyncThunk(
-  `location/getLocationUsingFilter`,
+export const getLocationsUsingFilter = createAsyncThunk(
+  "location/getLocationsUsingFilter",
   async (params, { rejectWithValue }) => {
     try {
       const response = await fetch(
@@ -68,7 +68,7 @@ export const getLocationUsingFilter = createAsyncThunk(
       }
 
       const data = await response.json();
-      console.log("getLocationUsingFilter res:", data);
+      console.log("getLocationsUsingFilter res:", data);
       return data;
     } catch (error) {
       console.error(error);
@@ -78,7 +78,7 @@ export const getLocationUsingFilter = createAsyncThunk(
 );
 
 export const postLocation = createAsyncThunk(
-  `location/postLocation`,
+  "location/postLocation",
   async (postLocationObj, { rejectWithValue }) => {
     try {
       const response = await fetch(
@@ -110,7 +110,7 @@ export const postLocation = createAsyncThunk(
 );
 
 export const updateLocationById = createAsyncThunk(
-  `location/updateLocationById`,
+  "location/updateLocationById",
   async (updateLocationObj, { rejectWithValue }) => {
     try {
       const response = await fetch(
@@ -142,7 +142,7 @@ export const updateLocationById = createAsyncThunk(
 );
 
 export const waterLocationWithId = createAsyncThunk(
-  `location/waterLocationWithId`,
+  "location/waterLocationWithId",
   async (paramsObj, { rejectWithValue }) => {
     try {
       const response = await fetch(
@@ -174,7 +174,7 @@ export const waterLocationWithId = createAsyncThunk(
 );
 
 export const deactivateLocationWithId = createAsyncThunk(
-  `location/deactivateLocationWithId`,
+  "location/deactivateLocationWithId",
   async (id, { rejectWithValue }) => {
     try {
       const response = await fetch(
@@ -207,38 +207,38 @@ export const deactivateLocationWithId = createAsyncThunk(
 const locationSlice = createSlice({
   name: "location",
   initialState: {
-    allLocation: [],
+    allLocations: [],
     locationById: null,
-    locationUsingFilter: [],
+    locationsUsingFilter: [],
   },
   reducers: {},
   extraReducers: (builder) => {
     builder
-      .addCase(getAllLocation.fulfilled, (state, action) => {
-        state.allLocation = action.payload;
+      .addCase(getAllLocations.fulfilled, (state, action) => {
+        state.allLocations = action.payload;
       })
       .addCase(getLocationById.fulfilled, (state, action) => {
         state.locationById = action.payload;
       })
-      .addCase(getLocationUsingFilter.fulfilled, (state, action) => {
-        state.locationUsingFilter = action.payload;
+      .addCase(getLocationsUsingFilter.fulfilled, (state, action) => {
+        state.locationsUsingFilter = action.payload;
       })
       .addCase(postLocation.fulfilled, (state, action) => {
-        state.allLocation.push(action.payload);
+        state.allLocations.push(action.payload);
       })
       .addCase(updateLocationById.fulfilled, (state, action) => {
-        const index = state.allLocation.findIndex(
+        const index = state.allLocations.findIndex(
           (location) => location.id == action.payload.id
         );
 
         if (index !== -1) {
-          state.allLocation[index] = {
-            ...state.allLocation[index],
+          state.allLocations[index] = {
+            ...state.allLocations[index],
             name: action.payload.name,
             description: action.payload.description,
             type: action.payload.type,
             position: {
-              ...state.allLocation[index].position,
+              ...state.allLocations[index].position,
               address: action.payload.position.address,
             },
             waterAvailability: action.payload.waterAvailability,
@@ -247,13 +247,13 @@ const locationSlice = createSlice({
         }
       })
       .addCase(waterLocationWithId.fulfilled, (state, action) => {
-        const index = state.allLocation.findIndex(
+        const index = state.allLocations.findIndex(
           (location) => location.id == action.payload.id
         );
 
         if (index !== -1) {
-          state.allLocation[index] = {
-            ...state.allLocation[index],
+          state.allLocations[index] = {
+            ...state.allLocations[index],
             lastWatered: action.payload.lastwatered,
             // points: action.payload.points  //comming soon..
           };
@@ -262,7 +262,7 @@ const locationSlice = createSlice({
       .addCase(deactivateLocationWithId.fulfilled, (state, action) => {
         const locationId = action.payload.id;
 
-        state.allLocation = state.allLocation.filter(
+        state.allLocations = state.allLocations.filter(
           (location) => location.id !== locationId
         );
       });
