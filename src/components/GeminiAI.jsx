@@ -14,10 +14,12 @@ function GeminiAI() {
       input +
       " ,Keep your response clear and only filled with actual names without unnecessary words, phrases and disclaimers and also without any formating, keep the response small of 2-3 lines";
 
-    dispatch(geminiApi(inputData)).then((response) => {
+    dispatch(geminiApi(inputData)).unwrap().then((response) => {
       console.log(response);
       setResponse(response.payload.candidates[0].content.parts[0].text);
-    });
+    }).catch((error) => {
+      console.log("Gemini Api error", error)
+    })
   };
 
   return (
