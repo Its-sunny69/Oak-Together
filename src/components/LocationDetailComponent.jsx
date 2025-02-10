@@ -23,9 +23,7 @@ function LocationDetailComponent({ selectedLocationId, setSelectedLocationId, se
                     if (detail === "relatedEvents" && value != "NA") {
                         value = (value && value.length > 0) ? value.map((eventObj) => eventObj.name).join(", ") : "NA";
                     }
-                    if (detail === "intelligence") {
-                        // Might be required later
-                    }
+                    if (detail === "description" && value == "") value = "NA";
                     if (detail === "markedBy" && value) value = value.name ?? "NA";
                     responseObj[detail] = value;
                 }
@@ -72,22 +70,22 @@ function LocationDetailComponent({ selectedLocationId, setSelectedLocationId, se
         </div>
     )
 
-    const DescriptiveDetailsBox = ({ imageSrc, title, description, content }) => (
-        <div className="flex flex-col h-fit min-h-[15vh] rounded-xl shadow-[0px_0px_25px_rgba(0,0,0,0.2)] gap-2 bg-white px-4 py-2">
-            <div className="flex items-center gap-2">
-                <img src={imageSrc} />
-                <span className="text-gray-500 text-sm">{title}</span>
+    const DescriptiveDetailsBox = ({ imageSrc, title, content }) => {
+        return (
+            <div className="flex flex-col flex-grow h-fit min-h-[15vh] min-w-[15vw] rounded-xl shadow-[0px_0px_25px_rgba(0,0,0,0.2)] gap-2 bg-white px-4 py-2">
+                <div className="flex items-center gap-2">
+                    <img src={imageSrc} />
+                    <span className="text-gray-500 text-sm">{title}</span>
+                </div>
+                {content}
             </div>
-            {description && <span className="w-[30vw] text-sm">{description}</span>}
-            {content}
-        </div>
-    )
+        )
+    }
 
-    // Object.hasOwn()
 
     const AQIContent = (
-        <div className="flex flex-col items-center justify-center gap-4">
-            <span className="flex gap-2 items-center">
+        <div className="flex flex-col justify-center gap-4">
+            <span className="flex gap-2 items-center ">
                 <FontAwesomeIcon
                     icon={faWind}
                     className="text-cyan-700"
@@ -104,24 +102,30 @@ function LocationDetailComponent({ selectedLocationId, setSelectedLocationId, se
         </div>
     )
 
+    const descriptionContent = (
+        locationObj.description && <span className="text-sm text-wrap">{locationObj.description}</span>
+    )
+    
+
     const descriptiveDetailsList = [
-        { imageSrc: HandWithPenPng, title: "Description", description: locationObj.description },
+        { imageSrc: HandWithPenPng, title: "Description", content: descriptionContent },
         { imageSrc: SeasonPng, title: "AQI", content: AQIContent },
         // not sure what to use to fill the description for 'Current Season'
     ]
 
     let descriptiveDetailsId = 0;
     const descriptiveDetailsRow = (
-        <div className="flex p-4 gap-8 overflow-x-auto">
-            {descriptiveDetailsList.map(({ imageSrc, title, description = null, content = null }) => (
-                <DescriptiveDetailsBox
-                    key={descriptiveDetailsId++}
-                    imageSrc={imageSrc}
-                    title={title}
-                    description={description}
-                    content={content}
-                />
-            ))}
+        <div className="flex p-4 gap-8 overflow-x-auto ">
+            {descriptiveDetailsList.map(({ imageSrc, title, content }) => 
+                (
+                    <DescriptiveDetailsBox
+                        key={descriptiveDetailsId++}
+                        imageSrc={imageSrc}
+                        title={title}
+                        content={content}
+                    />
+                )
+            )}
         </div>
     )
 
