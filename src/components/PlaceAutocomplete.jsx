@@ -20,13 +20,16 @@ function PlaceAutocomplete({ onPlaceSelect, children, customInputRef, setInputVa
 
         placeAutocomplete.addListener("place_changed", () => {
             const selectedPlace = placeAutocomplete.getPlace();
-            setInputValue == null?
+            if(!selectedPlace.geometry) return;
+
+            setInputValue == null ?
                 customInputRef.current.value = selectedPlace.formatted_address :
                 setInputValue(selectedPlace.formatted_address);
 
             const locationCoords = selectedPlace.geometry.location;
-            const coords = { lat: locationCoords.lat(), lng: locationCoords.lng() };
+            // console.log(locationCoords)
 
+            const coords = { lat: locationCoords.lat(), lng: locationCoords.lng() };
             map.setCenter(coords);
             onPlaceSelect(coords);
         });

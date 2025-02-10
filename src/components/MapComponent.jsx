@@ -1,79 +1,21 @@
-import { useState, useRef } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { APIProvider, Map, AdvancedMarker, useMap, MapControl, ControlPosition } from '@vis.gl/react-google-maps';
 import { DeadTreePng, EventMarkerPng, LargeTreePng, LocateIcon } from '../assets';
 import { LocationDetailComponent, LocationPostComponent, PlaceAutocomplete } from './';
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faMagnifyingGlass, faLocationDot } from "@fortawesome/free-solid-svg-icons";
 import { faCircleXmark } from "@fortawesome/free-regular-svg-icons";
-import { getLocationUsingFilter } from '../features/locationSlice';
+import { getLocationsUsingFilter } from '../features/locationSlice';
 import { useDispatch } from 'react-redux';
+import { MarkerClusterer } from '@googlemaps/markerclusterer';
+
 
 /*
   Adding marker clusterer: https://developers.google.com/maps/documentation/javascript/marker-clustering
 */
 
-// Dummy Data for Markers:
-const dummyCoordinates = [
-  { id: 1, lat: 19.122345, lng: 72.995623 },
-  { id: 2, lat: 19.117890, lng: 73.001234 },
-  { id: 3, lat: 19.121256, lng: 72.993678 },
-  { id: 4, lat: 19.118765, lng: 72.996543 },
-  { id: 5, lat: 19.120123, lng: 72.999876 },
-  { id: 6, lat: 19.119876, lng: 72.997123 },
-  { id: 7, lat: 19.122789, lng: 72.994321 },
-  { id: 8, lat: 19.118432, lng: 73.000111 },
-  { id: 9, lat: 19.121876, lng: 72.996789 },
-  { id: 10, lat: 19.120345, lng: 72.998765 },
-  { id: 11, lat: 19.118901, lng: 73.002234 },
-  { id: 12, lat: 19.122134, lng: 72.999001 },
-  { id: 13, lat: 19.119432, lng: 72.994567 },
-  { id: 14, lat: 19.120543, lng: 73.001876 },
-  { id: 15, lat: 19.121234, lng: 72.997890 },
-  { id: 16, lat: 19.122678, lng: 72.993234 },
-  { id: 17, lat: 19.120987, lng: 72.995432 },
-  { id: 18, lat: 19.119876, lng: 72.999654 },
-  { id: 19, lat: 19.121345, lng: 72.994876 },
-  { id: 20, lat: 19.118234, lng: 72.997654 },
-  { id: 21, lat: 19.120432, lng: 73.002001 },
-  { id: 22, lat: 19.119678, lng: 72.995321 },
-  { id: 23, lat: 19.122123, lng: 72.998234 },
-  { id: 24, lat: 19.120765, lng: 72.996123 },
-  { id: 25, lat: 19.121987, lng: 72.993987 },
-  { id: 26, lat: 19.119543, lng: 73.000987 },
-  { id: 27, lat: 19.122345, lng: 72.995432 },
-  { id: 28, lat: 19.118765, lng: 72.997987 },
-  { id: 29, lat: 19.121001, lng: 73.001543 },
-  { id: 30, lat: 19.119123, lng: 72.994876 }
-]
 
-// let i = 0;
-// while (i < 14) {
-//   plantedCoordinates.push(dummyCoordinates[i]);
-//   i++;
-// }
-// while (i < 25) {
-//   barrenCoordinates.push(dummyCoordinates[i]);
-//   i++;
-// }
-// while (i < dummyCoordinates.length) {
-//   eventCoordinates.push(dummyCoordinates[i]);
-//   i++;
-// }
-
-const applyStyle = (styleProp) => {
-  styleProp.backgroundColor = "#83E2C1"
-  styleProp.borderRadius = "45px";
-  styleProp.border = "2px solid #1566E7";
-}
-
-const revertStyle = (styleProp) => {
-  styleProp.backgroundColor = "";
-  styleProp.borderRadius = "0px";
-  styleProp.border = "none";
-}
-
-
-const Markers = ({ locationsList, type, lastMarkerDiv, setLastMarkerDiv, setSelectedLocationId, showPostInterface }) => {
+const Markers = ({ markerCoordinates, markerStates, setSelectedLocationId, setSelectedLocationCoords, showPostInterface }) => {
 
   const markerIcons = {
     "planted": LargeTreePng,
@@ -81,40 +23,60 @@ const Markers = ({ locationsList, type, lastMarkerDiv, setLastMarkerDiv, setSele
     "event": EventMarkerPng
   }
 
-  {/* onClick is required to detect events in Advanced Markers... */ }
+  const { plantedCoordinates, barrenCoordinates, eventCoordinates } = markerCoordinates;
 
-  return (
-    locationsList.map(({ id, lat, lng }) => {
-      return (
-        <AdvancedMarker
-        key={id}
-        position={{ lat: lat, lng: lng }}
-        onClick={() => { }}
-      >
-        <div
-          onClick={(e) => {
+  const allMarkerCoordsList = [];
+  if (markerStates.showPlantedMarkers) allMarkerCoordsList.push(...plantedCoordinates);
+  if (markerStates.showBarrenMarkers) allMarkerCoordsList.push(...barrenCoordinates);
+  if (markerStates.showEventMarkers) allMarkerCoordsList.push(...eventCoordinates);
 
-            if (showPostInterface) return; // might need to handle this differently later...
+  const map = useMap();
+  const clusterer = useRef(null);
+  const markersRef = useRef([]);
 
-            const markerDiv = e.target;
-            if (lastMarkerDiv) revertStyle(lastMarkerDiv.style);
-            setSelectedLocationId(id);
-            setLastMarkerDiv(markerDiv);
-            applyStyle(markerDiv.style)
-          }}
-          id={`location-marker-${id}`}
-        >
-          <img src={markerIcons[type]} className="w-8" />
-        </div>
-      </AdvancedMarker>
-      )
+  useEffect(() => {
+    if (!map) return;
+
+    if (!clusterer.current) {
+      clusterer.current = new MarkerClusterer({ map });
     }
-    )
-  )
-}
+
+    // Clear existing markers before adding new ones
+    clusterer.current.clearMarkers();
+    markersRef.current.forEach(marker => marker.setMap(null));
+    markersRef.current = [];
+
+    const newMarkers = allMarkerCoordsList.map(({ id, lat, lng, type }) => {
+      const markerDOM = document.createElement("div");
+      const markerImgElement = document.createElement("img");
+
+      markerImgElement.className = "w-8";
+      markerImgElement.src = markerIcons[type];
+      markerDOM.appendChild(markerImgElement);
+
+      const advancedMarkerElement = new google.maps.marker.AdvancedMarkerElement({
+        position: { lat: lat, lng: lng },
+        content: markerDOM
+      });
+
+      advancedMarkerElement.addListener("click", (e) => {
+        if (showPostInterface) return; // might need to handle this differently later...
+        setSelectedLocationId(id);
+        setSelectedLocationCoords({lat: e.latLng.lat(), lng: e.latLng.lng()});
+      });
+
+      return advancedMarkerElement;
+    });
+
+    markersRef.current = newMarkers;
+    clusterer.current.addMarkers(newMarkers);
+
+  }, [map, allMarkerCoordsList]); // Dependencies update when marker list changes
+};
+
+
 
 // Custom Recenter button control for the map:
-
 const RecenterButton = ({ locationCoords }) => {
   const [recenterTooltipVisible, setRecenterTooltipVisible] = useState(false);
   const map = useMap();
@@ -150,7 +112,7 @@ const FilterCheckBox = ({ id, text, checked, setChecked }) => {
           className="appearance-none w-8 h-8 border-2 border-teal-300 rounded-lg checked:border-transparent checked:bg-teal-400 cursor-pointer"
           checked={checked}
           onChange={() => {
-            setChecked((checked) => !checked);
+            setChecked(!checked);
             // console.log(text, ": ", checked)
           }}
         />
@@ -169,7 +131,6 @@ const FilterCheckBox = ({ id, text, checked, setChecked }) => {
 function MapComponent({ currLocationCoords, setIsModalVisible }) {
 
   // console.log(currLocationCoords);
-  const mapRef = useRef(null);
 
   // For Marking/Posting locations:
   const [showPostInterface, setShowPostInterface] = useState(false);
@@ -200,22 +161,29 @@ function MapComponent({ currLocationCoords, setIsModalVisible }) {
   )
 
   // Map filter checkbox collection
-  let filterID = 0;
   const texts = ["Planted Locations", "Barren Locations", "Events"];
-  const plantedMarkerState = useState(true);
-  const barrenMarkerState = useState(true);
-  const eventMarkerState = useState(true);
-  const markerStates = [plantedMarkerState, barrenMarkerState, eventMarkerState];
+  const [markerStates, setMarkerStates] = useState({
+    showPlantedMarkers: true,
+    showBarrenMarkers: true,
+    showEventMarkers: true
+  });
+  const markerStateKeys = Object.keys(markerStates);
 
   const filterCheckBoxes = (
     <ul className='flex flex-col gap-2 w-full bg-white py-4 rounded-lg shadow-lg'>
-      {texts.map(text =>
+      {texts.map((text, index) =>
         <FilterCheckBox
-          key={filterID++}
-          id={filterID}
+          key={index}
+          id={index}
           text={text}
-          checked={markerStates[filterID][0]}
-          setChecked={markerStates[filterID][1]}
+          checked={markerStates[markerStateKeys[index]]}
+          setChecked={(boolVal) => {
+
+            const nextMarkerStates = { ...markerStates }
+            nextMarkerStates[markerStateKeys[index]] = boolVal;
+
+            setMarkerStates(nextMarkerStates)
+          }}
         />
       )}
     </ul>
@@ -226,16 +194,16 @@ function MapComponent({ currLocationCoords, setIsModalVisible }) {
     <button
       className='py-2 w-full rounded-lg bg-gradient-120 shadow-md from-[#83E2C1] from-50% to-[#1566E7] to-100% hover:from-[#1566E7] hover:to-[#83E2C1] text-white'
       onClick={() => {
-        plantedMarkerState[1](true);
-        barrenMarkerState[1](true);
-        eventMarkerState[1](true);
+        setMarkerStates({
+          showPlantedMarkers: true,
+          showBarrenMarkers: true,
+          showEventMarkers: true
+        })
 
         setShowPostInterface(true);
         setSelectedLocationId(null);
+        setSelectedLocationCoords(null);
         setSearchedLocationCoords(null);
-
-        if (lastMarkerDiv) revertStyle(lastMarkerDiv.style);
-        setLastMarkerDiv(null);
       }}
     >
       Mark a Location
@@ -325,9 +293,9 @@ function MapComponent({ currLocationCoords, setIsModalVisible }) {
 
   // For keeping track of Selected Locations via Marker Clicks
   const [selectedLocationId, setSelectedLocationId] = useState(null);
-  const [lastMarkerDiv, setLastMarkerDiv] = useState(null);
+  const [selectedLocationCoords, setSelectedLocationCoords] = useState(null);
 
-
+  // API Calls to get Location and Event Coords
   const [markerCoordinates, setMarkerCoordinates] = useState({
     plantedCoordinates: [], barrenCoordinates: [], eventCoordinates: []
   });
@@ -335,7 +303,7 @@ function MapComponent({ currLocationCoords, setIsModalVisible }) {
 
   const setAllMarkers = (mapInstance) => {
     const mapCenter = mapInstance.getCenter();
-    const centerCoords = {lat: mapCenter.lat(), lng: mapCenter.lng()}
+    const centerCoords = { lat: mapCenter.lat(), lng: mapCenter.lng() }
 
     const mapNE = mapInstance.getBounds().getNorthEast();
     const radius = google.maps.geometry.spherical.computeDistanceBetween(mapCenter, mapNE);
@@ -346,54 +314,62 @@ function MapComponent({ currLocationCoords, setIsModalVisible }) {
         : "";
 
     // console.log(filterText);
-    dispatch(getLocationUsingFilter(filterText)).then((response) => {
-      const plantedCoords = [], barrenCoords = [];
+    dispatch(getLocationsUsingFilter(filterText)).unwrap()
+      .then((response) => {
+        const plantedCoords = [], barrenCoords = [];
 
-      response.payload.forEach((locationObj) => {
-        const coordinateObj = {
-          id: locationObj.id,
-          lat: locationObj.position.locations.latitude,
-          lng: locationObj.position.locations.longitude
-        };
+        response.forEach((locationObj) => {
+          const coordinateObj = {
+            id: locationObj.id,
+            lat: locationObj.position.locations.latitude,
+            lng: locationObj.position.locations.longitude,
+            type: locationObj.type.toLowerCase()
+          };
 
-        switch (locationObj.type) {
-          case "PLANTED":
-            plantedCoords.push(coordinateObj);
-            break;
-          case "BARREN":
-            barrenCoords.push(coordinateObj);
-            break;
-        }
+          switch (coordinateObj.type) {
+            case "planted":
+              plantedCoords.push(coordinateObj);
+              break;
+            case "barren":
+              barrenCoords.push(coordinateObj);
+              break;
+          }
 
-      });
+        });
 
-      setMarkerCoordinates({
-        ...markerCoordinates,
-        plantedCoordinates: plantedCoords,
-        barrenCoordinates: barrenCoords
-      });
+        setMarkerCoordinates((prevState) => {
+          const isSame =
+            JSON.stringify(prevState.plantedCoordinates) === JSON.stringify(plantedCoords) &&
+            JSON.stringify(prevState.barrenCoordinates) === JSON.stringify(barrenCoords);
 
-    });
+          if (isSame) return prevState; // Prevent unnecessary updates
+          return { ...prevState, plantedCoordinates: plantedCoords, barrenCoordinates: barrenCoords };
+        });
+
+      })
+      .catch((error) => console.log(error));
 
     // Uncomment and/or update after 'eventSlice' is developed in src/features
-    // dispatch(getEventsByFilter("")).then((response) => {
-    //   const eventCoords = [];
+    // dispatch(getEventsByFilter("")).unwrap()
+    //   .then((response) => {
+    //     const eventCoords = [];
 
-    //   response.payload.forEach((eventObj) => {
-    //     const coordinateObj = { 
-    //       id: eventObj.id, 
-    //       lat: eventObj.position.locations.latitude, 
-    //       lng: eventObj.position.locations.longitude
-    //     };
+    //     response.payload.forEach((eventObj) => {
+    //       const coordinateObj = {
+    //         id: eventObj.id,
+    //         lat: eventObj.position.locations.latitude,
+    //         lng: eventObj.position.locations.longitude,
+    //         type: "event"
+    //       };
 
-    //     eventCoords.push(coordinateObj);
+    //       eventCoords.push(coordinateObj);
+    //     });
+
+    //     setMarkerCoordinates({
+    //       ...markerCoordinates,
+    //       eventCoordinates: eventCoords
+    //     })
     //   });
-
-    //   setMarkerCoordinates({
-    //     ...markerCoordinates,
-    //     eventCoordinates: eventCoords
-    //   })
-    // });
   }
 
   return (
@@ -429,49 +405,18 @@ function MapComponent({ currLocationCoords, setIsModalVisible }) {
               setSearchedLocationCoords(e.detail.latLng);
             }}
             onIdle={(e) => setAllMarkers(e.map)}
-            onCenterChanged={(e) => {
-              console.log("On Center Change:");
-              setAllMarkers(e.map);
-            }}
           >
             {/* Current Location Marker: */}
             {currentLocationMarker}
 
-            {/* Planted Location Markers:*/}
-            {plantedMarkerState[0] &&
-              <Markers
-                locationsList={markerCoordinates.plantedCoordinates}
-                type="planted"
-                lastMarkerDiv={lastMarkerDiv}
-                setLastMarkerDiv={setLastMarkerDiv}
-                setSelectedLocationId={setSelectedLocationId}
-                showPostInterface={showPostInterface}
-              />
-            }
-
-            {/* Barren Location Markers: */}
-            {barrenMarkerState[0] &&
-              <Markers
-                locationsList={markerCoordinates.barrenCoordinates}
-                type="barren"
-                lastMarkerDiv={lastMarkerDiv}
-                setLastMarkerDiv={setLastMarkerDiv}
-                setSelectedLocationId={setSelectedLocationId}
-                showPostInterface={showPostInterface}
-              />
-            }
-
-            {/* Event Location Markers: */}
-            {eventMarkerState[0] &&
-              <Markers
-                locationsList={markerCoordinates.eventCoordinates}
-                type="event"
-                lastMarkerDiv={lastMarkerDiv}
-                setLastMarkerDiv={setLastMarkerDiv}
-                setSelectedLocationId={setSelectedLocationId}
-                showPostInterface={showPostInterface}
-              />
-            }
+            {/* Planted/Barren/Event Location Markers:*/}
+            <Markers
+              markerCoordinates={markerCoordinates}
+              markerStates={markerStates}
+              setSelectedLocationId={setSelectedLocationId}
+              setSelectedLocationCoords={setSelectedLocationCoords}
+              showPostInterface={showPostInterface}
+            />
 
             {/* Searched Location Marker: */}
             {searchedLocationCoords && searchedLocationMarker}
@@ -492,11 +437,10 @@ function MapComponent({ currLocationCoords, setIsModalVisible }) {
 
           {selectedLocationId != null &&
             <LocationDetailComponent
-              lastMarkerDiv={lastMarkerDiv}
-              setLastMarkerDiv={setLastMarkerDiv}
               selectedLocationId={selectedLocationId}
               setSelectedLocationId={setSelectedLocationId}
-              revertStyle={revertStyle}
+              selectedLocationCoords = {selectedLocationCoords}
+              setSelectedLocationCoords = {setSelectedLocationCoords}
             />
           }
 

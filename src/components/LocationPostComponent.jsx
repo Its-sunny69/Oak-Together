@@ -250,7 +250,10 @@ function LocationPostComponent({ setShowPostInterface, setIsModalVisible, locati
                   </button>
                   <span
                     className="text-red-600 text-center cursor-pointer"
-                    onClick={() => setShowPostInterface(false)}
+                    onClick={() => {
+                      setShowPostInterface(false);
+                      setLocationCoords(null);
+                    }}
                   >
                     Cancel
                   </span>

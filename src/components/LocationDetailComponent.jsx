@@ -2,30 +2,43 @@ import { useState, useEffect } from "react";
 import { useDispatch } from "react-redux";
 import { getLocationById } from "../features/locationSlice";
 import { HandWithPenPng, IrrigationPng, ConfettiPng, UserPng, Calendar1Png, MultiplyPng, SeasonPng } from "../assets";
+import { getAQIByCoordinates } from "../features/airVisualAPISlice";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { faWind } from "@fortawesome/free-solid-svg-icons";
 
 
-function LocationDetailComponent({ lastMarkerDiv, setLastMarkerDiv, selectedLocationId, setSelectedLocationId, revertStyle, }) {
+function LocationDetailComponent({ selectedLocationId, setSelectedLocationId, selectedLocationCoords, setSelectedLocationCoords }) {
 
     // We use the 'selectedLocationId' to fetch data from API, for now, using dummy data
     const [locationObj, setLocationObj] = useState({});
+    const [aqiObj, setAqiObj] = useState({});
     const dispatch = useDispatch();
 
     useEffect(() => {
-        dispatch(getLocationById(selectedLocationId)).then((response) => {
-            const responseObj = {};
-            for(let detail in response.payload) {
-                let value = response.payload[detail]?? "NA";
-                if(detail === "relatedEvents" && value != "NA") {
-                    value = (value && value.length > 0)? value.map((eventObj) => eventObj.name).join(", "): "NA";
+        dispatch(getLocationById(selectedLocationId)).unwrap()
+            .then((response) => {
+                const responseObj = {};
+                for (let detail in response) {
+                    let value = response[detail] ?? "NA";
+                    if (detail === "relatedEvents" && value != "NA") {
+                        value = (value && value.length > 0) ? value.map((eventObj) => eventObj.name).join(", ") : "NA";
+                    }
+                    if (detail === "intelligence") {
+                        // Might be required later
+                    }
+                    if (detail === "markedBy" && value) value = value.name ?? "NA";
+                    responseObj[detail] = value;
                 }
-                if(detail === "intelligence") {
-                    // Might be required later
-                }
-                if(detail === "markedBy" && value) value = value.name?? "NA";
-                responseObj[detail] = value;
-            }
-            setLocationObj(responseObj);
-        });
+                setLocationObj(responseObj);
+            })
+            .catch((error) => console.log(error));
+
+        dispatch(getAQIByCoordinates(`lat=${selectedLocationCoords.lat}&lng=${selectedLocationCoords.lng}`)).unwrap()
+            .then((response) => {
+                setAqiObj(response);
+                // console.log(response);
+            })
+            .catch((error) => console.log(error));
     }, [selectedLocationId]);
 
     const ShortDetailBox = ({ imageSrc, metaData, data }) => (
@@ -59,31 +72,54 @@ function LocationDetailComponent({ lastMarkerDiv, setLastMarkerDiv, selectedLoca
         </div>
     )
 
-    const DescriptiveDetailsBox = ({ imageSrc, title, description }) => (
-        <div className="flex flex-col h-fit rounded-xl shadow-[0px_0px_25px_rgba(0,0,0,0.2)] gap-2 bg-white px-4 py-2">
+    const DescriptiveDetailsBox = ({ imageSrc, title, description, content }) => (
+        <div className="flex flex-col h-fit min-h-[15vh] rounded-xl shadow-[0px_0px_25px_rgba(0,0,0,0.2)] gap-2 bg-white px-4 py-2">
             <div className="flex items-center gap-2">
                 <img src={imageSrc} />
                 <span className="text-gray-500 text-sm">{title}</span>
             </div>
-            <span className="w-[30vw] text-sm">{description}</span>
+            {description && <span className="w-[30vw] text-sm">{description}</span>}
+            {content}
+        </div>
+    )
+
+    // Object.hasOwn()
+
+    const AQIContent = (
+        <div className="flex flex-col items-center justify-center gap-4">
+            <span className="flex gap-2 items-center">
+                <FontAwesomeIcon
+                    icon={faWind}
+                    className="text-cyan-700"
+                />
+                AQI (US): {Object.hasOwn(aqiObj, "data") && aqiObj.data.current.pollution.aqius}
+            </span>
+            <span className="flex gap-2 items-center">
+                <FontAwesomeIcon
+                    icon={faWind}
+                    className="text-cyan-700"
+                />
+                AQI (CN): {Object.hasOwn(aqiObj, "data") && aqiObj.data.current.pollution.aqicn}
+            </span>
         </div>
     )
 
     const descriptiveDetailsList = [
         { imageSrc: HandWithPenPng, title: "Description", description: locationObj.description },
-        { imageSrc: SeasonPng, title: "Current Season", description: "" }, 
+        { imageSrc: SeasonPng, title: "AQI", content: AQIContent },
         // not sure what to use to fill the description for 'Current Season'
     ]
 
     let descriptiveDetailsId = 0;
     const descriptiveDetailsRow = (
         <div className="flex p-4 gap-8 overflow-x-auto">
-            {descriptiveDetailsList.map(({ imageSrc, title, description }) => (
+            {descriptiveDetailsList.map(({ imageSrc, title, description = null, content = null }) => (
                 <DescriptiveDetailsBox
                     key={descriptiveDetailsId++}
                     imageSrc={imageSrc}
                     title={title}
                     description={description}
+                    content={content}
                 />
             ))}
         </div>
@@ -103,9 +139,8 @@ function LocationDetailComponent({ lastMarkerDiv, setLastMarkerDiv, selectedLoca
             <button
                 className="absolute top-2 right-2"
                 onClick={() => {
-                    setSelectedLocationId(null)
-                    revertStyle(lastMarkerDiv.style)
-                    setLastMarkerDiv(null)
+                    setSelectedLocationId(null);
+                    setSelectedLocationCoords(null);
                 }}
             >
                 <img src={MultiplyPng} />

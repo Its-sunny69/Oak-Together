@@ -52,8 +52,8 @@ export const getLocationById = createAsyncThunk(
   }
 );
 
-export const getLocationUsingFilter = createAsyncThunk(
-  `location/getLocationUsingFilter`,
+export const getLocationsUsingFilter = createAsyncThunk(
+  `location/getLocationsUsingFilter`,
   async (params, { rejectWithValue }) => {
     try {
       const response = await fetch(
@@ -68,7 +68,7 @@ export const getLocationUsingFilter = createAsyncThunk(
       }
 
       const data = await response.json();
-      console.log("getLocationUsingFilter res:", data);
+      console.log("getLocationsUsingFilter res:", data);
       return data;
     } catch (error) {
       console.error(error);
@@ -220,7 +220,7 @@ const locationSlice = createSlice({
       .addCase(getLocationById.fulfilled, (state, action) => {
         state.locationById = action.payload;
       })
-      .addCase(getLocationUsingFilter.fulfilled, (state, action) => {
+      .addCase(getLocationsUsingFilter.fulfilled, (state, action) => {
         state.locationUsingFilter = action.payload;
       })
       .addCase(postLocation.fulfilled, (state, action) => {
