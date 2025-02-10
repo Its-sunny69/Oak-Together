@@ -72,11 +72,12 @@ function LocationDetailComponent({ selectedLocationId, setSelectedLocationId, se
 
     const DescriptiveDetailsBox = ({ imageSrc, title, content }) => {
         return (
-            <div className="flex flex-col flex-grow h-fit min-h-[15vh] min-w-[15vw] rounded-xl shadow-[0px_0px_25px_rgba(0,0,0,0.2)] gap-2 bg-white px-4 py-2">
+            <div className="flex flex-col flex-grow h-fit min-h-[15vh] min-w-[12vw] rounded-xl shadow-[0px_0px_10px_rgba(0,0,0,0.2)] gap-2 bg-white px-4 py-2">
                 <div className="flex items-center gap-2">
                     <img src={imageSrc} />
                     <span className="text-gray-500 text-sm">{title}</span>
                 </div>
+              
                 {content}
             </div>
         )
@@ -84,7 +85,7 @@ function LocationDetailComponent({ selectedLocationId, setSelectedLocationId, se
 
 
     const AQIContent = (
-        <div className="flex flex-col justify-center gap-4">
+        <div className="flex flex-col justify-center gap-4 text-sm">
             <span className="flex gap-2 items-center ">
                 <FontAwesomeIcon
                     icon={faWind}
@@ -103,7 +104,7 @@ function LocationDetailComponent({ selectedLocationId, setSelectedLocationId, se
     )
 
     const descriptionContent = (
-        locationObj.description && <span className="text-sm text-wrap">{locationObj.description}</span>
+        locationObj.description && <p className="text-sm break-words text-justify">{locationObj.description}</p>
     )
     
 
@@ -115,7 +116,7 @@ function LocationDetailComponent({ selectedLocationId, setSelectedLocationId, se
 
     let descriptiveDetailsId = 0;
     const descriptiveDetailsRow = (
-        <div className="flex p-4 gap-8 overflow-x-auto ">
+        <div className="flex p-4 gap-3 overflow-x-auto ">
             {descriptiveDetailsList.map(({ imageSrc, title, content }) => 
                 (
                     <DescriptiveDetailsBox
