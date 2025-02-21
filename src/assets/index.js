@@ -40,6 +40,7 @@ import DefaultCoverPic from "./default_cover_photo.png";
 import LocationInfoIcon from "./location_info.png";
 import GCPIconPng from "./gcp.png";
 import DefaultBadge from "./default_badge.png";
+import Trophy2Png from "./trophy2.png";
 
 export {
   LogoPng,
@@ -84,4 +85,5 @@ export {
   LocationInfoIcon,
   GCPIconPng,
   DefaultBadge,
+  Trophy2Png,
 };

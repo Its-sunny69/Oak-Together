@@ -1,11 +1,11 @@
 import { SideNavBar } from "../components";
-import { GCPIconPng, CoinPng, TrophyPng, DefaultCoverPic, DefaultBadge, ProfileImg2 } from "../assets";
+import { GCPIconPng, CoinPng, TrophyPng, DefaultCoverPic, DefaultBadge, ProfileImg2, Trophy2Png } from "../assets";
 import { useState } from "react";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faAngleDown, faAngleUp } from "@fortawesome/free-solid-svg-icons";
+import { faAngleDown, faAngleUp, faCircleInfo } from "@fortawesome/free-solid-svg-icons";
 
 // temporary variables for ease in UI Development
-const isSponsor = true;
+const isSponsor = false;
 const coinCount = 1020;
 const trophyCount = 1080;
 const badgeName = "Frenzy Wizard"
@@ -112,12 +112,19 @@ function UserProfile() {
         </div>
     );
 
+    const statsList = [
+        { statName: isSponsor ? "Sponsored Events" : "Participated Events", statValue: "100" },
+        { statName: "Locations Marked", statValue: "10" },
+        { statName: "Locations Watered", statValue: "600" },
+        { statName: "Carbon footprints", statValue: "0.5%" }
+    ]
+
     const badgeAndStats = (
         <div className="bg-gradient-90 from-[#9A9A9A] to-[#FFEA63] min-h-[60vh] w-[40%] rounded-lg shadow-[#FFEA63_-3px_0px_18px_1px]">
             {showBadge ?
                 <div className="flex flex-col justify-end items-center px-4 pb-4">
                     <div
-                        className="h-[46vh] w-full"
+                        className="h-[45vh] w-full"
                         style={{
                             backgroundImage: `url(${DefaultBadge})`,
                             backgroundSize: "cover",
@@ -126,16 +133,38 @@ function UserProfile() {
                         }}
                     >
                     </div>
-                    <p className="flex flex-wrap gap-2 overflow-hidden items-center break-words pt-4 pb-8 w-full h-full justify-center font-bold text-3xl bg-gradient-90 from-[#00B67A] to-[#005036] text-transparent bg-clip-text uppercase">
-                        {badgeName.split(" ").map((word, index) =>
-                            <span key={index} >
-                                <span className="text-4xl">{word[0]}</span>{word.slice(1)}
-                            </span>
-                        )}
-                    </p>
-                </div> :
-                <div>
 
+                    <span
+                        className="break-words pt-4 pb-8 w-full h-full text-4xl font-bold bg-gradient-90 from-[#00B67A] to-[#005036] text-center text-transparent bg-clip-text"
+                        style={{ fontFamily: "Playfair Display SC" }}
+                    >
+                        {badgeName}
+                    </span>
+                </div> :
+                <div
+                    className="relative flex flex-col p-5"
+                >
+                    <img src={Trophy2Png} alt="" className="absolute left-0 w-full h-[60vh] top-1" />
+                    <div className="flex flex-col items-center justify-center pt-4 w-full text-white uppercase">
+                        <span className="-mb-2">trophies</span>
+                        <span
+                            className="text-6xl font-extrabold bg-gradient-90 from-[#00B67A] to-[#005036] text-transparent bg-clip-text"
+                            style={{ fontFamily: "Playfair Display SC" }}>{trophyCount}</span>
+                    </div>
+                    <ul className="flex flex-col justify-between gap-2 pt-12 items-start">
+                        {statsList.map(({ statName, statValue }) =>
+                            <li
+                                key={statName}
+                                className="flex flex-col w-full"
+                            >
+                                <span className="flex items-center justify-between pr-[11.5rem] text-white">
+                                    <span>{statName}</span>
+                                    <FontAwesomeIcon icon={faCircleInfo}/>
+                                    </span>
+                                <span>{statValue}</span>
+                            </li>
+                        )}
+                    </ul>
                 </div>}
         </div>
     );
