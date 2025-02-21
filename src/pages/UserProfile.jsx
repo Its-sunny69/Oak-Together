@@ -1,7 +1,9 @@
 import { SideNavBar } from "../components";
 import { GCPIconPng, CoinPng, TrophyPng, DefaultCoverPic, DefaultBadge, ProfileImg2, Trophy2Png } from "../assets";
 import { useState } from "react";
+import { useInterval } from "../hooks";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { motion } from "framer-motion"
 import { faAngleDown, faAngleUp, faCircleInfo } from "@fortawesome/free-solid-svg-icons";
 
 // temporary variables for ease in UI Development
@@ -18,6 +20,9 @@ function UserProfile() {
     const [activeView, setActiveView] = useState("Overview");
     const [showBadge, setShowBadge] = useState(true);
     const [openDropdown, setOpenDropdown] = useState(null);
+    const [isAnimating, setIsAnimating] = useState(false);
+
+    const intervalID = useInterval(handleFlip, 5000);
 
     const nameIconDiv = (
         <div className="flex gap-6">
@@ -39,6 +44,7 @@ function UserProfile() {
                         className={"cursor-pointer " + ((option == activeView) ? "text-[#60D6D9]" : "")}
                         onClick={() => {
                             setActiveView(option);
+                            setShowBadge(true);
                             setOpenDropdown(activeView == option ? openDropdown : null);
                         }}
                         key={option}
@@ -119,12 +125,28 @@ function UserProfile() {
         { statName: "Carbon footprints", statValue: "0.5%" }
     ]
 
+    function handleFlip() {
+        if (!isAnimating) {
+            setShowBadge(!showBadge);
+            setIsAnimating(true);
+        }
+    }
+
     const badgeAndStats = (
-        <div className="bg-gradient-90 from-[#9A9A9A] to-[#FFEA63] min-h-[60vh] w-[40%] rounded-lg shadow-[#FFEA63_-3px_0px_18px_1px]">
-            {showBadge ?
-                <div className="flex flex-col justify-end items-center px-4 pb-4">
+        <div
+            className="flip-card min-h-[60vh] w-[40%]"
+            onClick={handleFlip}
+        >
+            <motion.div
+                className="flip-card-inner w-full h-full shadow-[#FFEA63_-3px_0px_18px_1px]"
+                initial={false}
+                animate={{ rotateY: showBadge ? 0 : 180 }}
+                transition={{ duration: 0.6, animationDirection: "normal" }}
+                onAnimationComplete={() => setIsAnimating(false)}
+            >
+                <div className="flip-card-front flex flex-col rounded-lg justify-end items-center px-4 pb-4 bg-gradient-90 from-[#9A9A9A] to-[#FFEA63]">
                     <div
-                        className="h-[45vh] w-full"
+                        className="absolute top-1 right-3 h-[45vh] w-full"
                         style={{
                             backgroundImage: `url(${DefaultBadge})`,
                             backgroundSize: "cover",
@@ -132,17 +154,17 @@ function UserProfile() {
                             backgroundRepeat: "no-repeat"
                         }}
                     >
+                        
                     </div>
-
                     <span
-                        className="break-words pt-4 pb-8 w-full h-full text-4xl font-bold bg-gradient-90 from-[#00B67A] to-[#005036] text-center text-transparent bg-clip-text"
+                        className="break-words pb-4 w-full h-fit text-4xl font-extrabold bg-gradient-90 from-[#00B67A] to-[#005036] text-center text-transparent bg-clip-text"
                         style={{ fontFamily: "Playfair Display SC" }}
                     >
                         {badgeName}
                     </span>
-                </div> :
+                </div>
                 <div
-                    className="relative flex flex-col p-5"
+                    className="flip-card-back relative flex flex-col rounded-lg p-5 bg-gradient-90 from-[#9A9A9A] to-[#FFEA63]"
                 >
                     <img src={Trophy2Png} alt="" className="absolute left-0 w-full h-[60vh] top-1" />
                     <div className="flex flex-col items-center justify-center pt-4 w-full text-white uppercase">
@@ -159,21 +181,19 @@ function UserProfile() {
                             >
                                 <span className="flex items-center justify-between pr-[11.5rem] text-white">
                                     <span>{statName}</span>
-                                    <FontAwesomeIcon icon={faCircleInfo}/>
-                                    </span>
+                                    <FontAwesomeIcon icon={faCircleInfo} />
+                                </span>
                                 <span>{statValue}</span>
                             </li>
                         )}
                     </ul>
-                </div>}
+                </div>
+            </motion.div>
         </div>
     );
 
     const infoSection = (
-        <div
-            className="flex gap-6 cursor-pointer"
-            onClick={() => { setShowBadge(prev => !prev) }}
-        >
+        <div className="flex gap-6 cursor-pointer">
             {profileInfo}
             {badgeAndStats}
         </div>
