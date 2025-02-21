@@ -5,6 +5,7 @@ import { useInterval } from "../hooks";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { motion } from "framer-motion"
 import { faAngleDown, faAngleUp, faCircleInfo } from "@fortawesome/free-solid-svg-icons";
+import { Tooltip } from "react-tooltip";
 
 // temporary variables for ease in UI Development
 const isSponsor = false;
@@ -22,7 +23,7 @@ function UserProfile() {
     const [openDropdown, setOpenDropdown] = useState(null);
     const [isAnimating, setIsAnimating] = useState(false);
 
-    const delay = activeView == "Overview"? 5000: null;
+    const delay = activeView == "Overview" ? 5000 : null;
 
     useInterval(handleFlip, delay);
 
@@ -121,14 +122,41 @@ function UserProfile() {
     );
 
     const statsList = [
-        { statName: isSponsor ? "Sponsored Events" : "Participated Events", statValue: "100" },
-        { statName: "Locations Marked", statValue: "10" },
-        { statName: "Locations Watered", statValue: "600" },
-        { statName: "Carbon footprints", statValue: "0.5%" }
+        isSponsor ?
+            {
+                statName: "Sponsored Events",
+                statValue: "100",
+                tooltipId: "sponsor-event",
+                tooltipContent: "The number of events you have sponsored or supported, helping to fund and facilitate eco-friendly activities."
+            } :
+            {
+                statName: "Participated Events",
+                statValue: "100",
+                tooltipId: "participate-event",
+                tooltipContent: "The total number of events you have actively taken part in, contributing to environmental initiatives and community efforts."
+            },
+        {
+            statName: "Locations Marked",
+            statValue: "10",
+            tooltipId: "location-marked",
+            tooltipContent: "The count of locations you have identified for environmental activities, such as tree plantations or clean-up drives."
+        },
+        {
+            statName: "Locations Watered",
+            statValue: "600",
+            tooltipId: "location-watered",
+            tooltipContent: "The total number of locations where you have watered trees or plants, contributing to their growth and sustainability."
+        },
+        {
+            statName: "Carbon footprints",
+            statValue: "0.5%",
+            tooltipId: "carbon-footprint",
+            tooltipContent: "An estimate of the amount of CO₂ emissions you have helped offset or reduce through your eco-friendly activities."
+        }
     ]
 
     function handleFlip() {
-        console.log("Yo Koso, ...")
+        // console.log("Yo Koso, ...")
         if (!isAnimating) {
             setShowBadge(!showBadge);
             setIsAnimating(true);
@@ -158,7 +186,7 @@ function UserProfile() {
                             backgroundRepeat: "no-repeat"
                         }}
                     >
-                        
+
                     </div>
                     <span
                         className="break-words pb-4 w-full h-fit text-4xl font-extrabold bg-gradient-90 from-[#00B67A] to-[#005036] text-center text-transparent bg-clip-text"
@@ -178,18 +206,33 @@ function UserProfile() {
                             style={{ fontFamily: "Playfair Display SC" }}>{trophyCount}</span>
                     </div>
                     <ul className="flex flex-col justify-between gap-2 pt-12 items-start">
-                        {statsList.map(({ statName, statValue }) =>
-                            <li
+                        {statsList.map(({ statName, statValue, tooltipId, tooltipContent }) => {
+                            return <li
                                 key={statName}
-                                className="flex flex-col w-full"
+                                className="relative flex flex-col w-full"
                             >
                                 <span className="flex items-center justify-between pr-[11.5rem] text-white">
                                     <span>{statName}</span>
-                                    <FontAwesomeIcon icon={faCircleInfo} />
+                                    <FontAwesomeIcon
+                                        icon={faCircleInfo}
+                                        className="text-md"
+                                        data-tooltip-id={tooltipId}
+                                        data-tooltip-content={tooltipContent}
+                                        data-tooltip-place="top"
+                                    />
                                 </span>
+                                <Tooltip
+                                    id={tooltipId}
+                                    style={{
+                                        maxWidth: "200px",
+                                        borderRadius: "0.5rem",
+                                        backgroundColor: "white",
+                                        color: "#3BA5DA"
+                                    }}
+                                />
                                 <span>{statValue}</span>
                             </li>
-                        )}
+                        })}
                     </ul>
                 </div>
             </motion.div>
