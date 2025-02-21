@@ -8,7 +8,7 @@ import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faGlassWater, faMap, faWind } from "@fortawesome/free-solid-svg-icons";
 
 
-function LocationDetailComponent({ selectedLocationId, setSelectedLocationId, selectedLocationCoords, setSelectedLocationCoords, eventSelected, setEventSelected }) {
+function LocationDetailComponent({ selectedLocationId, setSelectedLocationId, selectedLocationCoords, setSelectedLocationCoords, eventSelected }) {
 
     // We use the 'selectedLocationId' to fetch data from API, for now, using dummy data
     const [locationObj, setLocationObj] = useState({});
@@ -16,7 +16,7 @@ function LocationDetailComponent({ selectedLocationId, setSelectedLocationId, se
     const dispatch = useDispatch();
 
     useEffect(() => {
-        console.log("Event Selected: ", eventSelected);
+        // console.log("Event Selected: ", eventSelected);
         dispatch(eventSelected? getEventById(selectedLocationId): getLocationById(selectedLocationId)).unwrap()
             .then((response) => {
                 const responseObj = {};

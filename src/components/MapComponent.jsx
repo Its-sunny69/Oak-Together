@@ -9,14 +9,27 @@ import { getLocationsUsingFilter } from '../features/locationSlice';
 import { getEventsByFilter } from "../features/eventSlice";
 import { useDispatch } from 'react-redux';
 import { MarkerClusterer } from '@googlemaps/markerclusterer';
+import Geohash from "ngeohash";
 
 
 /*
   Adding marker clusterer: https://developers.google.com/maps/documentation/javascript/marker-clustering
 */
 
-
 const Markers = ({ markerCoordinates, markerStates, setSelectedLocationId, setSelectedLocationCoords, setEventSelected, showPostInterface }) => {
+
+  function removeDuplicateCoords(allMarkerCoordsList) {
+    const geohashSet = new Set();
+
+    return allMarkerCoordsList.filter((markerCoordsObj) => {
+      const geohash = Geohash.encode(markerCoordsObj.lat, markerCoordsObj.lng, 9);
+
+      if(geohashSet.has(geohash)) return;
+      
+      geohashSet.add(geohash);
+      return markerCoordsObj;
+    });
+  }
 
   const markerIcons = {
     "planted": LargeTreePng,
@@ -27,9 +40,11 @@ const Markers = ({ markerCoordinates, markerStates, setSelectedLocationId, setSe
   const { plantedCoordinates, barrenCoordinates, eventCoordinates } = markerCoordinates;
 
   const allMarkerCoordsList = [];
+  if (markerStates.showEventMarkers) allMarkerCoordsList.push(...eventCoordinates);
   if (markerStates.showPlantedMarkers) allMarkerCoordsList.push(...plantedCoordinates);
   if (markerStates.showBarrenMarkers) allMarkerCoordsList.push(...barrenCoordinates);
-  if (markerStates.showEventMarkers) allMarkerCoordsList.push(...eventCoordinates);
+
+  const allUniqueMarkerCoordsList = removeDuplicateCoords(allMarkerCoordsList);
 
   const map = useMap();
   const clusterer = useRef(null);
@@ -47,7 +62,7 @@ const Markers = ({ markerCoordinates, markerStates, setSelectedLocationId, setSe
     markersRef.current.forEach(marker => marker.setMap(null));
     markersRef.current = [];
 
-    const newMarkers = allMarkerCoordsList.map(({ id, lat, lng, type }) => {
+    const newMarkers = allUniqueMarkerCoordsList.map(({ id, lat, lng, type }) => {
       const markerDOM = document.createElement("div");
       const markerImgElement = document.createElement("img");
 
@@ -73,7 +88,7 @@ const Markers = ({ markerCoordinates, markerStates, setSelectedLocationId, setSe
     markersRef.current = newMarkers;
     clusterer.current.addMarkers(newMarkers);
 
-  }, [map, allMarkerCoordsList]); // Dependencies update when marker list changes
+  }, [map, allUniqueMarkerCoordsList]); // Dependencies update when marker list changes
 };
 
 
@@ -85,7 +100,7 @@ const RecenterButton = ({ locationCoords }) => {
 
   return (
     <button
-      className="bg-white absolute right-2.5 bottom-52 hover:bg-gray-300 transition rounded-sm shadow-md"
+      className="bg-white absolute right-2.5 bottom-60 hover:bg-gray-300 transition rounded-sm shadow-md"
       onClick={() => map.setCenter(locationCoords)}
       onMouseEnter={() => setRecenterTooltipVisible(true)}
       onMouseOut={() => setRecenterTooltipVisible(false)}
@@ -214,7 +229,7 @@ function MapComponent({ currLocationCoords, setIsModalVisible }) {
 
   // Map controls container
   const mapControlsDiv = (
-    <div className="absolute bottom-6 right-20 flex flex-col gap-2 items-start">
+    <div className="absolute bottom-6 right-3 flex flex-col gap-2 items-start">
       {markLocationButton}
       {filterCheckBoxes}
     </div>
@@ -401,6 +416,8 @@ function MapComponent({ currLocationCoords, setIsModalVisible }) {
           <Map
             defaultCenter={currLocationCoords}
             defaultZoom={17}
+            streetViewControlOptions={{position: ControlPosition.RIGHT_CENTER}}
+            cameraControlOptions={{position: ControlPosition.RIGHT_TOP}}
             mapId={import.meta.env.VITE_GMAP_MAP_STYLE_ID}
             draggableCursor={showPostInterface ? "default" : "grab"}
             onClick={(e) => {

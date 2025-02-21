@@ -22,7 +22,9 @@ function UserProfile() {
     const [openDropdown, setOpenDropdown] = useState(null);
     const [isAnimating, setIsAnimating] = useState(false);
 
-    const intervalID = useInterval(handleFlip, 5000);
+    const delay = activeView == "Overview"? 5000: null;
+
+    useInterval(handleFlip, delay);
 
     const nameIconDiv = (
         <div className="flex gap-6">
@@ -126,15 +128,17 @@ function UserProfile() {
     ]
 
     function handleFlip() {
+        console.log("Yo Koso, ...")
         if (!isAnimating) {
             setShowBadge(!showBadge);
             setIsAnimating(true);
         }
     }
 
+    // https://youtu.be/GSOgbZ396MI?feature=shared (Card Flip Animation)
     const badgeAndStats = (
         <div
-            className="flip-card min-h-[60vh] w-[40%]"
+            className="flip-card min-h-[60vh] w-[40%] cursor-pointer"
             onClick={handleFlip}
         >
             <motion.div
@@ -193,7 +197,7 @@ function UserProfile() {
     );
 
     const infoSection = (
-        <div className="flex gap-6 cursor-pointer">
+        <div className="flex gap-6">
             {profileInfo}
             {badgeAndStats}
         </div>
