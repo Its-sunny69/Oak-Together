@@ -6,6 +6,7 @@ import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faMagnifyingGlass, faLocationDot } from "@fortawesome/free-solid-svg-icons";
 import { faCircleXmark } from "@fortawesome/free-regular-svg-icons";
 import { getLocationsUsingFilter } from '../features/locationSlice';
+import { getEventsByFilter } from "../features/eventSlice";
 import { useDispatch } from 'react-redux';
 import { MarkerClusterer } from '@googlemaps/markerclusterer';
 
@@ -15,7 +16,7 @@ import { MarkerClusterer } from '@googlemaps/markerclusterer';
 */
 
 
-const Markers = ({ markerCoordinates, markerStates, setSelectedLocationId, setSelectedLocationCoords, showPostInterface }) => {
+const Markers = ({ markerCoordinates, markerStates, setSelectedLocationId, setSelectedLocationCoords, setEventSelected, showPostInterface }) => {
 
   const markerIcons = {
     "planted": LargeTreePng,
@@ -63,6 +64,7 @@ const Markers = ({ markerCoordinates, markerStates, setSelectedLocationId, setSe
         if (showPostInterface) return; // might need to handle this differently later...
         setSelectedLocationId(id);
         setSelectedLocationCoords({lat: e.latLng.lat(), lng: e.latLng.lng()});
+        setEventSelected(type == "event");
       });
 
       return advancedMarkerElement;
@@ -294,6 +296,7 @@ function MapComponent({ currLocationCoords, setIsModalVisible }) {
   // For keeping track of Selected Locations via Marker Clicks
   const [selectedLocationId, setSelectedLocationId] = useState(null);
   const [selectedLocationCoords, setSelectedLocationCoords] = useState(null);
+  const [eventSelected, setEventSelected] = useState(false);
 
   // API Calls to get Location and Event Coords
   const [markerCoordinates, setMarkerCoordinates] = useState({
@@ -350,26 +353,26 @@ function MapComponent({ currLocationCoords, setIsModalVisible }) {
       .catch((error) => console.log(error));
 
     // Uncomment and/or update after 'eventSlice' is developed in src/features
-    // dispatch(getEventsByFilter("")).unwrap()
-    //   .then((response) => {
-    //     const eventCoords = [];
+    dispatch(getEventsByFilter(filterText)).unwrap()
+      .then((response) => {
+        const eventCoords = [];
 
-    //     response.payload.forEach((eventObj) => {
-    //       const coordinateObj = {
-    //         id: eventObj.id,
-    //         lat: eventObj.position.locations.latitude,
-    //         lng: eventObj.position.locations.longitude,
-    //         type: "event"
-    //       };
+        response.forEach((eventObj) => {
+          const coordinateObj = {
+            id: eventObj.id,
+            lat: eventObj.position.locations.latitude,
+            lng: eventObj.position.locations.longitude,
+            type: "event"
+          };
 
-    //       eventCoords.push(coordinateObj);
-    //     });
+          eventCoords.push(coordinateObj);
+        });
 
-    //     setMarkerCoordinates({
-    //       ...markerCoordinates,
-    //       eventCoordinates: eventCoords
-    //     })
-    //   });
+        setMarkerCoordinates({
+          ...markerCoordinates,
+          eventCoordinates: eventCoords
+        })
+      });
   }
 
   return (
@@ -415,6 +418,7 @@ function MapComponent({ currLocationCoords, setIsModalVisible }) {
               markerStates={markerStates}
               setSelectedLocationId={setSelectedLocationId}
               setSelectedLocationCoords={setSelectedLocationCoords}
+              setEventSelected={setEventSelected}
               showPostInterface={showPostInterface}
             />
 
@@ -441,6 +445,8 @@ function MapComponent({ currLocationCoords, setIsModalVisible }) {
               setSelectedLocationId={setSelectedLocationId}
               selectedLocationCoords = {selectedLocationCoords}
               setSelectedLocationCoords = {setSelectedLocationCoords}
+              eventSelected={eventSelected}
+              setEventSelected={setEventSelected}
             />
           }
 
