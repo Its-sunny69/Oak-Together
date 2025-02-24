@@ -4,6 +4,7 @@ import SignUp from "./SignUp";
 import Home from "./Home";
 import MapPage from "./MapPage";
 import AskAIPage from "./AskAIPage";
+import Temp from "./Temp";
 import UserProfile from "./UserProfile";
 
 export {
@@ -13,5 +14,6 @@ export {
     Home,
     MapPage,
     AskAIPage,
+    Temp,
     UserProfile
 }
