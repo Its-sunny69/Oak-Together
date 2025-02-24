@@ -1,6 +1,6 @@
 import { SideNavBar } from "../components";
 import { GCPIconPng, CoinPng, TrophyPng, DefaultCoverPic, DefaultBadge, ProfileImg2, Trophy2Png } from "../assets";
-import { useState } from "react";
+import { useEffect, useState, useMemo } from "react";
 import { useInterval } from "../hooks";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { motion } from "framer-motion"
@@ -16,16 +16,137 @@ const recentActivitiesList = Array(5).fill({ activity: "Enrolled in event \"Even
 const certificatesList = Array(5).fill({ title: "Enrolled in event \"Event Name\"", date: "March 01, 2025" });
 const gcpList = Array(5).fill({ activity: "Sponsored an event \"Event Name\"", pointsEarned: "20" });
 
+
+function BadgeAndStats({ activeView }) {
+    const statsList = [
+        isSponsor ?
+            {
+                statName: "Sponsored Events",
+                statValue: "100",
+                tooltipId: "sponsor-event",
+                tooltipContent: "The number of events you have sponsored or supported, helping to fund and facilitate eco-friendly activities."
+            } :
+            {
+                statName: "Participated Events",
+                statValue: "100",
+                tooltipId: "participate-event",
+                tooltipContent: "The total number of events you have actively taken part in, contributing to environmental initiatives and community efforts."
+            },
+        {
+            statName: "Locations Marked",
+            statValue: "10",
+            tooltipId: "location-marked",
+            tooltipContent: "The count of locations you have identified for environmental activities, such as tree plantations or clean-up drives."
+        },
+        {
+            statName: "Locations Watered",
+            statValue: "600",
+            tooltipId: "location-watered",
+            tooltipContent: "The total number of locations where you have watered trees or plants, contributing to their growth and sustainability."
+        },
+        {
+            statName: "Carbon footprints",
+            statValue: "0.5%",
+            tooltipId: "carbon-footprint",
+            tooltipContent: "An estimate of the amount of CO₂ emissions you have helped offset or reduce through your eco-friendly activities."
+        }
+    ]
+
+    const [showBadge, setShowBadge] = useState(true);
+    const [isAnimating, setIsAnimating] = useState(false);
+
+    function handleFlip() {
+        // console.log("Yo Koso, ...")
+        if (!isAnimating) {
+            setShowBadge(!showBadge);
+            setIsAnimating(true);
+        }
+    }
+
+    const delay = activeView == "Overview" ? 5000 : null;
+    useInterval(handleFlip, delay);
+
+    return (
+        <div
+            className="flip-card min-h-[60vh] w-[40%] cursor-pointer"
+            onClick={handleFlip}
+        // https://youtu.be/GSOgbZ396MI?feature=shared (Card Flip Animation)
+        >
+            <motion.div
+                className="flip-card-inner w-full h-full shadow-[#FFEA63_-3px_0px_18px_1px]"
+                initial={false}
+                animate={{ rotateY: showBadge ? 0 : 180 }}
+                transition={{ duration: 0.6, animationDirection: "normal" }}
+                onAnimationComplete={() => setIsAnimating(false)}
+            >
+                <div className="flip-card-front flex flex-col rounded-lg justify-end items-center px-4 pb-4 bg-gradient-90 from-[#9A9A9A] to-[#FFEA63]">
+                    <div
+                        className="absolute top-1 right-3 h-[45vh] w-full"
+                        style={{
+                            backgroundImage: `url(${DefaultBadge})`,
+                            backgroundSize: "cover",
+                            backgroundPosition: "center",
+                            backgroundRepeat: "no-repeat"
+                        }}
+                    >
+
+                    </div>
+                    <span
+                        className="break-words pb-4 w-full h-fit text-4xl font-extrabold bg-gradient-90 from-[#00B67A] to-[#005036] text-center text-transparent bg-clip-text"
+                        style={{ fontFamily: "Playfair Display SC" }}
+                    >
+                        {badgeName}
+                    </span>
+                </div>
+                <div
+                    className="flip-card-back relative flex flex-col rounded-lg p-5 bg-gradient-90 from-[#9A9A9A] to-[#FFEA63]"
+                >
+                    <img src={Trophy2Png} alt="" className="absolute left-0 w-full h-[60vh] top-1" />
+                    <div className="flex flex-col items-center justify-center pt-4 w-full text-white uppercase">
+                        <span className="-mb-2">trophies</span>
+                        <span
+                            className="text-6xl font-extrabold bg-gradient-90 from-[#00B67A] to-[#005036] text-transparent bg-clip-text"
+                            style={{ fontFamily: "Playfair Display SC" }}>{trophyCount}</span>
+                    </div>
+                    <ul className="flex flex-col justify-between gap-2 pt-12 items-start">
+                        {statsList.map(({ statName, statValue, tooltipId, tooltipContent }) => {
+                            return <li
+                                key={statName}
+                                className="relative flex flex-col w-full"
+                            >
+                                <span className="flex items-center justify-between pr-[11.5rem] text-white">
+                                    <span>{statName}</span>
+                                    <FontAwesomeIcon
+                                        icon={faCircleInfo}
+                                        className="text-md"
+                                        data-tooltip-id={tooltipId}
+                                        data-tooltip-content={tooltipContent}
+                                        data-tooltip-place="top"
+                                    />
+                                </span>
+                                <Tooltip
+                                    id={tooltipId}
+                                    style={{
+                                        maxWidth: "200px",
+                                        borderRadius: "0.5rem",
+                                        backgroundColor: "white",
+                                        color: "#3BA5DA",
+                                        zIndex: "10"
+                                    }}
+                                />
+                                <span>{statValue}</span>
+                            </li>
+                        })}
+                    </ul>
+                </div>
+            </motion.div>
+        </div>
+    )
+}
+
 function UserProfile() {
 
     const [activeView, setActiveView] = useState("Overview");
-    const [showBadge, setShowBadge] = useState(true);
-    const [openDropdown, setOpenDropdown] = useState(null);
-    const [isAnimating, setIsAnimating] = useState(false);
-
-    const delay = activeView == "Overview" ? 5000 : null;
-
-    useInterval(handleFlip, delay);
 
     const nameIconDiv = (
         <div className="flex gap-6">
@@ -48,7 +169,6 @@ function UserProfile() {
                         onClick={() => {
                             setActiveView(option);
                             setShowBadge(true);
-                            setOpenDropdown(activeView == option ? openDropdown : null);
                         }}
                         key={option}
                     >
@@ -121,138 +241,20 @@ function UserProfile() {
         </div>
     );
 
-    const statsList = [
-        isSponsor ?
-            {
-                statName: "Sponsored Events",
-                statValue: "100",
-                tooltipId: "sponsor-event",
-                tooltipContent: "The number of events you have sponsored or supported, helping to fund and facilitate eco-friendly activities."
-            } :
-            {
-                statName: "Participated Events",
-                statValue: "100",
-                tooltipId: "participate-event",
-                tooltipContent: "The total number of events you have actively taken part in, contributing to environmental initiatives and community efforts."
-            },
-        {
-            statName: "Locations Marked",
-            statValue: "10",
-            tooltipId: "location-marked",
-            tooltipContent: "The count of locations you have identified for environmental activities, such as tree plantations or clean-up drives."
-        },
-        {
-            statName: "Locations Watered",
-            statValue: "600",
-            tooltipId: "location-watered",
-            tooltipContent: "The total number of locations where you have watered trees or plants, contributing to their growth and sustainability."
-        },
-        {
-            statName: "Carbon footprints",
-            statValue: "0.5%",
-            tooltipId: "carbon-footprint",
-            tooltipContent: "An estimate of the amount of CO₂ emissions you have helped offset or reduce through your eco-friendly activities."
-        }
-    ]
-
-    function handleFlip() {
-        // console.log("Yo Koso, ...")
-        if (!isAnimating) {
-            setShowBadge(!showBadge);
-            setIsAnimating(true);
-        }
-    }
-
-    // https://youtu.be/GSOgbZ396MI?feature=shared (Card Flip Animation)
-    const badgeAndStats = (
-        <div
-            className="flip-card min-h-[60vh] w-[40%] cursor-pointer"
-            onClick={handleFlip}
-        >
-            <motion.div
-                className="flip-card-inner w-full h-full shadow-[#FFEA63_-3px_0px_18px_1px]"
-                initial={false}
-                animate={{ rotateY: showBadge ? 0 : 180 }}
-                transition={{ duration: 0.6, animationDirection: "normal" }}
-                onAnimationComplete={() => setIsAnimating(false)}
-            >
-                <div className="flip-card-front flex flex-col rounded-lg justify-end items-center px-4 pb-4 bg-gradient-90 from-[#9A9A9A] to-[#FFEA63]">
-                    <div
-                        className="absolute top-1 right-3 h-[45vh] w-full"
-                        style={{
-                            backgroundImage: `url(${DefaultBadge})`,
-                            backgroundSize: "cover",
-                            backgroundPosition: "center",
-                            backgroundRepeat: "no-repeat"
-                        }}
-                    >
-
-                    </div>
-                    <span
-                        className="break-words pb-4 w-full h-fit text-4xl font-extrabold bg-gradient-90 from-[#00B67A] to-[#005036] text-center text-transparent bg-clip-text"
-                        style={{ fontFamily: "Playfair Display SC" }}
-                    >
-                        {badgeName}
-                    </span>
-                </div>
-                <div
-                    className="flip-card-back relative flex flex-col rounded-lg p-5 bg-gradient-90 from-[#9A9A9A] to-[#FFEA63]"
-                >
-                    <img src={Trophy2Png} alt="" className="absolute left-0 w-full h-[60vh] top-1" />
-                    <div className="flex flex-col items-center justify-center pt-4 w-full text-white uppercase">
-                        <span className="-mb-2">trophies</span>
-                        <span
-                            className="text-6xl font-extrabold bg-gradient-90 from-[#00B67A] to-[#005036] text-transparent bg-clip-text"
-                            style={{ fontFamily: "Playfair Display SC" }}>{trophyCount}</span>
-                    </div>
-                    <ul className="flex flex-col justify-between gap-2 pt-12 items-start">
-                        {statsList.map(({ statName, statValue, tooltipId, tooltipContent }) => {
-                            return <li
-                                key={statName}
-                                className="relative flex flex-col w-full"
-                            >
-                                <span className="flex items-center justify-between pr-[11.5rem] text-white">
-                                    <span>{statName}</span>
-                                    <FontAwesomeIcon
-                                        icon={faCircleInfo}
-                                        className="text-md"
-                                        data-tooltip-id={tooltipId}
-                                        data-tooltip-content={tooltipContent}
-                                        data-tooltip-place="top"
-                                    />
-                                </span>
-                                <Tooltip
-                                    id={tooltipId}
-                                    style={{
-                                        maxWidth: "200px",
-                                        borderRadius: "0.5rem",
-                                        backgroundColor: "white",
-                                        color: "#3BA5DA"
-                                    }}
-                                />
-                                <span>{statValue}</span>
-                            </li>
-                        })}
-                    </ul>
-                </div>
-            </motion.div>
-        </div>
-    );
-
     const infoSection = (
         <div className="flex gap-6">
             {profileInfo}
-            {badgeAndStats}
+            <BadgeAndStats activeView={activeView} />
         </div>
     );
 
     const DropdownListComponent = ({ listName, listContent }) => {
 
+        const [isOpen, setIsOpen] = useState(false);
+
         function handleCertificateDownload(title) {
             console.log(`Downloading Certificate titled: ${title}`);
         }
-
-        const dropdownActive = listName == openDropdown;
 
         const activitiesList = (
             <>
@@ -332,16 +334,19 @@ function UserProfile() {
         );
 
         return (
-            <div
-                className="relative flex justify-between items-center rounded-lg px-4 py-10 text-[#3BA5DA] shadow-[rgba(96,214,217,0.2)_-1px_3px_6px_1px] cursor-pointer"
-                onClick={() => setOpenDropdown(dropdownActive ? null : listName)}
-            >
-                <p>{listName}</p>
-                <FontAwesomeIcon icon={dropdownActive ? faAngleUp : faAngleDown} className="text-xl" />
+            <div className="flex flex-col">
+                <div
+                    className={`relative flex justify-between items-center px-4 py-10 text-[#3BA5DA] shadow-[rgba(96,214,217,0.2)_-1px_3px_6px_1px] cursor-pointer ${isOpen ? "rounded-t-lg" : "rounded-lg"} `}
+                    onClick={() => setIsOpen(!isOpen)}
+                >
+                    <p>{listName}</p>
+                    <FontAwesomeIcon icon={isOpen ? faAngleUp : faAngleDown} className="text-xl" />
+
+                </div>
                 {
-                    dropdownActive &&
+                    isOpen &&
                     <ul
-                        className="flex flex-col gap-2 absolute h-fit z-10 rounded-b-lg bottom-0 top-24 right-0 left-0 bg-white shadow-[rgba(96,214,217,0.2)_-1px_3px_6px_1px] transition-opacity duration-[1000ms] cursor-default"
+                        className="flex flex-col gap-2 h-fit z-10 rounded-b-lg bottom-0 top-24 right-0 left-0 bg-white shadow-[rgba(96,214,217,0.2)_-1px_3px_6px_1px] cursor-default animate-fade-down"
                         onClick={(e) => { e.stopPropagation() }}
                     >
                         {listName == "Recent Activities" && activitiesList}
@@ -351,6 +356,7 @@ function UserProfile() {
                     </ul>
                 }
             </div>
+
         )
     }
 
@@ -366,15 +372,13 @@ function UserProfile() {
 
     const listSection = (
         <div className="flex flex-col gap-4">
-            {
-                listItemObjects.map(({ listName, listContent }, index) =>
-                    <DropdownListComponent
-                        key={index}
-                        listName={listName}
-                        listContent={listContent}
-                    />
-                )
-            }
+            {listItemObjects.map(({ listName, listContent }, index) => (
+                <DropdownListComponent
+                    key={index}
+                    listName={listName}
+                    listContent={listContent}
+                />
+            ))}
         </div>
     );
 
@@ -398,18 +402,10 @@ function UserProfile() {
         </>
     )
 
-    let pageExpansionMargin = "";
-    if (openDropdown) {
-        const condition = ((openDropdown == "Recent Activities" && isSponsor) || openDropdown == "My Certificates");
-        console.log(condition);
-        pageExpansionMargin = condition ? "mb-80" : "mb-48";
-
-    }
-
     return (
         <div className="flex">
             <SideNavBar />
-            <div className={"flex flex-col gap-6 w-full px-4 pt-4 pb-8 " + pageExpansionMargin}>
+            <div className="flex flex-col gap-6 w-full px-4 pt-4 pb-8">
                 {profileHeader}
                 {activeView == "Overview" && overViewDisplay}
                 {deleteAccountBtn}
