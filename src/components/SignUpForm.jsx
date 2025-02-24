@@ -1,18 +1,21 @@
 import { useState, useEffect } from "react";
-import { useNavigate } from "react-router-dom";
 import { useApi } from "../hooks";
 import {
   getAllCountryNames,
   getStateNamesByCountryName,
   getCityNamesByStateName,
 } from "../api";
+import { useNavigate } from "react-router-dom";
 import { signUpSchema } from "../schemas";
 import { Formik, Form } from "formik";
 import { SignUpButton, FormTextComponent, FormSelectComponent } from ".";
 import toast from "react-hot-toast";
+import { useDispatch } from "react-redux";
+import { registerUser } from "../features/userSlice";
 
 function SignUpForm() {
   const navigate = useNavigate();
+  const dispatch = useDispatch();
 
   // const [countryResponse, setCountryResponse] = useApi(() =>
   //   getAllCountryNames()
@@ -123,23 +126,9 @@ function SignUpForm() {
 
   const handleFormSubmit = (values, { setSubmitting }) => {
 
-    const apiUrl = import.meta.env.VITE_SERVER_API_URL;
-
-    const postHeaders = new Headers();
-    postHeaders.append("Content-Type", "application/json");
-
-    fetch(apiUrl + "/user-profiles/register", {
-      method: "POST",
-      body: JSON.stringify(values),
-      headers: postHeaders,
-    })
-      .then(async (response) => {
-        const responseObj = await response.json();
-        if (!response.ok) throw new Error(`${responseObj.message}`);
-        return responseObj;
-      })
-      .then((data) => {
-        toast.success(`Welcome ${data.name} 🎉`, "success");
+    dispatch(registerUser(values)).unwrap()
+      .then((response) => {
+        toast.success("Sign-up successful");
         navigate("/login");
       })
       .catch((error) => {
@@ -148,6 +137,7 @@ function SignUpForm() {
       .finally(() => {
         setSubmitting(false);
       });
+      
   };
 
   const defaultContainerStyle = "flex flex-col w-full";
@@ -193,7 +183,7 @@ function SignUpForm() {
                   name={name}
                   containerStyleClasses={defaultContainerStyle}
                   inputStyleClasses={defaultInputStyle}
-                  // setSelected={setSelected}
+                // setSelected={setSelected}
                 >
                   <option value="">{defaultOptions[0]}</option>
 

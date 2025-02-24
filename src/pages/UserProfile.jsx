@@ -252,6 +252,9 @@ function UserProfile() {
 
         const [isOpen, setIsOpen] = useState(false);
 
+        const listHeaderStyle = "flex justify-start items-center border-b-[1.5px] border-opacity-25 border-[#60D6D9]";
+        const listElementStyle = "flex justify-between items-center py-4 ";
+
         function handleCertificateDownload(title) {
             console.log(`Downloading Certificate titled: ${title}`);
         }
@@ -259,7 +262,7 @@ function UserProfile() {
         const activitiesList = (
             <>
                 <li className="px-4 text-[#60D6D9]">
-                    <div className="flex justify-start items-center border-b-[1.5px] border-opacity-25 border-[#60D6D9]">
+                    <div className={listHeaderStyle}>
                         <div className="w-[88.6%]">Activity</div>
                         <div>Date</div>
                     </div>
@@ -269,7 +272,7 @@ function UserProfile() {
                         key={index}
                         className="px-4 text-black"
                     >
-                        <div className="flex justify-between items-center py-4 border-b-[1.5px] border-opacity-25 border-[#60D6D9]">
+                        <div className={listElementStyle + (index < listContent.length - 1 && "border-b-[1.5px] border-opacity-25 border-[#60D6D9]")}>
                             <div>{activity}</div>
                             <div>{date}</div>
                         </div>
@@ -282,7 +285,7 @@ function UserProfile() {
         const certificatesList = (
             <>
                 <li className="px-4 text-[#60D6D9]">
-                    <div className="flex justify-start items-center border-b-[1.5px] border-opacity-25 border-[#60D6D9]">
+                    <div className={listHeaderStyle}>
                         <div className="w-[70%]">Title</div>
                         <div>Date</div>
                     </div>
@@ -292,7 +295,7 @@ function UserProfile() {
                         key={index}
                         className="px-4 text-black"
                     >
-                        <div className="flex justify-start items-center py-4 border-b-[1.5px] border-opacity-25 border-[#60D6D9]">
+                        <div className={listElementStyle + (index < listContent.length - 1 && "border-b-[1.5px] border-opacity-25 border-[#60D6D9]")}>
                             <div className="w-[70%]">{title}</div>
                             <div className="flex justify-between w-[30%]">
                                 {date}
@@ -313,7 +316,7 @@ function UserProfile() {
         const gcpList = (
             <>
                 <li className="px-4 text-[#60D6D9]">
-                    <div className="flex justify-start items-center border-b-[1.5px] border-opacity-25 border-[#60D6D9]">
+                    <div className={listHeaderStyle}>
                         <div className="w-[85%]">Activity</div>
                         <div>Points Earned</div>
                     </div>
@@ -323,7 +326,7 @@ function UserProfile() {
                         key={index}
                         className="px-4 text-black"
                     >
-                        <div className="flex justify-start items-center py-4 border-b-[1.5px] border-opacity-25 border-[#60D6D9]">
+                        <div className={listElementStyle + (index < listContent.length - 1 && "border-b-[1.5px] border-opacity-25 border-[#60D6D9]")}>
                             <div className="w-[90%]">{activity}</div>
                             <div>{pointsEarned}</div>
                         </div>
@@ -334,9 +337,10 @@ function UserProfile() {
         );
 
         return (
-            <div className="flex flex-col">
+            <div className="flex flex-col shadow-[rgba(96,214,217,0.2)_0px_3px_6px_3px] rounded-lg">
                 <div
-                    className={`relative flex justify-between items-center px-4 py-10 text-[#3BA5DA] shadow-[rgba(96,214,217,0.2)_-1px_3px_6px_1px] cursor-pointer ${isOpen ? "rounded-t-lg" : "rounded-lg"} `}
+                    className={`relative flex justify-between items-center px-4 py-6 text-[#3BA5DA]  cursor-pointer`}
+
                     onClick={() => setIsOpen(!isOpen)}
                 >
                     <p>{listName}</p>
@@ -346,13 +350,13 @@ function UserProfile() {
                 {
                     isOpen &&
                     <ul
-                        className="flex flex-col gap-2 h-fit z-10 rounded-b-lg bottom-0 top-24 right-0 left-0 bg-white shadow-[rgba(96,214,217,0.2)_-1px_3px_6px_1px] cursor-default animate-fade-down"
+                        className={`flex flex-col gap-2 h-fit z-10 bottom-0 top-24 right-0 left-0 rounded-b-lg bg-white cursor-default animate-fade-down`}
                         onClick={(e) => { e.stopPropagation() }}
                     >
                         {listName == "Recent Activities" && activitiesList}
                         {listName == "My Certificates" && certificatesList}
                         {listName == "Green Credit Points" && gcpList}
-                        <li className="absolute h-8 bottom-0 right-0 left-0 top-96"></li>
+                        
                     </ul>
                 }
             </div>
