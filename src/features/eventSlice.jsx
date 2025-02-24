@@ -161,7 +161,7 @@ export const updateEventById = createAsyncThunk(
   async (updateEventObj, { rejectWithValue }) => {
     try {
       const response = await fetch(
-        `${apiUrl}/user-profiles/user-profiles/user-id/2/events/event-id/${updateEventObj.id}`,
+        `${apiUrl}/user-profiles/user-id/2/events/event-id/${updateEventObj.id}`,
         {
           method: "PUT",
           headers: {
