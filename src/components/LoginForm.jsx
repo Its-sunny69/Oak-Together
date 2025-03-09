@@ -3,40 +3,31 @@ import { loginSchema } from "../schemas";
 import { Formik, Form } from "formik";
 import { LoginButton, FormTextComponent } from ".";
 import toast from "react-hot-toast";
+import { useDispatch } from "react-redux";
+import { loginUser } from "../features/userSlice";
 
 function LoginForm() {
   const navigate = useNavigate();
+  const dispatch = useDispatch();
 
   const defaultContainerStyle = "flex flex-col w-full";
   const defaultInputStyle =
     "p-1 border-2 border-[#60d6d9] rounded-lg focus:outline-[#2572CF]";
 
   const handleFormSubmit = (values, { setSubmitting }) => {
-    const apiUrl = import.meta.env.VITE_SERVER_API_URL;
-
-    const postHeaders = new Headers();
-    postHeaders.append("Content-Type", "application/json");
-
-    fetch(apiUrl + "/user-profiles/login", {
-      method: "POST",
-      body: JSON.stringify(values),
-      headers: postHeaders,
-    })
-      .then(async (response) => {
-        const responseObj = await response.json();
-        if (!response.ok) throw new Error(`${responseObj.message}`);
-        return responseObj;
-      })
-      .then((data) => {
-        toast.success(`Welcome back ${data.name} 🥳`, "success");
+    
+    dispatch(loginUser(values)).unwrap()
+    .then((response) => {
+      toast.success(`Welcome ${response.name} 🥳`, "success");
         navigate("/home");
-      })
-      .catch((error) => {
-        toast.error(error.message, "error");
-      })
-      .finally(() => {
-        setSubmitting(false);
-      });
+    })
+    .catch((error) => {
+      toast.error(error.message, "error");
+    })
+    .finally(() => {
+      setSubmitting(false);
+    });
+
   };
 
   return (
