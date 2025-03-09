@@ -1,38 +1,18 @@
 import React, { useEffect, useState } from "react";
-import useEvents from "../hooks/useEvent";
-import useDebounce from "../hooks/useDebounce";
 import ArrowForwardIosRoundedIcon from "@mui/icons-material/ArrowForwardIosRounded";
 import TipsAndUpdatesRoundedIcon from "@mui/icons-material/TipsAndUpdatesRounded";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import {
-  faFilter,
-  faXmark,
-} from "@fortawesome/free-solid-svg-icons";
-import EventCard from "./EventCard";
+import { faFilter, faXmark } from "@fortawesome/free-solid-svg-icons";
+import { useDispatch } from "react-redux";
+import { getEventsByFilter } from "../features/eventSlice";
+import { SearchRounded } from "@mui/icons-material";
 
-function Filter() {
-  const [search, setSearch] = useState("");
+function Filter({ paramsObj, setParamsObj }) {
+  //tempparamsObj is used to prevent api calls on every changes in search and filter, now it will call on button click
+  const [tempParamsObj, setTempParamsObj] = useState(paramsObj);
+
   const [showFilter, setShowFilter] = useState(false);
   const [selectedName, setSelectedName] = useState("");
-  const [filterObj, setFilterObj] = useState({
-    joinedEvents: false,
-    status: [],
-    space: [],
-    eventAfterDate: "",
-    eventBeforeDate: "",
-    acceptingParticipants: false,
-    acceptingSponsors: false,
-    waterAvailability: [],
-    participantLimitMoreThan: "",
-    participantLimitLessThan: "",
-    participatedBy: "",
-    targetPlantNumberMoreThan: "",
-    targetPlantNumberLessThan: "",
-    estimatedCostMoreThan: "",
-    estimatedCostLessThan: "",
-    estimatedAreaMoreThan: "",
-    estimatedAreaLessThan: "",
-  });
 
   const statusType = ["UPCOMING", "ONGOING", "COMPLETED"];
   const spaceTypes = [
@@ -59,67 +39,93 @@ function Filter() {
     "Estimated Area",
   ];
 
-  const debouncedSearch = useDebounce(search, 500);
-
-  const eventData = useEvents(debouncedSearch, filterObj);
+  const dispatch = useDispatch();
 
   const handleCheckboxChange = (e) => {
     const { name, value, checked } = e.target;
 
-    setFilterObj((prev) => ({
+    setTempParamsObj((prev) => ({
       ...prev,
-      [name]: checked
-        ? [...prev[name], value]
-        : prev[name].filter((item) => item !== value),
+      filterObj: {
+        ...prev.filterObj,
+        [name]: checked
+          ? [...prev.filterObj[name], value]
+          : prev.filterObj[name].filter((item) => item !== value),
+      },
     }));
   };
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;
 
-    setFilterObj((prev) => ({
+    setTempParamsObj((prev) => ({
       ...prev,
-      [name]: value,
+      filterObj: {
+        ...prev.filterObj,
+        [name]: value,
+      },
     }));
   };
 
   const handleSingleCheckBoxChange = (e) => {
     const { name, checked } = e.target;
 
-    setFilterObj((prev) => ({
+    setTempParamsObj((prev) => ({
       ...prev,
-      [name]: checked ? true : false,
+      filterObj: {
+        ...prev.filterObj,
+        [name]: checked,
+      },
     }));
   };
 
   const handleReset = () => {
-    setFilterObj({
-      joinedEvents: false,
-      status: [],
-      space: [],
-      eventAfterDate: "",
-      eventBeforeDate: "",
-      acceptingParticipants: false,
-      acceptingSponsors: false,
-      waterAvailability: [],
-      participantLimitMoreThan: "",
-      participantLimitLessThan: "",
-      participatedBy: "",
-      targetPlantNumberMoreThan: "",
-      targetPlantNumberLessThan: "",
-      estimatedCostMoreThan: "",
-      estimatedCostLessThan: "",
-      estimatedAreaMoreThan: "",
-      estimatedAreaLessThan: "",
-    });
+    const resetParams = {
+      filterObj: {
+        joinedEvents: false,
+        eventStatus: [],
+        space: [],
+        eventAfterDate: "",
+        eventBeforeDate: "",
+        acceptingParticipants: false,
+        acceptingSponsors: false,
+        waterAvailability: [],
+        participantLimitMoreThan: "",
+        participantLimitLessThan: "",
+        participatedBy: "",
+        targetPlantNumberMoreThan: "",
+        targetPlantNumberLessThan: "",
+        estimatedCostMoreThan: "",
+        estimatedCostLessThan: "",
+        estimatedAreaMoreThan: "",
+        estimatedAreaLessThan: "",
+      },
+      search: "",
+      page: 0,
+      size: 10,
+    };
 
     setSelectedName("");
+    setTempParamsObj(resetParams); // Reset locally
+    setParamsObj(resetParams); // Reset globally
+
+    dispatch(getEventsByFilter({}));
   };
 
-  useEffect(() => {
-    console.log("filterObj:", filterObj);
-    console.log("search:", debouncedSearch);
-  }, [filterObj, debouncedSearch]);
+  // useEffect(() => {
+  //   console.log("filterObj:", tempParamsObj.filterObj);
+  //   console.log("search:", tempParamsObj.search);
+  // }, [tempParamsObj]);
+
+  const handleSearch = () => {
+    setParamsObj(tempParamsObj);
+    dispatch(getEventsByFilter(tempParamsObj));
+  };
+
+  const handleFilter = () => {
+    setParamsObj(tempParamsObj);
+    dispatch(getEventsByFilter(tempParamsObj));
+  };
 
   return (
     <div className="py-6">
@@ -128,9 +134,14 @@ function Filter() {
           className="px-3 py-1 w-full border-2 border-[#60d6d9] rounded-lg focus:outline-[#2572CF]"
           type="text"
           placeholder="Search..."
-          value={search}
-          onChange={(e) => setSearch(e.target.value)}
+          value={tempParamsObj.search}
+          onChange={(e) =>
+            setTempParamsObj((prev) => ({ ...prev, search: e.target.value }))
+          }
         />
+        <button className="p-2 mx-1" onClick={handleSearch}>
+          <SearchRounded className="text-[#60d6d9]" sx={{fontSize: 30}}/>
+        </button>
 
         {showFilter ? (
           <button
@@ -158,8 +169,9 @@ function Filter() {
       >
         <div className="col-span-2">
           <ul>
-            {list.map((item) => (
+            {list.map((item, index) => (
               <li
+                key={index}
                 className={`my-1 p-2 rounded-lg flex justify-between font-bold hover:outline outline-[#60D6D9] outline-1 ${
                   selectedName == item
                     ? "text-white bg-[#60D6D9]"
@@ -199,10 +211,10 @@ function Filter() {
                     className="appearance-none w-6 h-6 border-2 border-teal-300 rounded-md checked:border-transparent checked:bg-teal-400 cursor-pointer"
                     type="checkbox"
                     name="joinedEvents"
-                    checked={filterObj.joinedEvents}
+                    checked={tempParamsObj.filterObj.joinedEvents}
                     onChange={handleSingleCheckBoxChange}
                   />
-                  {filterObj.joinedEvents && (
+                  {tempParamsObj.filterObj.joinedEvents && (
                     <span className="absolute left-1 text-lg pointer-events-none text-white font-extrabold">
                       ✓
                     </span>
@@ -223,12 +235,14 @@ function Filter() {
                     <input
                       className="appearance-none w-6 h-6 border-2 border-teal-300 rounded-md checked:border-transparent checked:bg-teal-400 cursor-pointer"
                       type="checkbox"
-                      name="status"
+                      name="eventStatus"
                       value={item}
-                      checked={filterObj.status.includes(item)}
+                      checked={tempParamsObj.filterObj.eventStatus.includes(
+                        item
+                      )}
                       onChange={handleCheckboxChange}
                     />
-                    {filterObj.status.includes(item) && (
+                    {tempParamsObj.filterObj.eventStatus.includes(item) && (
                       <span className="absolute left-1 text-lg pointer-events-none text-white font-extrabold">
                         ✓
                       </span>
@@ -248,7 +262,7 @@ function Filter() {
                     type="date"
                     name="eventAfterDate"
                     className="px-2 py-1 font-normal border-[1px] rounded-lg border-[#60d6d9] focus:outline-[#2572CF]"
-                    value={filterObj.eventStartDate}
+                    value={tempParamsObj.filterObj.eventStartDate}
                     onChange={handleInputChange}
                   />
                 </label>
@@ -258,7 +272,7 @@ function Filter() {
                     type="date"
                     name="eventBeforeDate"
                     className="px-2 py-1 font-normal border-[1px] rounded-lg border-[#60d6d9] focus:outline-[#2572CF]"
-                    value={filterObj.eventEndDate}
+                    value={tempParamsObj.filterObj.eventEndDate}
                     onChange={handleInputChange}
                   />
                 </label>
@@ -272,10 +286,10 @@ function Filter() {
                     className="appearance-none w-6 h-6 border-2 border-teal-300 rounded-md checked:border-transparent checked:bg-teal-400 cursor-pointer"
                     type="checkbox"
                     name="acceptingParticipants"
-                    checked={filterObj.acceptingParticipants}
+                    checked={tempParamsObj.filterObj.acceptingParticipants}
                     onChange={handleSingleCheckBoxChange}
                   />
-                  {filterObj.acceptingParticipants && (
+                  {tempParamsObj.filterObj.acceptingParticipants && (
                     <span className="absolute left-1 text-lg pointer-events-none text-white font-extrabold">
                       ✓
                     </span>
@@ -293,10 +307,10 @@ function Filter() {
                     className="appearance-none w-6 h-6 border-2 border-teal-300 rounded-md checked:border-transparent checked:bg-teal-400 cursor-pointer"
                     type="checkbox"
                     name="acceptingSponsors"
-                    checked={filterObj.acceptingSponsors}
+                    checked={tempParamsObj.filterObj.acceptingSponsors}
                     onChange={handleSingleCheckBoxChange}
                   />
-                  {filterObj.acceptingSponsors && (
+                  {tempParamsObj.filterObj.acceptingSponsors && (
                     <span className="absolute left-1 text-lg pointer-events-none text-white font-extrabold">
                       ✓
                     </span>
@@ -319,10 +333,10 @@ function Filter() {
                       type="checkbox"
                       name="space"
                       value={item}
-                      checked={filterObj.space.includes(item)}
+                      checked={tempParamsObj.filterObj.space.includes(item)}
                       onChange={handleCheckboxChange}
                     />
-                    {filterObj.space.includes(item) && (
+                    {tempParamsObj.filterObj.space.includes(item) && (
                       <span className="absolute left-1 text-lg pointer-events-none text-white font-extrabold">
                         ✓
                       </span>
@@ -346,10 +360,14 @@ function Filter() {
                       type="checkbox"
                       name="waterAvailability"
                       value={item}
-                      checked={filterObj.waterAvailability.includes(item)}
+                      checked={tempParamsObj.filterObj.waterAvailability.includes(
+                        item
+                      )}
                       onChange={handleCheckboxChange}
                     />
-                    {filterObj.waterAvailability.includes(item) && (
+                    {tempParamsObj.filterObj.waterAvailability.includes(
+                      item
+                    ) && (
                       <span className="absolute left-1 text-lg pointer-events-none text-white font-extrabold">
                         ✓
                       </span>
@@ -499,20 +517,13 @@ function Filter() {
           <button
             className="px-4 py-2 ml-4 flex justify-between items-center rounded-lg bg-gradient-120 shadow-md from-[#60D6D9] from-50% to-[#1566E7] to-100% hover:from-[#1566E7] hover:to-[#60D6D9]
            text-white"
-            onClick={() => setShowFilter(!showFilter)}
+            onClick={handleFilter}
           >
-            <span className="mr-4">Show {eventData.length} Events</span>
+            <span className="mr-4">Show Events</span>
 
             <ArrowForwardIosRoundedIcon />
           </button>
         </div>
-      </div>
-
-      <div>
-        {eventData.map((event) => (
-          <EventCard event={event} />
-        ))}
-        
       </div>
     </div>
   );

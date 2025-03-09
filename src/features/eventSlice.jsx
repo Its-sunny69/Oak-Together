@@ -7,7 +7,7 @@ export const getAllEvents = createAsyncThunk(
   async (_, { rejectWithValue }) => {
     try {
       const response = await fetch(
-        `${apiUrl}/user-profiles/user-id/1/events/filters`
+        `${apiUrl}/user-profiles/user-id/1/events/filters/spec?sortOrder=DESC`
       );
 
       if (!response.ok) {
@@ -54,11 +54,41 @@ export const getEventById = createAsyncThunk(
 
 export const getEventsByFilter = createAsyncThunk(
   "event/getEventsByFilter",
-  async (params, { rejectWithValue }) => {
+
+  async (paramsObj, { rejectWithValue }) => {
+    console.log("paramsObj", paramsObj);
     try {
-      const response = await fetch(
-        `${apiUrl}/user-profiles/user-id/1/events/filters?${params}`
-      );
+     
+      const sortOrder = paramsObj?.sortOrder || "DESC";
+
+      let url = `${apiUrl}/user-profiles/user-id/1/events/filters/spec?sortOrder=${sortOrder}`;
+
+      // Dynamically append only the parameters that exist
+      const queryParams = new URLSearchParams();
+
+      if (paramsObj.search) queryParams.append("name", paramsObj.search);
+
+      // Add other filters dynamically
+      Object.keys(paramsObj.filterObj || {}).forEach((key) => {
+        const value = paramsObj.filterObj[key];
+        if (value !== "" && value !== false && value !== undefined) {
+          queryParams.append(key, value);
+        }
+      });
+
+      if (paramsObj.sortBy) queryParams.append("sortBy", paramsObj.sortBy);
+      if (paramsObj.page !== undefined)
+        queryParams.append("page", paramsObj.page);
+      if (paramsObj.size) queryParams.append("size", paramsObj.size);
+
+      // Append the constructed query string to the URL
+      if (queryParams.toString()) {
+        url += `&${queryParams.toString()}`;
+      }
+
+      console.log("Final Request URL:", url);
+
+      const response = await fetch(url);
 
       if (!response.ok) {
         const errorData = await response.json(); // Get error details
@@ -424,16 +454,22 @@ const eventSlice = createSlice({
   initialState: {
     allEvents: [],
     eventsByFilter: [],
+    totalPages: 0,
+    totalItems: 0,
     unapprovedEvents: [],
   },
   reducers: {},
   extraReducers: (builder) => {
     builder
       .addCase(getAllEvents.fulfilled, (state, action) => {
-        state.allEvents = action.payload;
+        console.log(action.payload);
+        state.allEvents = action.payload.content;
       })
       .addCase(getEventsByFilter.fulfilled, (state, action) => {
-        state.eventsByFilter = action.payload;
+        console.log(action.payload);
+        state.eventsByFilter = action.payload.content;
+        state.totalPages = action.payload.page.totalPages;
+        state.totalItems = action.payload.page.totalElements;
       })
       .addCase(getUnapprovedEvents.fulfilled, (state, action) => {
         state.unapprovedEvents = action.payload;
