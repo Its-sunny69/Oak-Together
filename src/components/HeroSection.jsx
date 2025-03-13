@@ -36,13 +36,15 @@ function HeroSection() {
             </button>
             <SignUpButton action={"/signup"} />
           </div>
+          
           <div className="mt-10">
-            <button className="px-6 py-2 rounded-lg bg-gradient-120 shadow-md from-[#83E2C1] from-50% to-[#1566E7] to-100% hover:from-[#1566E7] hover:to-[#83E2C1] text-white font-semibold">
+            <a href="" download className="px-6 py-2 rounded-lg bg-gradient-120 shadow-md from-[#83E2C1] from-50% to-[#1566E7] to-100% hover:from-[#1566E7] hover:to-[#83E2C1] text-white font-semibold">
               DOWNLOAD
               <DownloadRoundedIcon className="ml-1"/>
-            </button>
+            </a>
           </div>
         </div>
+
         <div className="w-1/2">
           <img
             src="../src/assets/gradient-people-planting-tree-illustration.png"
