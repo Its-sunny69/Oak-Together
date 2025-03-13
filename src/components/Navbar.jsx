@@ -24,8 +24,9 @@ function Navbar() {
                 className="group cursor-pointer"
                 onClick={() => {
                   const lowerCased = item.toLowerCase();
-                  const pathEndPoint = (lowerCased === "home")? "": lowerCased;
+                  const pathEndPoint = (lowerCased === "home")? "home": lowerCased;
                   navigate("/" + pathEndPoint)
+                  console.log("/" + pathEndPoint)
                 }}
               >
                 {item}

@@ -27,6 +27,7 @@ import SignUpButton from './SignUpButton';
 import SignUpForm from './SignUpForm';
 import Testimonial from './Testimonial';
 import TestimonialCard from './TestimonialCard';
+import CreateEventForm from './CreateEventForm';
 
 export {
   AboutUs,
@@ -58,4 +59,5 @@ export {
   SignUpForm,
   Testimonial,
   TestimonialCard,
+  CreateEventForm,
 };

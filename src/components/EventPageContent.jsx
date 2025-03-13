@@ -8,6 +8,7 @@ import EventCard from "./EventCard";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { FolderCopyRounded } from "@mui/icons-material";
 import { faArrowLeft, faArrowRight } from "@fortawesome/free-solid-svg-icons";
+import CreateEventForm from "./CreateEventForm";
 
 function EventPageContent() {
   const dispatch = useDispatch();
@@ -91,6 +92,10 @@ function EventPageContent() {
   return (
     <div className="pt-6 pr-4 w-full">
       <ProfileHeader />
+
+      <div>
+        <CreateEventForm/>
+      </div>
 
       <Filter paramsObj={paramsObj} setParamsObj={setParamsObj} />
 
@@ -178,6 +183,8 @@ function EventPageContent() {
           <EventCard key={event.id} event={event} />
         ))}
       </div>
+
+      <button className="px-6 py-2 ml-4 rounded-lg bg-gradient-120 shadow-md from-[#60D6D9] from-50% to-[#1566E7] to-100% hover:from-[#1566E7] hover:to-[#60D6D9] text-white font-medium flex justify-center items-center gap-2 active:scale-95 transition-all fixed bottom-4 right-4">Create Event</button>
     </div>
   );
 }
