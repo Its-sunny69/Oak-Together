@@ -4,7 +4,7 @@ import TipsAndUpdatesRoundedIcon from "@mui/icons-material/TipsAndUpdatesRounded
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faFilter, faXmark } from "@fortawesome/free-solid-svg-icons";
 import { useDispatch } from "react-redux";
-import { getEventsByFilter } from "../features/eventSlice";
+import { getEventsByFilterPagination } from "../features/eventSlice";
 import { SearchRounded } from "@mui/icons-material";
 
 function Filter({ paramsObj, setParamsObj }) {
@@ -109,7 +109,7 @@ function Filter({ paramsObj, setParamsObj }) {
     setTempParamsObj(resetParams); // Reset locally
     setParamsObj(resetParams); // Reset globally
 
-    dispatch(getEventsByFilter({}));
+    dispatch(getEventsByFilterPagination({}));
   };
 
   // useEffect(() => {
@@ -119,12 +119,12 @@ function Filter({ paramsObj, setParamsObj }) {
 
   const handleSearch = () => {
     setParamsObj(tempParamsObj);
-    dispatch(getEventsByFilter(tempParamsObj));
+    dispatch(getEventsByFilterPagination(tempParamsObj));
   };
 
   const handleFilter = () => {
     setParamsObj(tempParamsObj);
-    dispatch(getEventsByFilter(tempParamsObj));
+    dispatch(getEventsByFilterPagination(tempParamsObj));
   };
 
   return (

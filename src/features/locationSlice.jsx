@@ -1,13 +1,14 @@
 import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
 
 const apiUrl = import.meta.env.VITE_SERVER_API_URL;
+const userId = 202;
 
 export const getAllLocations = createAsyncThunk(
   "location/getAllLocations",
   async (_, { rejectWithValue }) => {
     try {
       const response = await fetch(
-        `${apiUrl}/user-profiles/user-id/1/locations`
+        `${apiUrl}/user-profiles/user-id/${userId}/locations`
       );
 
       if (!response.ok) {
@@ -32,7 +33,7 @@ export const getLocationById = createAsyncThunk(
   async (id, { rejectWithValue }) => {
     try {
       const response = await fetch(
-        `${apiUrl}/user-profiles/user-id/1/locations/location-id/${id}`
+        `${apiUrl}/user-profiles/user-id/${userId}/locations/location-id/${id}`
       );
 
       if (!response.ok) {
@@ -57,7 +58,7 @@ export const getLocationsUsingFilter = createAsyncThunk(
   async (params, { rejectWithValue }) => {
     try {
       const response = await fetch(
-        `${apiUrl}/user-profiles/user-id/1/locations/filter?${params}`
+        `${apiUrl}/user-profiles/user-id/${userId}/locations/filter?${params}`
       );
 
       if (!response.ok) {
@@ -82,7 +83,7 @@ export const postLocation = createAsyncThunk(
   async (postLocationObj, { rejectWithValue }) => {
     try {
       const response = await fetch(
-        `${apiUrl}/user-profiles/user-id/1/locations`,
+        `${apiUrl}/user-profiles/user-id/${userId}/locations`,
         {
           method: "POST",
           headers: {
@@ -114,7 +115,7 @@ export const updateLocationById = createAsyncThunk(
   async (updateLocationObj, { rejectWithValue }) => {
     try {
       const response = await fetch(
-        `${apiUrl}/user-profiles/user-id/1/locations/location-id/${updateLocationObj.id}`,
+        `${apiUrl}/user-profiles/user-id/${userId}/locations/location-id/${updateLocationObj.id}`,
         {
           method: "PUT",
           headers: {
@@ -146,7 +147,7 @@ export const waterLocationWithId = createAsyncThunk(
   async (paramsObj, { rejectWithValue }) => {
     try {
       const response = await fetch(
-        `${apiUrl}/user-profiles/user-id/1/locations/location-id/${paramsObj.id}/watered?${paramsObj.params}`,
+        `${apiUrl}/user-profiles/user-id/${userId}/locations/location-id/${paramsObj.id}/watered?${paramsObj.params}`,
         {
           method: "PUT",
           headers: {
@@ -178,7 +179,7 @@ export const deactivateLocationWithId = createAsyncThunk(
   async (id, { rejectWithValue }) => {
     try {
       const response = await fetch(
-        `${apiUrl}/user-profiles/user-id/1/locations/location-id/${id}`,
+        `${apiUrl}/user-profiles/user-id/${userId}/locations/location-id/${id}`,
         {
           method: "DELETE",
           headers: {

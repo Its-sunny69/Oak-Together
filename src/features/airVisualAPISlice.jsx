@@ -1,13 +1,14 @@
 import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
 
 const apiUrl = import.meta.env.VITE_SERVER_API_URL;
+const userId = 202;
 
 export const getAQIByCoordinates = createAsyncThunk(
   "airVisual/getAQIByCoordinates",
   async (coords, { rejectWithValue }) => {
     try {
       const response = await fetch(
-        `${apiUrl}/user-profiles/user-id/1/aqi/coordinates?${coords}`
+        `${apiUrl}/user-profiles/user-id/${userId}/aqi/coordinates?${coords}`
       );
 
       if (!response.ok) {
@@ -32,7 +33,7 @@ export const getAQIByAddress = createAsyncThunk(
   async (addressParams, { rejectWithValue }) => {
     try {
       const response = await fetch(
-        `${apiUrl}/user-profiles/user-id/1/aqi/address?${addressParams}`
+        `${apiUrl}/user-profiles/user-id/${userId}/aqi/address?${addressParams}`
       );
 
       if (!response.ok) {

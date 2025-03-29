@@ -1,13 +1,14 @@
 import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
 
 const apiUrl = import.meta.env.VITE_SERVER_API_URL;
+const userId = 202;
 
 export const geminiApi = createAsyncThunk(
   "gemini/response",
   async (params, { rejectWithValue }) => {
     try {
       const response = await fetch(
-        `${apiUrl}/user-profiles/user-id/1/intel/prompt?${params}`,
+        `${apiUrl}/user-profiles/user-id/${userId}/intel/prompt?${params}`,
         {
           method: "POST",
           headers: {
@@ -38,7 +39,7 @@ export const intelligenceApi = createAsyncThunk(
   async (params, { rejectWithValue }) => {
     try {
       const response = await fetch(
-        `${apiUrl}/user-profiles/user-id/1/intel/position?${params}`,
+        `${apiUrl}/user-profiles/user-id/${userId}/intel/position?${params}`,
         {
           method: "POST",
           headers: {

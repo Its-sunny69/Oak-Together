@@ -3,7 +3,7 @@ import ProfileHeader from "./ProfileHeader";
 import Filter from "./Filter";
 import { useDispatch, useSelector } from "react-redux";
 import ReactPaginate from "react-paginate";
-import { getEventsByFilter } from "../features/eventSlice";
+import { getEventsByFilterPagination } from "../features/eventSlice";
 import EventCard from "./EventCard";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { FolderCopyRounded } from "@mui/icons-material";
@@ -49,7 +49,7 @@ function EventPageContent() {
   console.log(eventsByFilter);
 
   useEffect(() => {
-    dispatch(getEventsByFilter(paramsObj));
+    dispatch(getEventsByFilterPagination(paramsObj));
   }, [paramsObj, dispatch]);
 
   useEffect(() => {

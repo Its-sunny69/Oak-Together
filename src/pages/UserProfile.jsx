@@ -225,7 +225,7 @@ function BadgeAndStats({ activeView }) {
             <motion.div
                 className="flip-card-inner w-full h-full shadow-[#FFEA63_-3px_0px_18px_1px]"
                 initial={false}
-                animate={{ rotateY: showBadge ? 0 : 180 }}
+                animate={{ rotateY: showBadge ? 0 : 540 }}
                 transition={{ duration: 0.6, animationDirection: "normal" }}
                 onAnimationComplete={() => setIsAnimating(false)}
             >
@@ -539,6 +539,8 @@ function UserProfile() {
             {listSection}
         </div>
     )
+
+    
 
     const badgeDisplay = (
         <>

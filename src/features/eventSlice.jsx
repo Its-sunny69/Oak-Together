@@ -1,13 +1,14 @@
 import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
 
 const apiUrl = import.meta.env.VITE_SERVER_API_URL;
+const userId = 202;
 
 export const getAllEvents = createAsyncThunk(
   "event/getAllEvents",
   async (_, { rejectWithValue }) => {
     try {
       const response = await fetch(
-        `${apiUrl}/user-profiles/user-id/1/events/filters/spec?sortOrder=DESC`
+        `${apiUrl}/user-profiles/user-id/${userId}/events/filters/spec?sortOrder=DESC`
       );
 
       if (!response.ok) {
@@ -32,7 +33,7 @@ export const getEventById = createAsyncThunk(
   async (id, { rejectWithValue }) => {
     try {
       const response = await fetch(
-        `${apiUrl}/user-profiles/user-id/1/events/event-id/${id}`
+        `${apiUrl}/user-profiles/user-id/${userId}/events/event-id/${id}`
       );
 
       if (!response.ok) {
@@ -54,6 +55,31 @@ export const getEventById = createAsyncThunk(
 
 export const getEventsByFilter = createAsyncThunk(
   "event/getEventsByFilter",
+  async (params, { rejectWithValue }) => {
+    try {
+      const response = await fetch(
+        `${apiUrl}/user-profiles/user-id/${userId}/events/filters?${params}`
+      );
+
+      if (!response.ok) {
+        const errorData = await response.json(); // Get error details
+        return rejectWithValue({
+          message: errorData.message || "Failed to get all event by filter",
+        });
+      }
+
+      const data = await response.json();
+      console.log("getEventsByFilter res:", data);
+      return data;
+    } catch (error) {
+      console.error(error);
+      return rejectWithValue(error);
+    }
+  }
+);
+
+export const getEventsByFilterPagination = createAsyncThunk(
+  "event/getEventsByFilterPagination",
 
   async (paramsObj, { rejectWithValue }) => {
     console.log("paramsObj", paramsObj);
@@ -61,7 +87,7 @@ export const getEventsByFilter = createAsyncThunk(
      
       const sortOrder = paramsObj?.sortOrder || "DESC";
 
-      let url = `${apiUrl}/user-profiles/user-id/1/events/filters/spec?sortOrder=${sortOrder}`;
+      let url = `${apiUrl}/user-profiles/user-id/${userId}/events/filters/spec?sortOrder=${sortOrder}`;
 
       // Dynamically append only the parameters that exist
       const queryParams = new URLSearchParams();
@@ -98,7 +124,7 @@ export const getEventsByFilter = createAsyncThunk(
       }
 
       const data = await response.json();
-      console.log("getEventsByFilter res:", data);
+      console.log("getEventsByFilterPagination res:", data);
       return data;
     } catch (error) {
       console.error(error);
@@ -112,7 +138,7 @@ export const getUnapprovedEvents = createAsyncThunk(
   async (_, { rejectWithValue }) => {
     try {
       const response = await fetch(
-        `${apiUrl}/user-profiles/user-id/1/events/unapproved`
+        `${apiUrl}/user-profiles/user-id/${userId}/events/unapproved`
       );
 
       if (!response.ok) {
@@ -136,7 +162,7 @@ export const postEvent = createAsyncThunk(
   "event/postEvent",
   async (postEventObj, { rejectWithValue }) => {
     try {
-      const response = await fetch(`${apiUrl}/user-profiles/user-id/1/events`, {
+      const response = await fetch(`${apiUrl}/user-profiles/user-id/${userId}/events`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -223,7 +249,7 @@ export const enrollInEventById = createAsyncThunk(
   async (id, { rejectWithValue }) => {
     try {
       const response = await fetch(
-        `${apiUrl}/user-profiles/user-id/1/events/event-id/${id}/enroll`,
+        `${apiUrl}/user-profiles/user-id/${userId}/events/event-id/${id}/enroll`,
         {
           method: "PUT",
           headers: {
@@ -254,7 +280,7 @@ export const withdrawFromEventById = createAsyncThunk(
   async (id, { rejectWithValue }) => {
     try {
       const response = await fetch(
-        `${apiUrl}/user-profiles/user-id/1/events/event-id/${id}/withdraw`,
+        `${apiUrl}/user-profiles/user-id/${userId}/events/event-id/${id}/withdraw`,
         {
           method: "PUT",
           headers: {
@@ -285,7 +311,7 @@ export const sponsorEvent = createAsyncThunk(
   async (paramsObj, { rejectWithValue }) => {
     try {
       const response = await fetch(
-        `${apiUrl}/user-profiles/user-id/1/events/event-id/${paramsObj.id}/sponsor/amount/${paramsObj.amount}`,
+        `${apiUrl}/user-profiles/user-id/${userId}/events/event-id/${paramsObj.id}/sponsor/amount/${paramsObj.amount}`,
         {
           method: "PUT",
           headers: {
@@ -366,7 +392,7 @@ export const markAttendance = createAsyncThunk(
   async (paramsObj, { rejectWithValue }) => {
     try {
       const response = await fetch(
-        `${apiUrl}/user-profiles/user-id/1/events/event-id/${paramsObj.id}/attendance?${paramsObj.location}`
+        `${apiUrl}/user-profiles/user-id/${userId}/events/event-id/${paramsObj.id}/attendance?${paramsObj.location}`
       );
 
       if (!response.ok) {
@@ -423,7 +449,7 @@ export const deleteEventById = createAsyncThunk(
   async (id, { rejectWithValue }) => {
     try {
       const response = await fetch(
-        `${apiUrl}/user-profiles/user-id/1/events/event-id/${id}`,
+        `${apiUrl}/user-profiles/user-id/${userId}/events/event-id/${id}`,
         {
           method: "DELETE",
           headers: {
@@ -465,7 +491,7 @@ const eventSlice = createSlice({
         console.log(action.payload);
         state.allEvents = action.payload.content;
       })
-      .addCase(getEventsByFilter.fulfilled, (state, action) => {
+      .addCase(getEventsByFilterPagination.fulfilled, (state, action) => {
         console.log(action.payload);
         state.eventsByFilter = action.payload.content;
         state.totalPages = action.payload.page.totalPages;
