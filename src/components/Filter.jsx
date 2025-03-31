@@ -7,7 +7,7 @@ import { useDispatch } from "react-redux";
 import { getEventsByFilterPagination } from "../features/eventSlice";
 import { SearchRounded } from "@mui/icons-material";
 
-function Filter({ paramsObj, setParamsObj }) {
+function Filter({ paramsObj, setParamsObj, isSearchInputValid }) {
   //tempparamsObj is used to prevent api calls on every changes in search and filter, now it will call on button click
   const [tempParamsObj, setTempParamsObj] = useState(paramsObj);
 
@@ -109,15 +109,22 @@ function Filter({ paramsObj, setParamsObj }) {
     setTempParamsObj(resetParams); // Reset locally
     setParamsObj(resetParams); // Reset globally
 
-    dispatch(getEventsByFilterPagination({}));
+    dispatch(getEventsByFilterPagination(resetParams));
   };
 
-  // useEffect(() => {
-  //   console.log("filterObj:", tempParamsObj.filterObj);
-  //   console.log("search:", tempParamsObj.search);
-  // }, [tempParamsObj]);
+  useEffect(() => {
+    // console.log("filterObj:", tempParamsObj.filterObj);
+    // console.log("search:", tempParamsObj.search);
+    // console.log("tempParamsObj", tempParamsObj)
+    setParamsObj(tempParamsObj);
+  }, [tempParamsObj]);
 
   const handleSearch = () => {
+    if (tempParamsObj.search.trim().length < 3) {
+      alert("Please Enter atleast 3 characters to search.");
+      return;
+    }
+
     setParamsObj(tempParamsObj);
     dispatch(getEventsByFilterPagination(tempParamsObj));
   };
@@ -138,9 +145,11 @@ function Filter({ paramsObj, setParamsObj }) {
           onChange={(e) =>
             setTempParamsObj((prev) => ({ ...prev, search: e.target.value }))
           }
+          min="3"
         />
+       
         <button className="p-2 mx-1" onClick={handleSearch}>
-          <SearchRounded className="text-[#60d6d9]" sx={{fontSize: 30}}/>
+          <SearchRounded className="text-[#60d6d9]" sx={{ fontSize: 30 }} />
         </button>
 
         {showFilter ? (
@@ -161,6 +170,8 @@ function Filter({ paramsObj, setParamsObj }) {
           </button>
         )}
       </div>
+      {console.log(isSearchInputValid)}
+      {isSearchInputValid ? "" : <div className="text-red-400 text-sm px-4">Please Enter minimum 3 characters to search!</div> }
 
       <div
         className={`bg-gradient-120 shadow-[rgba(96,214,217,0.2)_0px_0px_10px_3px] border border-[#60D6D9]  mt-3 py-2 px-4 rounded-lg grid grid-cols-6 gap-6 ${

@@ -17,6 +17,8 @@ function EventPageContent() {
   );
 
   const [sortBy, setSortBy] = useState("eventStartDate");
+  const [isSearchInputValid, setIsSearchInputValid] = useState(true);
+
   const [paramsObj, setParamsObj] = useState({
     page: 0,
     size: 10,
@@ -49,7 +51,14 @@ function EventPageContent() {
   console.log(eventsByFilter);
 
   useEffect(() => {
-    dispatch(getEventsByFilterPagination(paramsObj));
+    if (paramsObj.search.trim() && paramsObj.search.trim().length < 3) {
+      setIsSearchInputValid(false);
+      return;
+    } else {
+      setIsSearchInputValid(true);
+      dispatch(getEventsByFilterPagination(paramsObj));
+    }
+
   }, [paramsObj, dispatch]);
 
   useEffect(() => {
@@ -93,98 +102,112 @@ function EventPageContent() {
     <div className="pt-6 pr-4 w-full">
       <ProfileHeader />
 
-      <div>
-        <CreateEventForm/>
-      </div>
+      <div>{/* <CreateEventForm/> */}</div>
 
-      <Filter paramsObj={paramsObj} setParamsObj={setParamsObj} />
+      <Filter
+        paramsObj={paramsObj}
+        setParamsObj={setParamsObj}
+        isSearchInputValid={isSearchInputValid}
+      />
 
-      <div className="flex justify-between">
-        <div className="flex justify-center items-center">
-          <p className="font-semibold">
-            Results: {startIndex} - {endIndex} of {totalItems}
-          </p>
+      {isSearchInputValid ? (
+        <>
+          <div className="flex justify-between">
+            <div className="flex justify-center items-center">
+              <p className="font-semibold">
+                Results: {startIndex} - {endIndex} of {totalItems}
+              </p>
 
-          <div className="ml-4">
+              <div className="ml-4">
+                <select
+                  name="eventPerPage"
+                  id="event-per-page"
+                  className="p-1 w-full border-[1px] rounded-lg border-[#60d6d9] focus:outline-[#2572CF]"
+                  value={paramsObj.size}
+                  disabled={!isSearchInputValid}
+                  onChange={(e) => {
+                    isSearchInputValid
+                      ? setParamsObj((prev) => ({
+                          ...prev,
+                          size: Number(e.target.value),
+                          page: 0,
+                        }))
+                      : "";
+                  }}
+                >
+                  <option value="" className="text-gray-400">
+                    10
+                  </option>
+
+                  {eventPerPage.map((option, index) => (
+                    <option key={index} value={option}>
+                      {option}
+                    </option>
+                  ))}
+                </select>
+              </div>
+            </div>
             <select
-              name="eventPerPage"
-              id="event-per-page"
-              className="p-1 w-full border-[1px] rounded-lg border-[#60d6d9] focus:outline-[#2572CF]"
-              value={paramsObj.size}
-              onChange={(e) =>
-                setParamsObj((prev) => ({
-                  ...prev,
-                  size: Number(e.target.value),
-                  page: 0,
-                }))
-              }
+              name="sort"
+              id="sort-by"
+              className="p-1 border-[1px] rounded-lg border-[#60d6d9] focus:outline-[#2572CF]"
+              disabled={!isSearchInputValid}
+              onChange={(e) => setSortBy(e.target.value)}
             >
-              <option value="" className="text-gray-400">
-                10
+              <option value="" className="text-gray-400 ">
+                Sort By
               </option>
 
-              {eventPerPage.map((option, index) => (
+              {sortByOptionList.map((option, index) => (
                 <option key={index} value={option}>
-                  {option}
+                  {formatLabel(option)}
                 </option>
               ))}
             </select>
           </div>
-        </div>
-        <select
-          name="sort"
-          id="sort-by"
-          className="p-1 border-[1px] rounded-lg border-[#60d6d9] focus:outline-[#2572CF]"
-          onChange={(e) => setSortBy(e.target.value)}
-        >
-          <option value="" className="text-gray-400 ">
-            Sort By
-          </option>
 
-          {sortByOptionList.map((option, index) => (
-            <option key={index} value={option}>
-              {formatLabel(option)}
-            </option>
-          ))}
-        </select>
-      </div>
+          <ReactPaginate
+            nextLabel={<FontAwesomeIcon icon={faArrowRight} />}
+            onPageChange={handlePageClick}
+            forcePage={paramsObj.page}
+            pageRangeDisplayed={3}
+            marginPagesDisplayed={2}
+            pageCount={Math.max(totalPages, 1)}
+            previousLabel={<FontAwesomeIcon icon={faArrowLeft} />}
+            previousClassName={`page-item ${
+              paramsObj.page === 0 ? "opacity-50 pointer-events-none" : ""
+            }`}
+            nextClassName={`page-item ${
+              paramsObj.page === totalPages - 1
+                ? "opacity-50 pointer-events-none"
+                : ""
+            }`}
+            pageLinkClassName="page-link"
+            previousLinkClassName="page-link"
+            nextLinkClassName="page-link"
+            breakLabel="..."
+            breakClassName="page-item"
+            breakLinkClassName="page-link"
+            renderOnZeroPageCount={null}
+            containerClassName="pagination flex justify-center items-center my-4"
+            pageClassName="page-item px-3 py-1 border border-[#60d6d9] rounded-md mx-2"
+            activeClassName="active bg-[#60d6d9] text-white"
+          />
 
-      <ReactPaginate
-        nextLabel={<FontAwesomeIcon icon={faArrowRight} />}
-        onPageChange={handlePageClick}
-        forcePage={paramsObj.page}
-        pageRangeDisplayed={3}
-        marginPagesDisplayed={2}
-        pageCount={Math.max(totalPages, 1)}
-        previousLabel={<FontAwesomeIcon icon={faArrowLeft} />}
-        previousClassName={`page-item ${
-          paramsObj.page === 0 ? "opacity-50 pointer-events-none" : ""
-        }`}
-        nextClassName={`page-item ${
-          paramsObj.page === totalPages - 1
-            ? "opacity-50 pointer-events-none"
-            : ""
-        }`}
-        pageLinkClassName="page-link"
-        previousLinkClassName="page-link"
-        nextLinkClassName="page-link"
-        breakLabel="..."
-        breakClassName="page-item"
-        breakLinkClassName="page-link"
-        renderOnZeroPageCount={null}
-        containerClassName="pagination flex justify-center items-center my-4"
-        pageClassName="page-item px-3 py-1 border border-[#60d6d9] rounded-md mx-2"
-        activeClassName="active bg-[#60d6d9] text-white"
-      />
+          {/* Event List */}
+          <div>
+            {eventsByFilter?.map((event) => (
+            <EventCard key={event.id} event={event} />
+            ))}
+          </div>
+        </>
+      ) : (
+        "invalid"
+      )}
 
-      {/* Event List */}
-      <div>
-        {eventsByFilter?.map((event) => (
-          <EventCard key={event.id} event={event} />
-        ))}
-      </div>
-
-      <button className="px-6 py-2 ml-4 rounded-lg bg-gradient-120 shadow-md from-[#60D6D9] from-50% to-[#1566E7] to-100% hover:from-[#1566E7] hover:to-[#60D6D9] text-white font-medium flex justify-center items-center gap-2 active:scale-95 transition-all fixed bottom-4 right-4">Create Event</button>
+      <button className="px-6 py-2 ml-4 rounded-lg bg-gradient-120 shadow-md from-[#60D6D9] from-50% to-[#1566E7] to-100% hover:from-[#1566E7] hover:to-[#60D6D9] text-white font-medium flex justify-center items-center gap-2 active:scale-95 transition-all fixed bottom-4 right-4">
+        Create Event
+      </button>
     </div>
   );
 }
