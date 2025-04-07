@@ -11,6 +11,14 @@ import { faArrowLeft, faArrowRight } from "@fortawesome/free-solid-svg-icons";
 import CreateEventForm from "./CreateEventForm";
 
 function EventPageContent() {
+  const [currentView, setCurrentView] = useState("event-search");
+  const [selectedEventId, setSelectedEventId] = useState(null);
+
+  const handleRegisterClick = (nextEventId) => {
+    setCurrentView("event-details");
+    setSelectedEventId(nextEventId);
+  }
+
   const dispatch = useDispatch();
   const { eventsByFilter, totalPages, totalItems } = useSelector(
     (state) => state.event
@@ -98,12 +106,8 @@ function EventPageContent() {
     console.log("sortBy", sortBy);
   }, [sortBy]);
 
-  return (
-    <div className="pt-6 pr-4 w-full">
-      <ProfileHeader />
-
-      <div>{/* <CreateEventForm/> */}</div>
-
+  const eventSearchDisplay = (
+    <>
       <Filter
         paramsObj={paramsObj}
         setParamsObj={setParamsObj}
@@ -128,10 +132,10 @@ function EventPageContent() {
                   onChange={(e) => {
                     isSearchInputValid
                       ? setParamsObj((prev) => ({
-                          ...prev,
-                          size: Number(e.target.value),
-                          page: 0,
-                        }))
+                        ...prev,
+                        size: Number(e.target.value),
+                        page: 0,
+                      }))
                       : "";
                   }}
                 >
@@ -174,14 +178,12 @@ function EventPageContent() {
             marginPagesDisplayed={2}
             pageCount={Math.max(totalPages, 1)}
             previousLabel={<FontAwesomeIcon icon={faArrowLeft} />}
-            previousClassName={`page-item ${
-              paramsObj.page === 0 ? "opacity-50 pointer-events-none" : ""
-            }`}
-            nextClassName={`page-item ${
-              paramsObj.page === totalPages - 1
-                ? "opacity-50 pointer-events-none"
-                : ""
-            }`}
+            previousClassName={`page-item ${paramsObj.page === 0 ? "opacity-50 pointer-events-none" : ""
+              }`}
+            nextClassName={`page-item ${paramsObj.page === totalPages - 1
+              ? "opacity-50 pointer-events-none"
+              : ""
+              }`}
             pageLinkClassName="page-link"
             previousLinkClassName="page-link"
             nextLinkClassName="page-link"
@@ -197,7 +199,11 @@ function EventPageContent() {
           {/* Event List */}
           <div>
             {eventsByFilter?.map((event) => (
-            <EventCard key={event.id} event={event} />
+              <EventCard
+                key={event.id}
+                event={event}
+                onRegisterClick={handleRegisterClick}
+              />
             ))}
           </div>
         </>
@@ -205,9 +211,42 @@ function EventPageContent() {
         "invalid"
       )}
 
-      <button className="px-6 py-2 ml-4 rounded-lg bg-gradient-120 shadow-md from-[#60D6D9] from-50% to-[#1566E7] to-100% hover:from-[#1566E7] hover:to-[#60D6D9] text-white font-medium flex justify-center items-center gap-2 active:scale-95 transition-all fixed bottom-4 right-4">
+      <button 
+      className="px-6 py-2 ml-4 rounded-lg bg-gradient-120 shadow-md from-[#60D6D9] from-50% to-[#1566E7] to-100% hover:from-[#1566E7] hover:to-[#60D6D9] text-white font-medium flex justify-center items-center gap-2 active:scale-95 transition-all fixed bottom-4 right-4"
+      onClick={() => setCurrentView('create-event-form')}
+      >
         Create Event
       </button>
+    </>
+  );
+
+  const eventFormDisplay = (
+    <>
+      <CreateEventForm />
+    </>
+  );
+
+  const eventDetailsDisplay = (
+    <>
+      
+    </>
+  );
+
+  const viewMap = {
+    "event-search": eventSearchDisplay,
+    "create-event-form": eventFormDisplay,
+    "event-details": eventDetailsDisplay
+  }
+
+  return (
+    <div className="pt-6 pr-4 w-full">
+      <ProfileHeader />
+      <div className="w-full">
+
+
+        {viewMap[currentView]}
+
+      </div>
     </div>
   );
 }

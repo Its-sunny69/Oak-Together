@@ -367,7 +367,6 @@ function MapComponent({ currLocationCoords, setIsModalVisible }) {
       })
       .catch((error) => console.log(error));
 
-    // Uncomment and/or update after 'eventSlice' is developed in src/features
     dispatch(getEventsByFilter(filterText)).unwrap()
       .then((response) => {
         const eventCoords = [];
@@ -387,7 +386,8 @@ function MapComponent({ currLocationCoords, setIsModalVisible }) {
           ...markerCoordinates,
           eventCoordinates: eventCoords
         })
-      });
+      })
+      .catch((error) => console.log(error));
   }
 
   return (

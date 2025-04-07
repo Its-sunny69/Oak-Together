@@ -15,6 +15,7 @@ function PlaceAutocomplete({ onPlaceSelect, children, customInputRef, setInputVa
 
         setPlaceAutocomplete(new places.Autocomplete(customInputRef.current, options));
     }, [places]);
+    
     useEffect(() => {
         if (!placeAutocomplete) return;
 

@@ -8,7 +8,8 @@ import {
   faTrophy,
 } from "@fortawesome/free-solid-svg-icons";
 
-function EventCard({ event }) {
+function EventCard({ event, onRegisterClick }) {
+
   return (
     <div
       className={`border-2 border-dashed ${
@@ -77,12 +78,15 @@ function EventCard({ event }) {
       </div>
 
       <div className="flex justify-end">
-        {event.eventStatus == "COMPLETED" ? (
+        {event?.eventStatus == "COMPLETED" ? (
           <button className="bg-[#60D6D9] hover:bg-white hover:outline outline-1 outline-[#60D6D9] px-4 py-2 rounded-lg text-white hover:text-[#60D6D9] font-bold">
             See Images
           </button>
         ) : (
-          <button className="bg-[#60D6D9] hover:bg-white hover:outline outline-1 outline-[#60D6D9] px-4 py-2 rounded-lg text-white hover:text-[#60D6D9] font-bold">
+          <button 
+            className="bg-[#60D6D9] hover:bg-white hover:outline outline-1 outline-[#60D6D9] px-4 py-2 rounded-lg text-white hover:text-[#60D6D9] font-bold"
+            onClick={() => onRegisterClick(event?.id)}
+          >
             Register
           </button>
         )}

@@ -7,7 +7,7 @@ export const fetchUsers = createAsyncThunk(
   "users/fetchAll",
   async (userId, { rejectWithValue }) => {
     try {
-      const response = await fetch(`${apiUrl}/userId/${userId}/filters`);
+      const response = await fetch(`${apiUrl}/user-id/${userId}/filters`);
 
       if (!response.ok) throw new Error("Failed to fetch users");
 
@@ -24,7 +24,7 @@ export const fetchUserByFilter = createAsyncThunk(
   async (userParams, { rejectWithValue }) => {
     try {
       const response = await fetch(
-        `${apiUrl}/userId/${userParams.userId}/filters?${userParams.filter}`
+        `${apiUrl}/user-id/${userParams.userId}/filters?${userParams.filter}`
       );
 
       if (!response.ok) throw new Error("Failed to fetch user by filter");
@@ -41,7 +41,7 @@ export const fetchUserById = createAsyncThunk(
   "users/fetchById",
   async (userId, { rejectWithValue }) => {
     try {
-      const response = await fetch(`${apiUrl}/userId/${userId}`);
+      const response = await fetch(`${apiUrl}/user-id/${userId}`);
 
       if (!response.ok) throw new Error("Failed to fetch user");
 
@@ -98,7 +98,7 @@ export const uploadProfilePicture = createAsyncThunk(
   async ({ userId, formData }, { rejectWithValue }) => {
     try {
       const response = await fetch(
-        `${apiUrl}/userId/${userId}/profile-picture`,
+        `${apiUrl}/user-id/${userId}/profile-picture`,
         {
           method: "POST",
           body: formData,
@@ -119,7 +119,7 @@ export const deactivateUser = createAsyncThunk(
   "users/deactivate",
   async (userId, { rejectWithValue }) => {
     try {
-      const response = await fetch(`${apiUrl}/userId/${userId}`, {
+      const response = await fetch(`${apiUrl}/user-id/${userId}`, {
         method: "DELETE",
       });
 
@@ -137,7 +137,7 @@ export const updateUserById = createAsyncThunk(
   "users/updateById",
   async ({ userId, updateData }, { rejectWithValue }) => {
     try {
-      const response = await fetch(`${apiUrl}/userId/${userId}`, {
+      const response = await fetch(`${apiUrl}/user-id/${userId}`, {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(updateData),
@@ -151,6 +151,28 @@ export const updateUserById = createAsyncThunk(
     }
   }
 );
+
+// PUT set primary badge for a user
+export const setPrimaryBadge = createAsyncThunk(
+  "users/setPrimaryBadge",
+  async ({ userId, badgeId }, { rejectWithValue }) => {
+    try {
+      const response = await fetch(
+        `${apiUrl}/user-id/${userId}/set-primary-badge/${badgeId}`,
+        {
+          method: "PUT",
+        }
+      );
+
+      if (!response.ok) throw new Error("Failed to set primary badge");
+
+      return await response.json();
+    } catch (error) {
+      return rejectWithValue(error.message);
+    }
+  }
+);
+
 
 const userSlice = createSlice({
   name: "users",
@@ -170,6 +192,7 @@ const userSlice = createSlice({
       .addCase(fetchUsers.fulfilled, (state, action) => {
         state.status = "succeeded";
         state.users = action.payload;
+        console.log(action.payload);
       })
       .addCase(fetchUsers.rejected, (state, action) => {
         state.status = "failed";
@@ -186,14 +209,24 @@ const userSlice = createSlice({
         state.users.push(action.payload);
       })
       .addCase(uploadProfilePicture.fulfilled, (state, action) => {
-        state.user = { ...state.user, profilePicture: action.payload };
+        state.user = { 
+          ...state.user, 
+          profilePicture: action.payload.profilePicture 
+        };
       })
       .addCase(deactivateUser.fulfilled, (state) => {
         state.user = null;
       })
       .addCase(updateUserById.fulfilled, (state, action) => {
         state.user = action.payload;
-      });
+      })
+      .addCase(setPrimaryBadge.fulfilled, (state, action) => {
+        state.user = {
+          ...state.user,
+          primaryBadge: action.payload.primaryBadge, 
+        };
+      })
+      ;
   },
 });
 

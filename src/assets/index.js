@@ -41,6 +41,12 @@ import LocationInfoIcon from "./location_info.png";
 import GCPIconPng from "./gcp.png";
 import DefaultBadge from "./default_badge.png";
 import Trophy2Png from "./trophy2.png";
+import CommonBadgeBG from "./common_badge_bg.png";
+import RareBadgeBG from "./rare_badge_bg.png";
+import EpicBadgeBG from "./epic_badge_bg.png";
+import LegendaryBadgeBG from "./legendary_badge_bg.png";
+import SampleEventImg from "./sample_event_img.png"
+import EmptyBadgeImg from "./empty_badge_img.png";
 
 export {
   LogoPng,
@@ -86,4 +92,10 @@ export {
   GCPIconPng,
   DefaultBadge,
   Trophy2Png,
+  CommonBadgeBG,
+  RareBadgeBG,
+  EpicBadgeBG,
+  LegendaryBadgeBG,
+  SampleEventImg,
+  EmptyBadgeImg
 };
