@@ -36,7 +36,7 @@ export const getAllBadgesByFilter = createAsyncThunk(
   async (pageSize, { rejectWithValue }) => {
     try {
       const response = await fetch(
-        `${apiUrl}/user-profiles/user-id/${userId}/badges/filter?pageSize=${pageSize}`
+        `${apiUrl}/user-profiles/user-id/${userId}/badges/filter?sortBy=id&&pageSize=${pageSize}`
       );
 
       if (!response.ok) {

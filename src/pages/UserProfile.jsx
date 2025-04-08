@@ -29,7 +29,7 @@ const userId = 202;
 const guestView = false;
 const isSponsor = false;
 const coinCount = 1020;
-const trophyCount = 1080;
+// const trophyCount = 1080;
 const badgeName = "Frenzy Wizard"
 const recentActivitiesList = Array(5).fill({ activity: "Enrolled in event \"Event Name\"", date: "March 01, 2025" });
 const certificatesList = Array(5).fill({ title: "Enrolled in event \"Event Name\"", date: "March 01, 2025" });
@@ -276,7 +276,7 @@ const badgeDetailsByRarity = {
 }
 
 // Overview:
-function BadgeAndStats({ activeView, selectedBadge }) {
+function BadgeAndStats({ activeView, selectedBadge, trophyCount }) {
     const statsList = [
         isSponsor ?
             {
@@ -407,7 +407,7 @@ function BadgeAndStats({ activeView, selectedBadge }) {
                         <span className="-mb-2">trophies</span>
                         <span
                             className={`text-6xl font-extrabold text-center`}
-                            style={textStyleObj}>{userData?.points}</span>
+                            style={textStyleObj}>{trophyCount}</span>
                     </div>
                     <ul className="flex flex-col justify-between gap-2 pt-12 items-start">
                         {statsList.map(({ statName, statValue, tooltipId, tooltipContent }) => {
@@ -592,7 +592,11 @@ function OverViewDisplay({ activeView, userData }) {
     const infoSection = (
         <div className="flex gap-6">
             {profileInfo}
-            <BadgeAndStats activeView={activeView} selectedBadge={userData?.primaryBadge} />
+            <BadgeAndStats
+                activeView={activeView}
+                selectedBadge={userData?.primaryBadge}
+                trophyCount={userData?.points}
+            />
         </div>
     );
 
@@ -1030,9 +1034,9 @@ function LocationDisplay({ gradientBgStyle }) {
 
 
 // To Do:
-    // 1) Provide EDIT form to user on button click
-    // 2) Handle user detail updates made by the user and 'put' them on server via the form
-    // 3) Fetch server data for Sponsored Events, Recent Activites and My Certificates.
+// 1) Provide EDIT form to user on button click
+// 2) Handle user detail updates made by the user and 'put' them on server via the form
+// 3) Fetch server data for Sponsored Events, Recent Activites and My Certificates.
 function UserProfile() {
 
     const [activeView, setActiveView] = useState("Overview");
@@ -1053,7 +1057,7 @@ function UserProfile() {
                     height: "6vw",
                     borderRadius: "0.5rem"
                 }}
-            >                
+            >
             </div>
             <div className="flex flex-col justify-center">
                 <div className="font-semibold text-[24px]">{userData?.name}</div>
