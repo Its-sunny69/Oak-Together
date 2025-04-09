@@ -165,7 +165,6 @@ export const setPrimaryBadge = createAsyncThunk(
       );
 
       if (!response.ok) throw new Error("Failed to set primary badge");
-
       return await response.json();
     } catch (error) {
       return rejectWithValue(error.message);

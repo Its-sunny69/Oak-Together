@@ -10,7 +10,7 @@ const postLocationSchema = Yup.object({
     type:
         Yup.string().required("Required"),
     address:
-        Yup.string().required("Required"),
+        Yup.string().trim().required("Required"),
     waterAvailability:
         Yup.string().required("Required"),
     space:

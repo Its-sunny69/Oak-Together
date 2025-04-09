@@ -12,7 +12,8 @@ import {
     RareBadgeBG,
     EpicBadgeBG,
     LegendaryBadgeBG,
-    EmptyBadgeImg
+    EmptyBadgeImg,
+    SampleCertificateImg
 } from "../assets";
 import { useState, useEffect } from "react";
 import { useInterval } from "../hooks";
@@ -23,6 +24,8 @@ import { Tooltip } from "react-tooltip";
 import { fetchUserById, setPrimaryBadge } from "../features/userSlice";
 import { getAllBadges, getAllBadgesByFilter, getBadgesByFilter, getBadgeById } from "../features/badgeSlice";
 import { useDispatch, useSelector } from "react-redux";
+import { getEventsByFilterPagination } from "../features/eventSlice";
+import { getLocationsByFilterPagination } from "../features/locationSlice";
 
 // temporary variables for ease in UI Development
 const userId = 202;
@@ -275,8 +278,12 @@ const badgeDetailsByRarity = {
     "LEGENDARY": { nameTextColor: ["#8E47FF", "#287BE3"], shadowColor: "rgba(255,99,252,0.25)", bgImage: LegendaryBadgeBG }
 }
 
+
 // Overview:
+// To-do:
+// 1) Update statsList to reflect real user data
 function BadgeAndStats({ activeView, selectedBadge, trophyCount }) {
+    
     const statsList = [
         isSponsor ?
             {
@@ -379,7 +386,7 @@ function BadgeAndStats({ activeView, selectedBadge, trophyCount }) {
                     }}
                 >
                     <div
-                        className="absolute top-4 h-[45vh] w-[66%]"
+                        className="absolute top-4 h-[45vh] w-[70%]"
                         style={{
                             backgroundImage: `url(${selectedBadgeObj.imageUrl})`,
                             backgroundSize: "cover",
@@ -452,12 +459,6 @@ function DropdownListComponent({ listName, listContent }) {
     const listHeaderStyle = "flex justify-start items-center border-b-[1.5px] border-opacity-25 border-[#60D6D9]";
     const listElementStyle = "flex justify-between items-center py-4 ";
 
-    function handleCertificateDownload(title) {
-        // Attention !! 
-        console.log(`Downloading Certificate titled: ${title}`);
-
-    }
-
     const activitiesList = (
         <>
             <li className="px-4 text-[#60D6D9]">
@@ -500,12 +501,13 @@ function DropdownListComponent({ listName, listContent }) {
                             {date}
                             {
                                 !guestView &&
-                                <button
-                                    className="text-[#60D6D9] hover:underline active:text-[#3BA5DA]"
-                                    onClick={() => handleCertificateDownload(title)}
+                                <a
+                                    className="text-[#60D6D9] cursor-pointer hover:underline active:text-[#3BA5DA]"
+                                    download
+                                    href={SampleCertificateImg}
                                 >
                                     Download
-                                </button>
+                                </a>
                             }
                         </div>
                     </div>
@@ -576,7 +578,7 @@ function OverViewDisplay({ activeView, userData }) {
     ];
 
     const profileInfo = (
-        <div className={`flex flex-col ${(guestView ? "gap-1" : "justify-evently gap-3")} px-4 py-3 w-[60%] rounded-lg shadow-[rgba(96,214,217,0.2)_-1px_3px_6px_1px]`} >
+        <div className={`flex flex-col ${(guestView ? "gap-1" : "justify-evently gap-3")} px-4 py-3 w-[60%] rounded-lg shadow-[rgba(96,214,217,0.2)_-1px_3px_6px_1px] overflow-scroll`} >
             <p className="font-medium text-lg mb-2">Profile Information</p>
             {
                 infoFields.map((infoObj) => (
@@ -590,7 +592,7 @@ function OverViewDisplay({ activeView, userData }) {
     );
 
     const infoSection = (
-        <div className="flex gap-6">
+        <div className="flex gap-6 h-[62vh]">
             {profileInfo}
             <BadgeAndStats
                 activeView={activeView}
@@ -714,7 +716,7 @@ function BadgeCard({ rarity, id, name, description, badgeImgUrl, selectedBadgeId
 function BadgeDisplay({ selectedBadge }) {
 
     const handleBadgeClick = (badgeId) => {
-        dispatch(setPrimaryBadge({ userId: userId, badgeId: badgeId }))
+        dispatch(setPrimaryBadge({ userId: userId, badgeId: badgeId }));
     }
 
     const { allBadgesByFilter: allBadges, badgesByFilter } = useSelector((state) => state.badge);
@@ -739,31 +741,26 @@ function BadgeDisplay({ selectedBadge }) {
     }
 
     return (
-        <div className="flex flex-col gap-6 transition-all animate-fade-up">
+        <div className="flex flex-col items-center gap-6 transition-all animate-fade-up">
             {
-                !guestView &&
+                !guestView && selectedBadge &&
                 <>
                     <div className="w-full text-center text-lg font-semibold -mb-3">SELECTED BADGE:</div>
-                    <div className="flex items-center justify-center w-full">
-                        {
-                            selectedBadge &&
-                            <BadgeCard
-                                key={selectedBadge.id}
-                                id={selectedBadge.id}
-                                rarity={selectedBadge.rarity}
-                                name={selectedBadge.name}
-                                description={selectedBadge.description}
-                                badgeImgUrl={selectedBadge.imageUrl}
-                                selectedBadgeId={selectedBadge.id}
-                                onBadgeClick={handleBadgeClick}
-                                isTopBadge
-                            />
-                        }
-                    </div>
+                    <BadgeCard
+                        key={selectedBadge?.id}
+                        id={selectedBadge?.id}
+                        rarity={selectedBadge?.rarity}
+                        name={selectedBadge?.name}
+                        description={selectedBadge?.description}
+                        badgeImgUrl={selectedBadge?.imageUrl}
+                        selectedBadgeId={selectedBadge?.id}
+                        onBadgeClick={handleBadgeClick}
+                        isTopBadge
+                    />
                     <div className="h-1 bg-gray-200 w-full"></div>
-                    <div className="w-full text-lg font-semibold -mb-3">Select a badge to showcase on your profile:</div>
                 </>
             }
+            <div className="w-full text-xl text-center font-semibold -mb-8">Select a badge to showcase on your profile:</div>
             <div className="flex gap-4 p-6">
                 {Object.keys(filteredBadgeLists).map((rarity) =>
                     <div key={rarity} className="flex flex-col gap-4">
@@ -775,7 +772,7 @@ function BadgeDisplay({ selectedBadge }) {
                                 name={name}
                                 description={description}
                                 badgeImgUrl={imageUrl}
-                                selectedBadgeId={selectedBadge.id}
+                                selectedBadgeId={selectedBadge?.id}
                                 isLocked={!unlockedBadges?.has(id)}
                                 onBadgeClick={handleBadgeClick}
                             />
@@ -851,6 +848,9 @@ function ListDisplay(
     )
 }
 
+// To-do:
+// 1) Show participant count for events using appropriate data from server
+// 2) Handle 'View' button action for both locations and events
 function ListItem({ date, time, address, name, type, space, waterAvailability, targetPlantNumber, numberOfParticipants, gradientBgStyle }) {
 
     const isLocation = time == null;
@@ -871,7 +871,7 @@ function ListItem({ date, time, address, name, type, space, waterAvailability, t
     timeArr[0] = (timeArr[0] < 10 ? "0" : "") + timeArr[0];
 
     const dateBox = (
-        <div className="flex flex-col items-center px-3 pt-3 pb-4 rounded-lg shadow-[rgba(96,214,217,0.2)_2px_0px_4px_0px]">
+        <div className="flex flex-col w-[8vw] items-center px-3 pt-3 pb-4 rounded-lg shadow-[rgba(96,214,217,0.2)_2px_0px_4px_0px]">
             <div className="text-[#3BA5DA]">{dateArr[0] + ", " + months[+dateArr[1] - 1].toUpperCase()}</div>
             <div className="text-5xl font-[500]" style={{ fontFamily: "Bebas Neue" }}>{dateArr[2]}</div>
         </div>
@@ -890,32 +890,32 @@ function ListItem({ date, time, address, name, type, space, waterAvailability, t
                     </>
                 }
             </div>
-            <div className="flex items-center gap-2">
+            <div className={`lex items-center gap-2 ${isLocation? "": "w-[30vw]"}`}>
                 {isLocation ?
-                    <>
-                        <FontAwesomeIcon icon={faLayerGroup} className="text-[#3BA5DA] -ml-1.5" />
+                    <div>
+                        <FontAwesomeIcon icon={faLayerGroup} className="text-[#3BA5DA] -ml-1.5 mr-2" />
                         {space}
-                    </> :
-                    <>
-                        <FontAwesomeIcon icon={faLocationDot} className="text-[#3BA5DA]" />
+                    </div> :
+                    <div className="text-ellipsis truncate">
+                        <FontAwesomeIcon icon={faLocationDot} className="text-[#3BA5DA] mr-2 " />
                         {address}
-                    </>
+                    </div>
                 }
             </div>
         </div>
     )
     const nameStatusBox = (
-        <div className="flex flex-col gap-2 pt-6 pb-2">
-            <div className="text-[#3BA5DA]">{name}</div>
+        <div className="flex flex-col gap-2 pt-6 pb-2 w-[18vw]">
+            <div className="text-[#3BA5DA] truncate text-ellipsis">{name}</div>
             <div className={`text-[${typeColorMap[type]}]`}>{type}</div>
         </div>
     )
 
     const detailsNearButton = (
         isLocation ?
-            <div className="flex gap-2 items-center min-w-[25vw]">
+            <div className="flex gap-2 items-center w-[25vw] ">
                 <FontAwesomeIcon icon={faLocationDot} className="text-[#3BA5DA]" />
-                {address}
+                <div className="truncate text-ellipsis">{address}</div>
             </div> :
             <div className="flex gap-3 items-center">
                 <FontAwesomeIcon icon={faUsers} className="text-[#3BA5DA]" />
@@ -951,14 +951,36 @@ function ListItem({ date, time, address, name, type, space, waterAvailability, t
 }
 
 // To-do:
-// 1) Get real data for user-created events and locations
 // 2) Use pagination for easy search and traversal
 
 // Events:
 function EventDisplay({ gradientBgStyle }) {
 
+    const filterObjByCategory = {
+        "Participated": {
+            participatedBy: userId
+        },
+        "Sponsored": {
+            sponsorId: userId
+        },
+        "Created": {
+            eventCreator: userId
+        },
+    }
+
     const [activeEventListCategory, setActiveEventListCategory] = useState(isSponsor ? "Sponsored" : "Participated");
-    const eventList = eventAndLocationListObj[activeEventListCategory];
+    const paramsObj = {size: 10, filterObj: filterObjByCategory[activeEventListCategory]} // Might need to handle page size differently later (if using pagination)
+    
+
+    const dispatch = useDispatch();
+    useEffect(() => { 
+        dispatch(getEventsByFilterPagination(paramsObj))
+    }, [activeEventListCategory, dispatch]);
+    // it might be possible to replace above useEffect with something else (will require identifying correct component structure and state handling)
+
+    const {eventsByFilterPagination: eventList} = useSelector((state) => state.event);
+
+    // const eventList = eventAndLocationListObj[activeEventListCategory]; // static data
 
     return (
         <ListDisplay
@@ -976,7 +998,7 @@ function EventDisplay({ gradientBgStyle }) {
                     name,
                     eventStatus,
                     targetPlantNumber,
-                    numberOfParticipants
+                    numberOfParticipants // need this from server
                 }, index) =>
                 <ListItem
                     key={index}
@@ -995,10 +1017,28 @@ function EventDisplay({ gradientBgStyle }) {
 }
 
 // Locations:
+// To-do:
+// 1) Use Pagination
 function LocationDisplay({ gradientBgStyle }) {
 
+    const filterObjByCategory = {
+        "Marked": {
+            markedBy: userId
+        }
+    }
+
     const [activeLocationListCategory, setActiveLocationListCategory] = useState("Marked");
-    const locationList = eventAndLocationListObj[activeLocationListCategory];
+    const paramsObj = {size: 10, filterObj: filterObjByCategory[activeLocationListCategory]}; // Might need to handle page size differently later (if using pagination)
+
+    const dispatch = useDispatch();
+    useEffect(() => { 
+        dispatch(getLocationsByFilterPagination(paramsObj))
+    }, [activeLocationListCategory, dispatch]);
+    // it might be possible to replace above useEffect with something else (will require identifying correct component structure and state handling)
+
+    const {locationsByFilterPagination: locationList} = useSelector((state) => state.location);
+
+    // const locationList = eventAndLocationListObj[activeLocationListCategory]; // static data
 
     return (
         <ListDisplay

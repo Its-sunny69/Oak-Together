@@ -480,6 +480,7 @@ const eventSlice = createSlice({
   initialState: {
     allEvents: [],
     eventsByFilter: [],
+    eventsByFilterPagination: [],
     totalPages: 0,
     totalItems: 0,
     unapprovedEvents: [],
@@ -491,9 +492,13 @@ const eventSlice = createSlice({
         console.log(action.payload);
         state.allEvents = action.payload.content;
       })
+      .addCase(getEventsByFilter.fulfilled, (state, action) => {
+        console.log(action.payload);
+        state.eventsByFilter = action.payload;
+      })
       .addCase(getEventsByFilterPagination.fulfilled, (state, action) => {
         console.log(action.payload);
-        state.eventsByFilter = action.payload.content;
+        state.eventsByFilterPagination = action.payload.content;
         state.totalPages = action.payload.page.totalPages;
         state.totalItems = action.payload.page.totalElements;
       })

@@ -78,6 +78,55 @@ export const getLocationsUsingFilter = createAsyncThunk(
   }
 );
 
+export const getLocationsByFilterPagination = createAsyncThunk(
+  "location/getLocationsByFilterPagination",
+  async (paramsObj, { rejectWithValue }) => {
+    console.log("paramsObj", paramsObj);
+    try {
+      const sortOrder = paramsObj?.sortOrder || "DESC";
+      let url = `${apiUrl}/user-profiles/user-id/${userId}/locations/filter/spec?sortOrder=${sortOrder}`;
+
+      const queryParams = new URLSearchParams();
+
+      if (paramsObj.search) queryParams.append("name", paramsObj.search);
+
+      Object.keys(paramsObj.filterObj || {}).forEach((key) => {
+        const value = paramsObj.filterObj[key];
+        if (value !== "" && value !== false && value !== undefined) {
+          queryParams.append(key, value);
+        }
+      });
+
+      if (paramsObj.sortBy) queryParams.append("sortBy", paramsObj.sortBy);
+      if (paramsObj.page !== undefined) queryParams.append("page", paramsObj.page);
+      if (paramsObj.size) queryParams.append("size", paramsObj.size);
+
+      if (queryParams.toString()) {
+        url += `&${queryParams.toString()}`;
+      }
+
+      console.log("Final Request URL:", url);
+
+      const response = await fetch(url);
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        return rejectWithValue({
+          message: errorData.message || "Failed to get locations with filter and pagination",
+        });
+      }
+
+      const data = await response.json();
+      console.log("getLocationsByFilterPagination res:", data);
+      return data;
+    } catch (error) {
+      console.error(error);
+      return rejectWithValue(error);
+    }
+  }
+);
+
+
 export const postLocation = createAsyncThunk(
   "location/postLocation",
   async (postLocationObj, { rejectWithValue }) => {
@@ -211,6 +260,9 @@ const locationSlice = createSlice({
     allLocations: [],
     locationById: null,
     locationsUsingFilter: [],
+    locationsByFilterPagination: [],
+    locationsTotalPages: 0,
+    locationsTotalItems: 0
   },
   reducers: {},
   extraReducers: (builder) => {
@@ -224,6 +276,12 @@ const locationSlice = createSlice({
       .addCase(getLocationsUsingFilter.fulfilled, (state, action) => {
         state.locationsUsingFilter = action.payload;
       })
+      .addCase(getLocationsByFilterPagination.fulfilled, (state, action) => {
+        console.log("getLocationsByFilterPagination res:", action.payload);
+        state.locationsByFilterPagination = action.payload.content;
+        state.locationsTotalPages = action.payload.page.totalPages;
+        state.locationsTotalItems = action.payload.page.totalElements;
+      })      
       .addCase(postLocation.fulfilled, (state, action) => {
         state.allLocations.push(action.payload);
       })

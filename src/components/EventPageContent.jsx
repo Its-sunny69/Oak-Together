@@ -9,9 +9,13 @@ import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { FolderCopyRounded } from "@mui/icons-material";
 import { faArrowLeft, faArrowRight } from "@fortawesome/free-solid-svg-icons";
 import CreateEventForm from "./CreateEventForm";
+import MessageModal from "./MessageModal";
 
 function EventPageContent() {
+
+  const [isModalVisible, setIsModalVisible] = useState(false);
   const [currentView, setCurrentView] = useState("event-search");
+  
   const [selectedEventId, setSelectedEventId] = useState(null);
 
   const handleRegisterClick = (nextEventId) => {
@@ -20,7 +24,7 @@ function EventPageContent() {
   }
 
   const dispatch = useDispatch();
-  const { eventsByFilter, totalPages, totalItems } = useSelector(
+  const { eventsByFilterPagination, totalPages, totalItems } = useSelector(
     (state) => state.event
   );
 
@@ -56,7 +60,7 @@ function EventPageContent() {
   const startIndex = paramsObj.page * paramsObj.size + 1;
   const endIndex = Math.min((paramsObj.page + 1) * paramsObj.size, totalItems);
 
-  console.log(eventsByFilter);
+  console.log(eventsByFilterPagination);
 
   useEffect(() => {
     if (paramsObj.search.trim() && paramsObj.search.trim().length < 3) {
@@ -100,7 +104,7 @@ function EventPageContent() {
     "numberOfParticipants",
   ];
 
-  const eventPerPage = ["5", "20", "50"];
+  const eventPerPage = ["5", "10", "20", "50"];
 
   useEffect(() => {
     console.log("sortBy", sortBy);
@@ -139,12 +143,13 @@ function EventPageContent() {
                       : "";
                   }}
                 >
-                  <option value="" className="text-gray-400">
-                    10
-                  </option>
 
                   {eventPerPage.map((option, index) => (
-                    <option key={index} value={option}>
+                    <option
+                      key={index}
+                      value={option}
+                      defaultValue={option == 10}
+                    >
                       {option}
                     </option>
                   ))}
@@ -198,7 +203,7 @@ function EventPageContent() {
 
           {/* Event List */}
           <div>
-            {eventsByFilter?.map((event) => (
+            {eventsByFilterPagination?.map((event) => (
               <EventCard
                 key={event.id}
                 event={event}
@@ -211,9 +216,9 @@ function EventPageContent() {
         "invalid"
       )}
 
-      <button 
-      className="px-6 py-2 ml-4 rounded-lg bg-gradient-120 shadow-md from-[#60D6D9] from-50% to-[#1566E7] to-100% hover:from-[#1566E7] hover:to-[#60D6D9] text-white font-medium flex justify-center items-center gap-2 active:scale-95 transition-all fixed bottom-4 right-4"
-      onClick={() => setCurrentView('create-event-form')}
+      <button
+        className="px-6 py-2 ml-4 rounded-lg bg-gradient-120 shadow-md from-[#60D6D9] from-50% to-[#1566E7] to-100% hover:from-[#1566E7] hover:to-[#60D6D9] text-white font-medium flex justify-center items-center gap-2 active:scale-95 transition-all fixed bottom-4 right-4"
+        onClick={() => setCurrentView('create-event-form')}
       >
         Create Event
       </button>
@@ -221,14 +226,37 @@ function EventPageContent() {
   );
 
   const eventFormDisplay = (
-    <>
-      <CreateEventForm />
-    </>
+    <div className="relative flex flex-col items-start gap-1 w-full">
+      <h2 className="font-bold flex justify-between text-xl pl-4 pt-6 bg-white w-[80%]">
+        Create a New Event:
+        <div
+          className="cursor-pointer text-xl text-red-500 hover:bg-gray-200 p-2 rounded-lg"
+          onClick={() => {
+            setCurrentView("event-search");
+          }}
+        >
+          <span className="text-lg mr-2">❌</span>
+          Close
+        </div>
+      </h2>
+      <CreateEventForm setCurrentView={setCurrentView} setIsModalVisible={setIsModalVisible} />
+
+      {isModalVisible && (
+        <div className="absolute inset-0 backdrop-blur-[2px] bg-gray-600/50 z-10 flex justify-center items-center">
+          <MessageModal
+            setIsModalVisible={setIsModalVisible}
+            task="Event Created"
+            message="Now hang tight! Once the event is approved, interested users can see the
+          event and participate anytime."
+          />
+        </div>
+      )}
+    </div>
   );
 
   const eventDetailsDisplay = (
     <>
-      
+
     </>
   );
 
@@ -241,11 +269,11 @@ function EventPageContent() {
   return (
     <div className="pt-6 pr-4 w-full">
       <ProfileHeader />
-      <div className="w-full">
-
+      <div className="pt-4 w-full">
 
         {viewMap[currentView]}
 
+        
       </div>
     </div>
   );

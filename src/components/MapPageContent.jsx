@@ -17,7 +17,7 @@ function MapPageContent() {
           const lng = position.coords.longitude;
 
           // Below line ensures that the state does not change when current location hasn't changed, preventing meaningless re-render of MapComponent
-          if(currLocationCoords && currLocationCoords.lat == lat && currLocationCoords.lng == lng) return;
+          if (currLocationCoords && currLocationCoords.lat == lat && currLocationCoords.lng == lng) return;
           setCurrentLocationCoords({ lat: lat, lng: lng });
         }
         , (error) => {
@@ -58,7 +58,12 @@ function MapPageContent() {
 
         {isModalVisible && (
           <div className=" absolute inset-0 backdrop-blur-[2px] bg-gray-600/50 z-10 flex justify-center items-center">
-            <MessageModal setIsModalVisible={setIsModalVisible} />
+            <MessageModal
+              setIsModalVisible={setIsModalVisible}
+              task="Location Marked"
+              message="Now hang tight! People around the neighborhood can now see the
+          location and could start tree plantation anytime."
+            />
           </div>
         )}
 

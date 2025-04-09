@@ -47,6 +47,7 @@ import EpicBadgeBG from "./epic_badge_bg.png";
 import LegendaryBadgeBG from "./legendary_badge_bg.png";
 import SampleEventImg from "./sample_event_img.png"
 import EmptyBadgeImg from "./empty_badge_img.png";
+import SampleCertificateImg from "./sample_certificate_img.png"
 
 export {
   LogoPng,
@@ -97,5 +98,6 @@ export {
   EpicBadgeBG,
   LegendaryBadgeBG,
   SampleEventImg,
-  EmptyBadgeImg
+  EmptyBadgeImg,
+  SampleCertificateImg
 };

@@ -249,7 +249,7 @@ function LocationPostComponent({ setShowPostInterface, setIsModalVisible, locati
                     Save
                   </button>
                   <span
-                    className="text-red-600 text-center cursor-pointer"
+                    className="text-red-600 text-center cursor-pointer hover:underline"
                     onClick={() => {
                       setShowPostInterface(false);
                       setLocationCoords(null);

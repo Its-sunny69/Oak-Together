@@ -1,6 +1,8 @@
 import * as Yup from "yup";
 
 const postEventSchema = Yup.object({
+    position: Yup.string()
+        .required("Required"),
     name: Yup.string()
         .trim()
         .min(1, "Name should contain between 1 and 100 characters.")
@@ -37,9 +39,6 @@ const postEventSchema = Yup.object({
     totalAmountRaised: Yup.number()
         .min(0, "Total amount raised cannot be negative.")
         .required("Required. (Numeric input expected, enter '0' if no amount raised)"),
-    eventStatus: Yup.string()
-        .oneOf(["UPCOMING", "ONGOING", "COMPLETED"], "Invalid event status.")
-        .required("Required."),
     space: Yup.string()
         .required("Required."),
     waterAvailability: Yup.string()

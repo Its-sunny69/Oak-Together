@@ -20,8 +20,8 @@ function SideNavBar({selectedPageName}) {
     const navbarItems = [
         "Home",
         "Map",
-        "AskAI",
         "Events",
+        "AskAI",
         "Oaks",
         "Learnings",
         "Shop",
