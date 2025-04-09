@@ -2,6 +2,7 @@ import LogoPng from "./logo.png";
 import LogoSvg from "./logo.svg";
 import MobileLegendPng from "./mobile-legends-bang-bang-removebg-preview.png";
 import GeminiPng from "./google-ai-gemini-removebg-preview.png";
+import GradientPeople from "./gradient-people-planting-tree-illustration.png"
 import GlobalRecyclePng from "./global-recycle-standard-removebg-preview.png";
 import TrustPilotPng from "./trustpilot-stars-logo.png";
 import QuotePng from "./quote.png";
@@ -101,5 +102,6 @@ export {
   LegendaryBadgeBG,
   SampleEventImg,
   EmptyBadgeImg,
-  SampleCertificateImg
+  SampleCertificateImg,
+  GradientPeople,
 };

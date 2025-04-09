@@ -1,6 +1,7 @@
 import React from "react";
 import { LoginButton, SignUpButton } from ".";
 import DownloadRoundedIcon from '@mui/icons-material/DownloadRounded';
+import { GradientPeople } from "../assets";
 
 function HeroSection() {
   return (
@@ -47,7 +48,7 @@ function HeroSection() {
 
         <div className="w-1/2">
           <img
-            src="../src/assets/gradient-people-planting-tree-illustration.png"
+            src={GradientPeople}
             alt=""
           />
         </div>

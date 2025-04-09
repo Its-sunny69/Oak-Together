@@ -1,6 +1,7 @@
 import React from "react";
 import { LoginButton, SignUpButton } from ".";
 import { useNavigate } from "react-router-dom";
+import { LogoPng } from "../assets";
 
 function Navbar() {
   const navigate = useNavigate();
@@ -13,7 +14,7 @@ function Navbar() {
         <ul className="w-full flex justify-between items-center">
           <div>
             <li>
-              <img src="../src/assets/logo.png" alt="" className="w-14" />
+              <img src={LogoPng} alt="" className="w-14" />
             </li>
           </div>
 
