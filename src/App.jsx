@@ -3,7 +3,7 @@ import "./App.css";
 import { Landing, Login, SignUp, Home, MapPage, AskAIPage, UserProfile, Events } from "./pages";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { Toaster } from "react-hot-toast";
-import { duration } from "@mui/material"; // What does this import do?
+import EventInfo from "./pages/EventInfo";
 
 
 function App() {
@@ -33,7 +33,7 @@ function App() {
             <Route path="/map" element={<MapPage />} />
             <Route path="/events" element={<Events />} />
             <Route path="/askai" element={<AskAIPage />} />
-            {/* <Route path="/learnings" element={} /> */}
+            <Route path="/learnings" element={<EventInfo/>} />
             <Route path="/profile" element={<UserProfile />} />
           </Routes>
         </BrowserRouter>

@@ -48,6 +48,7 @@ import LegendaryBadgeBG from "./legendary_badge_bg.png";
 import SampleEventImg from "./sample_event_img.png"
 import EmptyBadgeImg from "./empty_badge_img.png";
 import SampleCertificateImg from "./sample_certificate_img.png"
+import ScrollTestPng from "./scroll test1.png"
 
 export {
   LogoPng,
@@ -93,6 +94,7 @@ export {
   GCPIconPng,
   DefaultBadge,
   Trophy2Png,
+  ScrollTestPng,
   CommonBadgeBG,
   RareBadgeBG,
   EpicBadgeBG,
