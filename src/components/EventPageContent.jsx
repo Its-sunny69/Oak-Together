@@ -248,6 +248,7 @@ function EventPageContent() {
             task="Event Created"
             message="Now hang tight! Once the event is approved, interested users can see the
           event and participate anytime."
+            suggestion="Inform your friends regarding this!"
           />
         </div>
       )}

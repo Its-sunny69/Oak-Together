@@ -117,10 +117,14 @@ export const uploadProfilePicture = createAsyncThunk(
 // DELETE deactivate user
 export const deactivateUser = createAsyncThunk(
   "users/deactivate",
-  async (userId, { rejectWithValue }) => {
+  async ({ userId, email, password }, { rejectWithValue }) => {
     try {
       const response = await fetch(`${apiUrl}/user-id/${userId}`, {
         method: "DELETE",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ email, password }),
       });
 
       if (!response.ok) throw new Error("Failed to deactivate user");

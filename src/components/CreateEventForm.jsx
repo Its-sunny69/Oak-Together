@@ -63,7 +63,7 @@ function CreateEventForm({ setCurrentView, setIsModalVisible }) {
     {
       id: "description",
       name: "description",
-      label: "Description",
+      label: "Description (Optional)",
       placeholder: "Describe Event",
       type: "textarea",
     },
@@ -255,7 +255,7 @@ function CreateEventForm({ setCurrentView, setIsModalVisible }) {
                       id={id}
                       name={name}
                       type={type}
-                      isTextArea={id == "description"}
+                      isTextArea={type == "textarea"}
                       placeholder={placeholder ? placeholder : ""}
                       min={getDateLimit(type, false)}
                       max={getDateLimit(type, true)}

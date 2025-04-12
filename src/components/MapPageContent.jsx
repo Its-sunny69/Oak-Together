@@ -63,6 +63,7 @@ function MapPageContent() {
               task="Location Marked"
               message="Now hang tight! People around the neighborhood can now see the
           location and could start tree plantation anytime."
+              suggestion="Inform your friends regarding this!"
             />
           </div>
         )}

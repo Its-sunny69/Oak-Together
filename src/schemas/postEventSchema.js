@@ -10,9 +10,7 @@ const postEventSchema = Yup.object({
         .required("Required"),
     description: Yup.string()
         .trim()
-        .min(10, "Description should contain at least 10 characters.")
-        .max(1000, "Description should not exceed 1000 characters.")
-        .required("Required"),
+        .max(1000, "Description should not exceed 1000 characters."),
     eventStartDate: Yup.date()
         .required("Required."),
     eventEndDate: Yup.date()

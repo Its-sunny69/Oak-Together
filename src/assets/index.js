@@ -50,6 +50,7 @@ import SampleEventImg from "./sample_event_img.png"
 import EmptyBadgeImg from "./empty_badge_img.png";
 import SampleCertificateImg from "./sample_certificate_img.png"
 import ScrollTestPng from "./scroll test1.png"
+import GalleryIcon from "./gallery-icon.jpg";
 
 export {
   LogoPng,
@@ -104,4 +105,5 @@ export {
   EmptyBadgeImg,
   SampleCertificateImg,
   GradientPeople,
+  GalleryIcon
 };

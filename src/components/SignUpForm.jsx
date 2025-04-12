@@ -168,7 +168,7 @@ function SignUpForm() {
                 id={id}
                 name={name}
                 type={type}
-                isTextArea={id == "description"}
+                isTextArea={type == "textarea"}
                 placeholder={placeholder}
               />
             </div>

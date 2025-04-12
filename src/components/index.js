@@ -2,6 +2,7 @@ import AboutUs from './AboutUs';
 import AskAIPageContent from './AskAIPageContent';
 import ContactBox from './ContactBox';
 import ContactUs from './ContactUs';
+import CreateEventForm from './CreateEventForm';
 import Footer from './Footer';
 import FormSelectComponent from './FormSelectComponent';
 import FormTextComponent from './FormTextComponent';
@@ -10,6 +11,7 @@ import HeroSection from './HeroSection';
 import HomeHeroSection from './HomeHeroSection';
 import HomeListSection from './HomeListSection';
 import HomePageContent from './HomePageContent';
+import ImageUploadField from './ImageUploadField';
 import LocationDetailComponent from './LocationDetailComponent';
 import LocationPostComponent from './LocationPostComponent';
 import LoginButton from './LoginButton';
@@ -27,13 +29,14 @@ import SignUpButton from './SignUpButton';
 import SignUpForm from './SignUpForm';
 import Testimonial from './Testimonial';
 import TestimonialCard from './TestimonialCard';
-import CreateEventForm from './CreateEventForm';
+
 
 export {
   AboutUs,
   AskAIPageContent,
   ContactBox,
   ContactUs,
+  CreateEventForm,
   Footer,
   FormSelectComponent,
   FormTextComponent,
@@ -41,7 +44,8 @@ export {
   HeroSection,
   HomeHeroSection,
   HomeListSection,
-  HomePageContent, 
+  HomePageContent,
+  ImageUploadField, 
   LocationDetailComponent,
   LocationPostComponent, 
   LoginButton,
@@ -58,6 +62,5 @@ export {
   SignUpButton,
   SignUpForm,
   Testimonial,
-  TestimonialCard,
-  CreateEventForm,
+  TestimonialCard
 };

@@ -98,6 +98,10 @@ export const getEventsByFilterPagination = createAsyncThunk(
       Object.keys(paramsObj.filterObj || {}).forEach((key) => {
         const value = paramsObj.filterObj[key];
         if (value !== "" && value !== false && value !== undefined) {
+          if(key == "joinedEvents") {
+            queryParams.append("participatedBy", userId);
+            return;
+          }
           queryParams.append(key, value);
         }
       });
