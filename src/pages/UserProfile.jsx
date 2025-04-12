@@ -1145,7 +1145,7 @@ function EditForm({ userData, setIsModalVisible }) {
     // Description (PUT)
     // Address (PUT)
     return (
-        <div className="w-[50%] animate-fade-up transition-all border-[#60D6D9] border-2 rounded-lg px-8 py-4 bg-gray-100">
+        <div className="w-[50%] animate-fade-up transition-all shadow-[rgba(96,214,217,0.2)_0px_0px_10px_8px] rounded-lg px-8 py-4">
             <h2 className="font-semibold text-2xl mb-8">Update Profile Details:</h2>
             <Formik
                 initialValues={{
