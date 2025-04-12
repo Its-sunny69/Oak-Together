@@ -19,7 +19,7 @@ import { useState, useEffect } from "react";
 import { useInterval } from "../hooks";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { motion } from "framer-motion"
-import { faAngleDown, faAngleUp, faCircleInfo, faClock, faLocationDot, faLayerGroup, faDroplet, faUsers, faSeedling, faLock, faUnlock } from "@fortawesome/free-solid-svg-icons";
+import { faAngleDown, faAngleUp, faCircleInfo, faClock, faLocationDot, faLayerGroup, faDroplet, faUsers, faSeedling, faLock, faUnlock, faArrowRight, faArrowLeft } from "@fortawesome/free-solid-svg-icons";
 import { Tooltip } from "react-tooltip";
 import { deactivateUser, fetchUserById, setPrimaryBadge } from "../features/userSlice";
 import { getAllBadgesByFilter, getBadgesByFilter } from "../features/badgeSlice";
@@ -27,11 +27,12 @@ import { useDispatch, useSelector } from "react-redux";
 import { getEventsByFilterPagination } from "../features/eventSlice";
 import { getLocationsByFilterPagination } from "../features/locationSlice";
 import { updateUserById, uploadProfilePicture } from "../features/userSlice";
-import { Formik, Form, Field, ErrorMessage } from "formik";
+import { Formik, Form, Field } from "formik";
 import MessageModal from "../components/MessageModal";
 import userEditSchema from "../schemas/userEditSchema";
 import { useNavigate } from "react-router-dom";
 import toast from "react-hot-toast";
+import ReactPaginate from "react-paginate";
 
 // temporary variables for ease in UI Development
 const userId = 202;
@@ -812,7 +813,10 @@ function FilterButtonRow({ activeListCategory, setActiveListCategory, buttonText
                             key={index}
                             text={buttonText}
                             isActive={activeListCategory == buttonText}
-                            handleClick={() => setActiveListCategory(buttonText)}
+                            handleClick={() => {
+                                console.log(buttonText);
+                                setActiveListCategory(buttonText);
+                            }}
                         />
                     )
                 }
@@ -854,8 +858,7 @@ function ListDisplay(
 }
 
 // To-do:
-// 1) Show participant count for events using appropriate data from server
-// 2) Handle 'View' button action for both locations and events
+// 1) Handle 'View' button action for both locations and events
 function ListItem({ date, time, address, name, type, space, waterAvailability, targetPlantNumber, numberOfParticipants, gradientBgStyle }) {
 
     const isLocation = time == null;
@@ -956,7 +959,7 @@ function ListItem({ date, time, address, name, type, space, waterAvailability, t
 }
 
 // To-do:
-// 2) Use pagination for easy search and traversal
+// 1) Use pagination for easy search and traversal
 
 // Events:
 function EventDisplay({ gradientBgStyle }) {
@@ -974,18 +977,40 @@ function EventDisplay({ gradientBgStyle }) {
     }
 
     const [activeEventListCategory, setActiveEventListCategory] = useState(isSponsor ? "Sponsored" : "Participated");
-    const paramsObj = { size: 10, filterObj: filterObjByCategory[activeEventListCategory] } // Might need to handle page size differently later (if using pagination)
+
+    const [paramsObj, setParamsObj] = useState({
+        page: 0,
+        size: 5,
+        sortOrder: "ASC",
+        filterObj: filterObjByCategory[activeEventListCategory]
+    })
+    useEffect(() => {
+        setParamsObj((prev) => ({
+            ...prev,
+            page: 0, // reset to first page
+            filterObj: filterObjByCategory[activeEventListCategory],
+        }));
+    }, [activeEventListCategory]);    
 
 
     const dispatch = useDispatch();
     useEffect(() => {
         dispatch(getEventsByFilterPagination(paramsObj))
-    }, [activeEventListCategory, dispatch]);
+    }, [paramsObj, dispatch]);
     // it might be possible to replace above useEffect with something else (will require identifying correct component structure and state handling)
 
-    const { eventsByFilterPagination: eventList } = useSelector((state) => state.event);
+    const { eventsByFilterPagination: eventList, totalPages, totalItems } = useSelector((state) => state.event);
 
-    // const eventList = eventAndLocationListObj[activeEventListCategory]; // static data
+    // const eventList = eventAndLocationListObj[activeEventListCategory]; // for using static data
+
+    const handlePageClick = (event) => {
+        setParamsObj({
+            ...paramsObj,
+            page: event.selected,
+        })
+    }
+
+    const eventPerPage = ["5", "10", "15"];
 
     return (
         <ListDisplay
@@ -993,8 +1018,63 @@ function EventDisplay({ gradientBgStyle }) {
             setActiveListCategory={setActiveEventListCategory}
             buttonTexts={[isSponsor ? "Sponsored" : "Participated", "Created"]}
             listType={"Event"}
-            listCount={eventList.length}
+            listCount={totalItems}
         >
+            <div className="relative flex items-center justify-between ">
+                <div className="absolute flex items-center gap-2 w-[20%] left-1">
+                    <div className="font-semibold text-md">Page Size:</div>
+                    <select
+                        name="eventPerPage"
+                        id="event-per-page"
+                        className="p-1 w-16 h-[4vh] border-[1px] rounded-lg border-[#60d6d9] focus:outline-[#2572CF]"
+                        value={paramsObj.size}
+                        onChange={(e) => {
+                            setParamsObj((prev) => ({
+                                ...prev,
+                                size: Number(e.target.value),
+                                page: 0,
+                            }))
+                        }}
+                    >
+
+                        {eventPerPage.map((option, index) => (
+                            <option
+                                key={index}
+                                value={option}
+                                defaultValue={option == 10}
+                            >
+                                {option}
+                            </option>
+                        ))}
+                    </select>
+                </div>
+                <ReactPaginate
+                    nextLabel={<FontAwesomeIcon icon={faArrowRight} />}
+                    onPageChange={handlePageClick}
+                    forcePage={paramsObj.page}
+                    pageRangeDisplayed={3}
+                    marginPagesDisplayed={2}
+                    pageCount={Math.max(totalPages, 1)}
+                    previousLabel={<FontAwesomeIcon icon={faArrowLeft} />}
+                    previousClassName={`page-item ${paramsObj.page === 0 ? "opacity-50 pointer-events-none" : ""
+                        }`}
+                    nextClassName={`page-item ${paramsObj.page === totalPages - 1
+                        ? "opacity-50 pointer-events-none"
+                        : ""
+                        }`}
+                    pageLinkClassName="page-link"
+                    previousLinkClassName="page-link"
+                    nextLinkClassName="page-link"
+                    breakLabel="..."
+                    breakClassName="page-item"
+                    breakLinkClassName="page-link"
+                    renderOnZeroPageCount={null}
+                    containerClassName="pagination flex justify-center items-center my-4 w-full"
+                    pageClassName="page-item px-3 py-1 border border-[#60d6d9] rounded-md mx-2"
+                    activeClassName="active bg-[#60d6d9] text-white"
+                />
+            </div>
+
             {eventList.map((
                 {
                     eventStartDate,
@@ -1013,7 +1093,7 @@ function EventDisplay({ gradientBgStyle }) {
                     name={name}
                     type={eventStatus}
                     targetPlantNumber={targetPlantNumber}
-                    numberOfParticipants={numberOfParticipants}
+                    numberOfParticipants={numberOfParticipants ?? 0}
                     gradientBgStyle={gradientBgStyle}
                 />
             )}
@@ -1030,20 +1110,41 @@ function LocationDisplay({ gradientBgStyle }) {
         "Marked": {
             markedBy: userId
         }
-    }
+    };
 
     const [activeLocationListCategory, setActiveLocationListCategory] = useState("Marked");
-    const paramsObj = { size: 10, filterObj: filterObjByCategory[activeLocationListCategory] }; // Might need to handle page size differently later (if using pagination)
+
+    const [paramsObj, setParamsObj] = useState({
+        page: 0,
+        size: 5,
+        sortOrder: "ASC",
+        sortBy: "markedBefore",
+        filterObj: filterObjByCategory[activeLocationListCategory]
+    });
+
+    useEffect(() => {
+        setParamsObj((prev) => ({
+            ...prev,
+            page: 0,
+            filterObj: filterObjByCategory[activeLocationListCategory],
+        }));
+    }, [activeLocationListCategory]);
 
     const dispatch = useDispatch();
     useEffect(() => {
-        dispatch(getLocationsByFilterPagination(paramsObj))
-    }, [activeLocationListCategory, dispatch]);
-    // it might be possible to replace above useEffect with something else (will require identifying correct component structure and state handling)
+        dispatch(getLocationsByFilterPagination(paramsObj));
+    }, [paramsObj, dispatch]);
 
-    const { locationsByFilterPagination: locationList } = useSelector((state) => state.location);
+    const { locationsByFilterPagination: locationList, totalPages, totalItems } = useSelector((state) => state.location);
 
-    // const locationList = eventAndLocationListObj[activeLocationListCategory]; // static data
+    const handlePageClick = (event) => {
+        setParamsObj((prev) => ({
+            ...prev,
+            page: event.selected
+        }));
+    };
+
+    const locationsPerPage = ["5", "10", "15"];
 
     return (
         <ListDisplay
@@ -1051,8 +1152,54 @@ function LocationDisplay({ gradientBgStyle }) {
             setActiveListCategory={setActiveLocationListCategory}
             buttonTexts={["Marked"]}
             listType={"Location"}
-            listCount={locationList.length}
+            listCount={totalItems}
         >
+            <div className="relative flex items-center justify-between ">
+                <div className="absolute flex items-center gap-2 w-[20%] left-1">
+                    <div className="font-semibold text-md">Page Size:</div>
+                    <select
+                        name="locationsPerPage"
+                        id="location-per-page"
+                        className="p-1 w-16 h-[4vh] border-[1px] rounded-lg border-[#60d6d9] focus:outline-[#2572CF]"
+                        value={paramsObj.size}
+                        onChange={(e) => {
+                            setParamsObj((prev) => ({
+                                ...prev,
+                                size: Number(e.target.value),
+                                page: 0,
+                            }));
+                        }}
+                    >
+                        {locationsPerPage.map((option, index) => (
+                            <option key={index} value={option}>
+                                {option}
+                            </option>
+                        ))}
+                    </select>
+                </div>
+                <ReactPaginate
+                    nextLabel={<FontAwesomeIcon icon={faArrowRight} />}
+                    onPageChange={handlePageClick}
+                    forcePage={paramsObj.page}
+                    pageRangeDisplayed={3}
+                    marginPagesDisplayed={2}
+                    pageCount={Math.max(totalPages, 1)}
+                    previousLabel={<FontAwesomeIcon icon={faArrowLeft} />}
+                    previousClassName={`page-item ${paramsObj.page === 0 ? "opacity-50 pointer-events-none" : ""}`}
+                    nextClassName={`page-item ${paramsObj.page === totalPages - 1 ? "opacity-50 pointer-events-none" : ""}`}
+                    pageLinkClassName="page-link"
+                    previousLinkClassName="page-link"
+                    nextLinkClassName="page-link"
+                    breakLabel="..."
+                    breakClassName="page-item"
+                    breakLinkClassName="page-link"
+                    renderOnZeroPageCount={null}
+                    containerClassName="pagination flex justify-center items-center my-4 w-full"
+                    pageClassName="page-item px-3 py-1 border border-[#60d6d9] rounded-md mx-2"
+                    activeClassName="active bg-[#60d6d9] text-white"
+                />
+            </div>
+
             {locationList.map((
                 {
                     markedOn,
@@ -1076,8 +1223,6 @@ function LocationDisplay({ gradientBgStyle }) {
         </ListDisplay>
     );
 }
-
-
 
 
 // To Do:
@@ -1107,21 +1252,24 @@ function EditForm({ userData, setIsModalVisible }) {
 
             let newDetails = true;
 
-            for(const key in detailsObj) {
-                if(userData[key] != detailsObj[key]) {
+            for (const key in detailsObj) {
+                if (userData[key] != detailsObj[key]) {
                     newDetails = true;
                     break;
                 }
             }
 
-            if(newDetails) {
+            if (newDetails) {
                 const detailsResponse = await dispatch(updateUserById({ userId, updateData: detailsObj })).unwrap();
                 // console.log("Details updated:", detailsResponse); 
             }
 
-            if(imageFileObj || newDetails) setIsModalVisible(true);
+            toast.success("Details updated for user: " + userData?.name);
+
+            if (imageFileObj || newDetails) setIsModalVisible(true);
             // Optionally close modal or show toast here
         } catch (error) {
+            toast.error(error.message, "error");
             console.error("Profile update failed:", error);
             // Optional: show toast or alert
         } finally {
@@ -1158,17 +1306,17 @@ function EditForm({ userData, setIsModalVisible }) {
             >
                 <Form className="flex flex-col gap-4 items-center">
                     <Field name="profilePic">
-                        {({form}) => 
-                        <ImageUploadField
-                            form={form}
-                            containerStyleClasses={defaultContainerStyle + " items-center "}
-                            labelStyleClasses={defaultLabelStyle}
-                            inputStyleClasses={defaultInputStyle}
-                            previewSizeClasses="w-44"
-                            id="profilePic"
-                            name="profilePic"
-                            label="Profile Picture (Optional)"
-                        />
+                        {({ form }) =>
+                            <ImageUploadField
+                                form={form}
+                                containerStyleClasses={defaultContainerStyle + " items-center "}
+                                labelStyleClasses={defaultLabelStyle}
+                                inputStyleClasses={defaultInputStyle}
+                                previewSizeClasses="w-44"
+                                id="profilePic"
+                                name="profilePic"
+                                label="Profile Picture (Optional)"
+                            />
                         }
                     </Field>
 
@@ -1199,7 +1347,7 @@ function EditForm({ userData, setIsModalVisible }) {
 }
 
 function DeleteFormModal() {
-    return(
+    return (
         <div>
 
         </div>

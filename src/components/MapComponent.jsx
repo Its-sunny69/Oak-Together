@@ -7,7 +7,7 @@ import { faMagnifyingGlass, faLocationDot } from "@fortawesome/free-solid-svg-ic
 import { faCircleXmark } from "@fortawesome/free-regular-svg-icons";
 import { getLocationsUsingFilter } from '../features/locationSlice';
 import { getEventsByFilter } from "../features/eventSlice";
-import { useDispatch } from 'react-redux';
+import { useDispatch, useSelector } from 'react-redux';
 import { MarkerClusterer } from '@googlemaps/markerclusterer';
 import Geohash from "ngeohash";
 

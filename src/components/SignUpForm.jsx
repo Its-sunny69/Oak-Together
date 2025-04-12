@@ -128,6 +128,7 @@ function SignUpForm() {
 
     dispatch(registerUser(values)).unwrap()
       .then((response) => {
+        // console.log(response);
         toast.success("Sign-up successful");
         navigate("/login");
       })

@@ -39,8 +39,6 @@ function Filter({ paramsObj, setParamsObj, isSearchInputValid }) {
     "Estimated Area",
   ];
 
-  const dispatch = useDispatch();
-
   const handleCheckboxChange = (e) => {
     const { name, value, checked } = e.target;
 
@@ -111,7 +109,6 @@ function Filter({ paramsObj, setParamsObj, isSearchInputValid }) {
     setTempParamsObj(resetParams); // Reset locally
     setParamsObj(resetParams); // Reset globally
 
-    dispatch(getEventsByFilterPagination(resetParams));
   };
 
   useEffect(() => {
@@ -128,12 +125,10 @@ function Filter({ paramsObj, setParamsObj, isSearchInputValid }) {
     }
 
     setParamsObj(tempParamsObj);
-    dispatch(getEventsByFilterPagination(tempParamsObj));
   };
 
   const handleFilter = () => {
     setParamsObj(tempParamsObj);
-    dispatch(getEventsByFilterPagination(tempParamsObj));
   };
 
   return (

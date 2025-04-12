@@ -49,6 +49,7 @@ function LocationPostComponent({ setShowPostInterface, setIsModalVisible, locati
 
     dispatch(postLocation(postLocationObj)).unwrap()
       .then(() => {
+        toast.success("Location Marking Successful");
         setIsModalVisible(true);
       })
       .catch((error) => {

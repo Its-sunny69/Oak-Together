@@ -39,6 +39,7 @@ function CreateEventForm({ setCurrentView, setIsModalVisible }) {
 
     dispatch(postEvent(postEventObj)).unwrap()
       .then(() => {
+        toast.success("Event Creation Successful");
         setIsModalVisible(true);
       })
       .catch((error) => {

@@ -261,8 +261,8 @@ const locationSlice = createSlice({
     locationById: null,
     locationsUsingFilter: [],
     locationsByFilterPagination: [],
-    locationsTotalPages: 0,
-    locationsTotalItems: 0
+    totalPages: 0,
+    totalItems: 0
   },
   reducers: {},
   extraReducers: (builder) => {
@@ -279,8 +279,8 @@ const locationSlice = createSlice({
       .addCase(getLocationsByFilterPagination.fulfilled, (state, action) => {
         console.log("getLocationsByFilterPagination res:", action.payload);
         state.locationsByFilterPagination = action.payload.content;
-        state.locationsTotalPages = action.payload.page.totalPages;
-        state.locationsTotalItems = action.payload.page.totalElements;
+        state.totalPages = action.payload.page.totalPages;
+        state.totalItems = action.payload.page.totalElements;
       })      
       .addCase(postLocation.fulfilled, (state, action) => {
         state.allLocations.push(action.payload);
