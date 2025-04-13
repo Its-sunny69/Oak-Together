@@ -1,9 +1,15 @@
 import { CartPng, MapImg, RocketPng, SettingsPng, WalletIcon } from "../assets";
+import { useNavigate } from "react-router-dom";
 
 function HomeHeroSection() {
 
+    const navigate = useNavigate();
+
     const mapImageDiv = (
-        <div className="flex gap-5 cursor-pointer w-[50%]" >
+        <div
+            className="flex gap-5 cursor-pointer w-[50%]"
+            onClick={() => navigate("/map")}
+        >
             <img src={MapImg} className="rounded-lg" />
         </div>
     )
@@ -22,8 +28,8 @@ function HomeHeroSection() {
             </div>
             {dummyData.map(count => {
                 const height = count * 100 / 500;
-                return(
-                    <div key={countId++} className="w-[6px] bg-white rounded-t-full rounded-b-full ml-2" style={{height: `${height}%`}}>
+                return (
+                    <div key={countId++} className="w-[6px] bg-white rounded-t-full rounded-b-full ml-2" style={{ height: `${height}%` }}>
                     </div>
                 )
             })}
@@ -32,25 +38,25 @@ function HomeHeroSection() {
 
     // More temp data:
     const progressBoxData = [
-        {id: 1, type: "Users", count: 32984, target: 66000},
-        {id: 2, icon: RocketPng, type: "Clicks", count: 242, target: 400, symbol:"m"},
-        {id: 3, icon: CartPng, type: "Sales", count: 2400, target: 6000, symbol: "$"},
-        {id: 4, icon: SettingsPng, type: "Items", count: 320, target: 740}
+        { id: 1, type: "Users", count: 32984, target: 66000 },
+        { id: 2, icon: RocketPng, type: "Clicks", count: 242, target: 400, symbol: "m" },
+        { id: 3, icon: CartPng, type: "Sales", count: 2400, target: 6000, symbol: "$" },
+        { id: 4, icon: SettingsPng, type: "Items", count: 320, target: 740 }
     ]
 
-    const ProgressBox = ({ icon=WalletIcon, type, count, target, symbol="" }) => { 
+    const ProgressBox = ({ icon = WalletIcon, type, count, target, symbol = "" }) => {
         const progress = count * 100 / target;
         return (
             <div className="flex flex-col gap-1">
                 <div className="flex gap-2 items-center">
                     <div className="bg-teal-300 p-1.5 rounded-lg">
-                        <img src={icon} className="w-3 "/>
+                        <img src={icon} className="w-3 " />
                     </div>
                     <p className="text-[#A0AEC0] text-sm font-semibold">{type}</p>
                 </div>
                 <h3 className="font-semibold">{count.toLocaleString()}{symbol}</h3>
                 <div className="w-full h-0.5 bg-gray-200">
-                    <div className="bg-teal-300 h-full" style={{width: progress}}></div>
+                    <div className="bg-teal-300 h-full" style={{ width: progress }}></div>
                 </div>
             </div>
         )
@@ -71,14 +77,14 @@ function HomeHeroSection() {
                     </p>
                 </div>
                 <div className="flex justify-between mr-8 pb-6 px-2">
-                    {progressBoxData.map(({id, icon, type, count, target, symbol}) => {
+                    {progressBoxData.map(({ id, icon, type, count, target, symbol }) => {
                         return <ProgressBox
-                            key={id} 
-                            icon= {icon}
-                            type= {type}
-                            count= {count}
-                            target= {target}
-                            symbol= {symbol}
+                            key={id}
+                            icon={icon}
+                            type={type}
+                            count={count}
+                            target={target}
+                            symbol={symbol}
                         />
                     })}
                 </div>
