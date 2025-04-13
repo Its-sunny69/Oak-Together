@@ -19,7 +19,7 @@ import { useState, useEffect } from "react";
 import { useInterval } from "../hooks";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { motion } from "framer-motion"
-import { faAngleDown, faAngleUp, faCircleInfo, faClock, faLocationDot, faLayerGroup, faDroplet, faUsers, faSeedling, faLock, faUnlock, faArrowRight, faArrowLeft } from "@fortawesome/free-solid-svg-icons";
+import { faAngleDown, faAngleUp, faCircleInfo, faClock, faLocationDot, faLayerGroup, faDroplet, faUsers, faSeedling, faLock, faUnlock, faArrowRight, faArrowLeft, faXmark } from "@fortawesome/free-solid-svg-icons";
 import { Tooltip } from "react-tooltip";
 import { deactivateUser, fetchUserById, setPrimaryBadge } from "../features/userSlice";
 import { getAllBadgesByFilter, getBadgesByFilter } from "../features/badgeSlice";
@@ -33,6 +33,7 @@ import userEditSchema from "../schemas/userEditSchema";
 import { useNavigate } from "react-router-dom";
 import toast from "react-hot-toast";
 import ReactPaginate from "react-paginate";
+import { loginSchema } from "../schemas";
 
 // temporary variables for ease in UI Development
 const userId = 202;
@@ -958,8 +959,6 @@ function ListItem({ date, time, address, name, type, space, waterAvailability, t
     )
 }
 
-// To-do:
-// 1) Use pagination for easy search and traversal
 
 // Events:
 function EventDisplay({ gradientBgStyle }) {
@@ -990,7 +989,7 @@ function EventDisplay({ gradientBgStyle }) {
             page: 0, // reset to first page
             filterObj: filterObjByCategory[activeEventListCategory],
         }));
-    }, [activeEventListCategory]);    
+    }, [activeEventListCategory]);
 
 
     const dispatch = useDispatch();
@@ -1102,8 +1101,6 @@ function EventDisplay({ gradientBgStyle }) {
 }
 
 // Locations:
-// To-do:
-// 1) Use Pagination
 function LocationDisplay({ gradientBgStyle }) {
 
     const filterObjByCategory = {
@@ -1118,7 +1115,6 @@ function LocationDisplay({ gradientBgStyle }) {
         page: 0,
         size: 5,
         sortOrder: "ASC",
-        sortBy: "markedBefore",
         filterObj: filterObjByCategory[activeLocationListCategory]
     });
 
@@ -1346,10 +1342,82 @@ function EditForm({ userData, setIsModalVisible }) {
     );
 }
 
-function DeleteFormModal() {
-    return (
-        <div>
+function DeleteFormModal({ userName, setIsModalVisible }) {
 
+    const dispatch = useDispatch();
+    const navigate = useNavigate();
+
+    const handleSubmit = (values, { setSubmitting }) => {
+        const { email, password } = values;
+
+        // !!! Replace '1407' with 'userId' once delete endpoint is fixed !!!
+        dispatch(deactivateUser({ userId: 1407, email: email, password: password })).unwrap()
+            .then(() => {
+                toast.success(`${userName ?? "User"}'s account has been scheduled for deletion.`);
+                setIsModalVisible(false)
+                navigate("/");
+            })
+            .catch((error) => {
+                console.log(error);
+                toast.error(error.message, "error");
+            })
+            .finally(() => {
+                setSubmitting(false);
+            })
+    }
+
+    const defaultContainerStyle = "flex flex-col gap-1 w-full";
+    const defaultLabelStyle = " font-semibold";
+    const defaultInputStyle = "p-1 w-full border-[1px] rounded-lg border-[#60d6d9] focus:outline-[#2572CF]";
+
+    return (
+        <div className="bg-white px-8 pt-2 pb-6 rounded-xl">
+            <div className="text-right w-full text-2xl font-medium text-red-500 cursor-pointer">
+                <FontAwesomeIcon
+                    icon={faXmark}
+                    className="-mr-4"
+                    onClick={() => setIsModalVisible(false)}
+                />
+            </div>
+            <h2 className="font-bold text-xl mb-1">Are you sure about the deletion?</h2>
+            <p className="font-medium mb-6">Enter your credentials to proceed</p>
+            <Formik
+                initialValues={{
+                    email: "",
+                    password: "",
+                }}
+                validationSchema={loginSchema}
+                onSubmit={handleSubmit}
+            >
+                <Form className="flex flex-col gap-3 justify-center">
+                    <FormTextComponent
+                        id="email"
+                        name="email"
+                        label="Email"
+                        type="email"
+                        containerStyleClasses={defaultContainerStyle}
+                        labelStyleClasses={defaultLabelStyle}
+                        inputStyleClasses={defaultInputStyle}
+                    />
+                    <FormTextComponent
+                        id="password"
+                        name="password"
+                        label="Password"
+                        type="password"
+                        containerStyleClasses={defaultContainerStyle}
+                        labelStyleClasses={defaultLabelStyle}
+                        inputStyleClasses={defaultInputStyle}
+                    />
+                    <div className="flex flex-col items-center gap-2 w-full">
+                        <button
+                            className="mt-8 py-2 px-10 w-fit rounded-lg text-white font-medium bg-gradient-135 from-[#FF0000] to-[#654398] hover:from-[#654398] hover:to-[#FF0000]"
+                            type="submit"
+                        >
+                            Delete Account
+                        </button>
+                    </div>
+                </Form>
+            </Formik>
         </div>
     )
 }
@@ -1496,7 +1564,7 @@ function UserProfile() {
                 }
                 {isDeleteFormModalVisible &&
                     <div className=" absolute inset-0 backdrop-blur-[2px] bg-gray-600/50 z-10 flex justify-center items-center">
-
+                        <DeleteFormModal userEmail={userData?.name} setIsModalVisible={setIsDeleteFormModalVisible} />
                     </div>
                 }
             </div>

@@ -26,13 +26,12 @@ function ProfileHeader() {
                     backgroundSize: "cover",
                     backgroundRepeat: "no-repeat",
                     width: "4vw",
-                    height: "3.5vw",
-                    borderRadius: "0.5rem"
+                    height: "4vw"
                 }}
+                className="rounded-full"
             >
 
             </div>
-            {/* <img src={userData?.profilePicture.url ?? ProfileImg} className="rounded-md w-[10%] h-10" /> */}
             <div>
                 <h3 className="font-semibold">{userData?.name ?? "User Name"}</h3>
                 <p className="text-[#3BA5DA]">{userData?.role ?? "User Role"}</p>

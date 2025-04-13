@@ -9,11 +9,16 @@ export const fetchUsers = createAsyncThunk(
     try {
       const response = await fetch(`${apiUrl}/user-id/${userId}/filters`);
 
-      if (!response.ok) throw new Error("Failed to fetch users");
+      if (!response.ok) {
+        const errorData = await response.json();
+        return rejectWithValue({
+          message: errorData.message || "Failed to fetch users",
+        });
+      }
 
       return await response.json();
     } catch (error) {
-      return rejectWithValue(error.message);
+      return rejectWithValue(error);
     }
   }
 );
@@ -27,11 +32,16 @@ export const fetchUserByFilter = createAsyncThunk(
         `${apiUrl}/user-id/${userParams.userId}/filters?${userParams.filter}`
       );
 
-      if (!response.ok) throw new Error("Failed to fetch user by filter");
+      if (!response.ok) {
+        const errorData = await response.json();
+        return rejectWithValue({
+          message: errorData.message || "Failed to fetch user by filter",
+        });
+      }
 
       return await response.json();
     } catch (error) {
-      return rejectWithValue(error.message);
+      return rejectWithValue(error);
     }
   }
 );
@@ -43,11 +53,16 @@ export const fetchUserById = createAsyncThunk(
     try {
       const response = await fetch(`${apiUrl}/user-id/${userId}`);
 
-      if (!response.ok) throw new Error("Failed to fetch user");
+      if (!response.ok) {
+        const errorData = await response.json();
+        return rejectWithValue({
+          message: errorData.message || "Failed to fetch user",
+        });
+      }
 
       return await response.json();
     } catch (error) {
-      return rejectWithValue(error.message);
+      return rejectWithValue(error);
     }
   }
 );
@@ -63,11 +78,16 @@ export const loginUser = createAsyncThunk(
         body: JSON.stringify(loginData),
       });
 
-      if (!response.ok) throw new Error("Login failed");
+      if (!response.ok) {
+        const errorData = await response.json();
+        return rejectWithValue({
+          message: errorData.message || "Login failed",
+        });
+      }
 
       return await response.json();
     } catch (error) {
-      return rejectWithValue(error.message);
+      return rejectWithValue(error);
     }
   }
 );
@@ -83,11 +103,16 @@ export const registerUser = createAsyncThunk(
         body: JSON.stringify(userData),
       });
 
-      if (!response.ok) throw new Error("Registration failed");
+      if (!response.ok) {
+        const errorData = await response.json();
+        return rejectWithValue({
+          message: errorData.message || "Registration failed",
+        });
+      }
 
       return await response.json();
     } catch (error) {
-      return rejectWithValue(error.message);
+      return rejectWithValue(error);
     }
   }
 );
@@ -105,11 +130,16 @@ export const uploadProfilePicture = createAsyncThunk(
         }
       );
 
-      if (!response.ok) throw new Error("Failed to upload profile picture");
+      if (!response.ok) {
+        const errorData = await response.json();
+        return rejectWithValue({
+          message: errorData.message || "Failed to upload profile picture",
+        });
+      }
 
       return await response.json();
     } catch (error) {
-      return rejectWithValue(error.message);
+      return rejectWithValue(error);
     }
   }
 );
@@ -127,11 +157,19 @@ export const deactivateUser = createAsyncThunk(
         body: JSON.stringify({ email, password }),
       });
 
-      if (!response.ok) throw new Error("Failed to deactivate user");
+      if (response.status === 204) return { message: "User deactivated successfully" };
 
-      return await response.json();
+      const dataObj = await response.json();
+
+      if (!response.ok) {
+        return rejectWithValue({
+          message: dataObj.message || "Failed to deactivate user",
+        });
+      }
+
+      return dataObj;
     } catch (error) {
-      return rejectWithValue(error.message);
+      return rejectWithValue(error);
     }
   }
 );
@@ -147,11 +185,16 @@ export const updateUserById = createAsyncThunk(
         body: JSON.stringify(updateData),
       });
 
-      if (!response.ok) throw new Error("Failed to update user");
+      if (!response.ok) {
+        const errorData = await response.json();
+        return rejectWithValue({
+          message: errorData.message || "Failed to update user",
+        });
+      }
 
       return await response.json();
     } catch (error) {
-      return rejectWithValue(error.message);
+      return rejectWithValue(error);
     }
   }
 );
@@ -168,14 +211,19 @@ export const setPrimaryBadge = createAsyncThunk(
         }
       );
 
-      if (!response.ok) throw new Error("Failed to set primary badge");
+      if (!response.ok) {
+        const errorData = await response.json();
+        return rejectWithValue({
+          message: errorData.message || "Failed to set primary badge",
+        });
+      }
+
       return await response.json();
     } catch (error) {
-      return rejectWithValue(error.message);
+      return rejectWithValue(error);
     }
   }
 );
-
 
 const userSlice = createSlice({
   name: "users",
