@@ -35,6 +35,7 @@
     "react-tooltip": "^5.28.0",
     "swiper": "^11.2.6",
     "tailwindcss-animated": "^2.0.0",
+    "use-immer": "^0.11.0",
     "yup": "^1.4.0"
   },
   "devDependencies": {

@@ -10,12 +10,13 @@ import { FolderCopyRounded } from "@mui/icons-material";
 import { faArrowLeft, faArrowRight } from "@fortawesome/free-solid-svg-icons";
 import CreateEventForm from "./CreateEventForm";
 import MessageModal from "./MessageModal";
+import ProfileHeader2 from "./ProfileHeader2";
 
 function EventPageContent() {
 
   const [isModalVisible, setIsModalVisible] = useState(false);
   const [currentView, setCurrentView] = useState("event-search");
-  
+
   const [selectedEventId, setSelectedEventId] = useState(null);
 
   const handleRegisterClick = (nextEventId) => {
@@ -227,18 +228,7 @@ function EventPageContent() {
 
   const eventFormDisplay = (
     <div className="relative flex flex-col items-start gap-1 w-full">
-      <h2 className="font-bold flex justify-between text-xl pl-4 pt-6 bg-white w-[80%]">
-        Create a New Event:
-        <div
-          className="cursor-pointer text-xl text-red-500 hover:bg-gray-200 p-2 rounded-lg"
-          onClick={() => {
-            setCurrentView("event-search");
-          }}
-        >
-          <span className="text-lg mr-2">❌</span>
-          Close
-        </div>
-      </h2>
+      
       <CreateEventForm setCurrentView={setCurrentView} setIsModalVisible={setIsModalVisible} />
 
       {isModalVisible && (
@@ -268,13 +258,28 @@ function EventPageContent() {
   }
 
   return (
-    <div className="pt-6 pr-4 w-full">
-      <ProfileHeader />
+    <div className="py-6 pr-4 w-full">
+      {currentView != "create-event-form" ?
+        <ProfileHeader />
+        :
+        <ProfileHeader2>
+          <h2 className="font-medium text-2xl">
+            Create New Event
+          </h2>
+          <div 
+          className="flex gap-3 items-center font-medium text-lg text-[#3BA5DA] cursor-pointer hover:underline transition-all"
+          onClick={() => setCurrentView("event-search")}
+          >
+            <FontAwesomeIcon icon={faArrowLeft} className="text-2xl"/>
+            <div>Back To Event Search</div>
+          </div>
+        </ProfileHeader2>
+      }
       <div className="pt-4 w-full">
 
         {viewMap[currentView]}
 
-        
+
       </div>
     </div>
   );

@@ -1,5 +1,7 @@
 import * as Yup from "yup";
 
+// To-Do:
+// 1) Update as per new event form design
 const postEventSchema = Yup.object({
     position: Yup.string()
         .required("Required"),

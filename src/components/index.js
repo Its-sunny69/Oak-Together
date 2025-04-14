@@ -23,6 +23,7 @@ import Organizations from './Organizations';
 import PlaceAutocomplete from "./PlaceAutocomplete";
 import PriceCardList from './PriceCardList';
 import ProfileHeader from './ProfileHeader';
+import ProfileHeader2 from './ProfileHeader2';
 import SideImageSection from './SideImageSection';
 import SideNavBar from './SideNavBar';
 import SignUpButton from './SignUpButton';
@@ -56,7 +57,8 @@ export {
   Organizations,
   PlaceAutocomplete, 
   PriceCardList,
-  ProfileHeader, 
+  ProfileHeader,
+  ProfileHeader2, 
   SideImageSection,
   SideNavBar,
   SignUpButton,
