@@ -483,6 +483,8 @@ const eventSlice = createSlice({
   name: "event",
   initialState: {
     allEvents: [],
+    eventById: null,
+
     eventsByFilter: [],
     eventsByFilterPagination: [],
     totalPages: 0,
@@ -496,6 +498,15 @@ const eventSlice = createSlice({
         console.log(action.payload);
         state.allEvents = action.payload.content;
       })
+      .addCase(getEventById.fulfilled, (state, action) => {
+        state.eventById = action.payload;
+      })
+      .addCase(getEventById.pending, (state) => {
+        state.eventById = null; // Optional: reset before fetch
+      })
+      .addCase(getEventById.rejected, (state, action) => {
+        state.eventById = { error: action.payload?.message || "Something went wrong" };
+      })            
       .addCase(getEventsByFilter.fulfilled, (state, action) => {
         console.log(action.payload);
         state.eventsByFilter = action.payload;

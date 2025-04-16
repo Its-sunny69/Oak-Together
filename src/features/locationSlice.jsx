@@ -193,10 +193,10 @@ export const updateLocationById = createAsyncThunk(
 
 export const waterLocationWithId = createAsyncThunk(
   "location/waterLocationWithId",
-  async (paramsObj, { rejectWithValue }) => {
+  async ({locationId, coordsString}, { rejectWithValue }) => {
     try {
       const response = await fetch(
-        `${apiUrl}/user-profiles/user-id/${userId}/locations/location-id/${paramsObj.id}/watered?${paramsObj.params}`,
+        `${apiUrl}/user-profiles/user-id/${userId}/locations/location-id/${locationId}/watered?${coordsString}`,
         {
           method: "PUT",
           headers: {

@@ -24,8 +24,8 @@ const Markers = ({ markerCoordinates, markerStates, setSelectedLocationId, setSe
     return allMarkerCoordsList.filter((markerCoordsObj) => {
       const geohash = Geohash.encode(markerCoordsObj.lat, markerCoordsObj.lng, 9);
 
-      if(geohashSet.has(geohash)) return;
-      
+      if (geohashSet.has(geohash)) return;
+
       geohashSet.add(geohash);
       return markerCoordsObj;
     });
@@ -72,13 +72,14 @@ const Markers = ({ markerCoordinates, markerStates, setSelectedLocationId, setSe
 
       const advancedMarkerElement = new google.maps.marker.AdvancedMarkerElement({
         position: { lat: lat, lng: lng },
-        content: markerDOM
+        content: markerDOM,
+        zIndex: 100
       });
 
       advancedMarkerElement.addListener("click", (e) => {
         if (showPostInterface) return; // might need to handle this differently later...
         setSelectedLocationId(id);
-        setSelectedLocationCoords({lat: e.latLng.lat(), lng: e.latLng.lng()});
+        setSelectedLocationCoords({ lat: e.latLng.lat(), lng: e.latLng.lng() });
         setEventSelected(type == "event");
       });
 
@@ -162,20 +163,29 @@ function MapComponent({ currLocationCoords, setIsModalVisible }) {
     <AdvancedMarker
       position={currLocationCoords}
       onClick={() => { }}
-      onMouseEnter={() => setCurrentTooltipVisible(true)}
-      onMouseLeave={() => setCurrentTooltipVisible(false)}
+      zIndex={0}
     >
-      <div className="relative">
-        <span className="text-2xl font-extrabold rounded-full py-2 px-3 shadow-sm shadow-emerald-400 bg-blue-200 bg-opacity-45 border-blue-700 border-[1px] ">📍</span>
-        {currentTooltipVisible &&
-          <div
-            className="p-3 whitespace-nowrap text-sm z-10 bg-black bg-opacity-80 font-medium text-white rounded-md font-[Arial] absolute -top-12 -right-2.5">
-            Current Location
-          </div>
-        }
+      <div
+        className="relative"
+        onMouseEnter={() => setCurrentTooltipVisible(true)}
+        onMouseLeave={() => setCurrentTooltipVisible(false)}
+      >
+        <span
+          className="text-2xl font-extrabold rounded-full py-2 px-3 shadow-sm shadow-emerald-400 bg-blue-200 bg-opacity-45 border-blue-700 border-[1px]"
+        >
+          📍
+        </span>
+
+        <div
+          className={`absolute -top-12 -right-2.5 z-10 p-3 whitespace-nowrap text-sm bg-black bg-opacity-80 font-medium text-white rounded-md font-[Arial] transition-opacity duration-150 ${currentTooltipVisible ? "opacity-100" : "opacity-0"
+            } pointer-events-none`}
+        >
+          Current Location
+        </div>
       </div>
     </AdvancedMarker>
-  )
+  );
+
 
   // Map filter checkbox collection
   const texts = ["Planted Locations", "Barren Locations", "Events"];
@@ -416,8 +426,8 @@ function MapComponent({ currLocationCoords, setIsModalVisible }) {
           <Map
             defaultCenter={currLocationCoords}
             defaultZoom={17}
-            streetViewControlOptions={{position: ControlPosition.RIGHT_CENTER}}
-            cameraControlOptions={{position: ControlPosition.RIGHT_TOP}}
+            streetViewControlOptions={{ position: ControlPosition.RIGHT_CENTER }}
+            cameraControlOptions={{ position: ControlPosition.RIGHT_TOP }}
             mapId={import.meta.env.VITE_GMAP_MAP_STYLE_ID}
             draggableCursor={showPostInterface ? "default" : "grab"}
             onClick={(e) => {
@@ -460,10 +470,11 @@ function MapComponent({ currLocationCoords, setIsModalVisible }) {
             <LocationDetailComponent
               selectedLocationId={selectedLocationId}
               setSelectedLocationId={setSelectedLocationId}
-              selectedLocationCoords = {selectedLocationCoords}
-              setSelectedLocationCoords = {setSelectedLocationCoords}
+              selectedLocationCoords={selectedLocationCoords}
+              setSelectedLocationCoords={setSelectedLocationCoords}
               eventSelected={eventSelected}
               setEventSelected={setEventSelected}
+              currLocationCoords={currLocationCoords}
             />
           }
 
