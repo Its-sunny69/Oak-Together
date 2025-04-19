@@ -6,6 +6,7 @@ import CreateEventForm from './CreateEventForm';
 import Footer from './Footer';
 import FormSelectComponent from './FormSelectComponent';
 import FormTextComponent from './FormTextComponent';
+import FormSelectMUI from './FormSelectMUI';
 import GeminiAI from './GeminiAI';
 import HeroSection from './HeroSection';
 import HomeHeroSection from './HomeHeroSection';
@@ -41,6 +42,7 @@ export {
   Footer,
   FormSelectComponent,
   FormTextComponent,
+  FormSelectMUI,
   GeminiAI,
   HeroSection,
   HomeHeroSection,

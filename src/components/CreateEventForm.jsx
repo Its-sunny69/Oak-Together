@@ -1,7 +1,7 @@
 import { useState, useRef } from 'react'
 import { useImmer } from "use-immer";
-import { Formik, Form, useFormikContext } from "formik";
-import { FormTextComponent, FormSelectComponent, PlaceAutocomplete } from ".";
+import { Formik, Form, Field, useFormikContext } from "formik";
+import { FormTextComponent, PlaceAutocomplete, ImageUploadField, FormSelectMUI } from ".";
 import postEventSchema from '../schemas/postEventSchema';
 import { useDispatch } from 'react-redux';
 import { postEvent } from '../features/eventSlice';
@@ -10,6 +10,7 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faCircleCheck, faCircleXmark, faXmark } from '@fortawesome/free-solid-svg-icons';
 import { APIProvider } from '@vis.gl/react-google-maps'
 import { faCircle, faCircleDot, faCircleQuestion } from '@fortawesome/free-regular-svg-icons';
+import { GalleryIcon } from '../assets';
 
 function getDateLimit(type, isMax) {
   if (type != "date") return null;
@@ -65,15 +66,22 @@ function FormSectionsThread({ activeSectionIndex, sectionStates, handleSectionCh
                     style={{
                       height: "0.1rem",
                       width: "3vw",
-                      backgroundColor: index > 0 ? statusToStyleMap[sectionStates[index - 1].status].color : ""
+                      backgroundColor:
+                        index > 0 ?
+                          sectionStates[index - 1].status == "Completed" ?
+                            statusToStyleMap[sectionStates[index - 1].status].color : statusToStyleMap["Untouched"].color
+                          : ""
                     }}
                   >
                   </div>
                   <FontAwesomeIcon
-                    className="text-xl cursor-pointer"
+                    className="text-xl cursor-pointer rounded-full"
                     icon={icon}
                     style={{
-                      color: color
+                      color: color,
+                      boxShadow:
+                        index == activeSectionIndex ?
+                          "0px 0px 3px 4px rgba(96,214,217,0.5)" : ""
                     }}
                     onClick={() => handleSectionChange(formik, activeSectionIndex, index)}
                   />
@@ -81,7 +89,11 @@ function FormSectionsThread({ activeSectionIndex, sectionStates, handleSectionCh
                     style={{
                       height: "0.1rem",
                       width: "3vw",
-                      backgroundColor: index < sectionStates.length - 1 ? color : ""
+                      backgroundColor:
+                        index < sectionStates.length - 1 ?
+                          status == "Completed" ?
+                            color : statusToStyleMap["Untouched"].color
+                          : ""
                     }}
                   >
                   </div>
@@ -99,16 +111,54 @@ function FormSectionsThread({ activeSectionIndex, sectionStates, handleSectionCh
   )
 }
 
-const fieldContainerStyle = "flex flex-col w-full"
-const fieldLabelStyle = "text-sm"
-const fieldInputStyle = "p-1 w-[80%] border-2 rounded-lg border-[#60d6d9]  focus:outline-[#2572CF]"
+function FormSectionContainer({ animation, children }) {
+  return (
+    <div className={`flex flex-col gap-3 px-2 h-[86%] w-full overflow-y-scroll transition-all ${animation}`}>
+      {children}
+    </div>
+  )
+}
+
+const fieldContainerStyle = "flex flex-col w-[98%] gap-2 mx-1"
+const fieldLabelStyle = "text-sm text-black font-medium"
+const fieldInputStyle = "py-2 px-4 w-full border-[1px] rounded-lg border-[#60d6d9] focus:outline-[#2572CF]"
+const fieldSelectStyleObject = {
+  width: "100%",
+  border: "1px solid #60D6D9",
+  borderRadius: "0.5rem",
+  backgroundColor: "white",
+  placeholderColor: "#a2a2a2",
+  padding: "0rem",
+  focusOutline: "2px solid #60D6D9",
+  arrowColor: "#60D6D9",
+  hoverBgColor: "#60D6D9",
+  hoverTextColor: "black",
+};
+
 
 function BasicFormSection() {
 
-  
+
 
   return (
-    <div>
+    <>
+      <Field name="profilePic">
+        {({ form }) =>
+          <ImageUploadField
+            form={form}
+            containerStyleClasses={fieldContainerStyle + "  items-center "}
+            labelStyleClasses={fieldLabelStyle}
+            inputStyleClasses={fieldInputStyle}
+            previewStyleClasses="relative w-full py-8 px-4 border-2 border-dashed border-[rgba(0,0,0,0.4)] rounded-2xl flex items-center justify-center overflow-hidden cursor-pointer hover:border-[#60D6D9]"
+            id="eventPictures"
+            name="eventPictures"
+            placeholder="Upload Pictures"
+            placeholderImg={GalleryIcon}
+            placeholderTextStyleClasses="text-lg text-[rgba(0,0,0,0.3)]"
+            placeholderImgStyleClasses="w-[75%]"
+          />
+        }
+      </Field>
       <FormTextComponent
         label="Name"
         id="name"
@@ -117,57 +167,119 @@ function BasicFormSection() {
         labelStyleClasses={fieldLabelStyle}
         inputStyleClasses={fieldInputStyle}
         type="text"
-        placeholder="Enter location name"
       />
+      <FormTextComponent 
+        label="Description"
+        id="description"
+        name="description"
+        containerStyleClasses={fieldContainerStyle}
+        labelStyleClasses={fieldLabelStyle}
+        inputStyleClasses={fieldInputStyle}
+        type="textarea"
+        isTextArea
+      />
+
+      <div className="flex gap-4">
+        <div className="flex flex-col gap-2">
+
+        </div>
+        <div className="flex flex-col gap-2">
+
+        </div>
+      </div>
 
       {/* https://mui.com/x/react-date-pickers/date-picker/ */}
       {/* https://mui.com/x/react-date-pickers/time-picker/ */}
       {/* https://mui.com/x/react-date-pickers/validation/ */}
-    </div>
+    </>
   )
 }
 
 function LocationFormSection() {
 
-  
-
   return (
-    <div>
-      b
-    </div>
+    <>
+      <FormTextComponent
+        label="Target Plant Number"
+        id="targetPlantNumber"
+        name="targetPlantNumber"
+        type="number"
+        labelStyleClasses={fieldLabelStyle}
+        containerStyleClasses={fieldContainerStyle}
+        inputStyleClasses={fieldInputStyle}
+      />
+    </>
   )
 }
 
 function ParticipantsFormSection() {
 
-  
-
   return (
-    <div>
-      c
-    </div>
+    <>
+      <FormSelectMUI
+        label="Accepting Participants"
+        id="acceptingParticipants"
+        name="acceptingParticipants"
+        options={[
+          { label: "Yes", value: "yes" },
+          { label: "No", value: "no" },
+        ]}
+        containerStyleClasses={fieldContainerStyle}
+        labelStyleClasses={fieldLabelStyle}
+        selectStyleObject={fieldSelectStyleObject}
+      />
+      <FormTextComponent
+        label="Participant Limit"
+        id="participantLimit"
+        name="participantLimit"
+        type="number"
+        labelStyleClasses={fieldLabelStyle}
+        containerStyleClasses={fieldContainerStyle}
+        inputStyleClasses={fieldInputStyle}
+      />
+    </>
   )
 }
 
+
+
 function SponsorsFormSection() {
 
-  
-
   return (
-    <div>
-      d
-    </div>
+    <>
+      <FormSelectMUI
+        label="Accepting Sponsors"
+        id="acceptingSponsors"
+        name="acceptingSponsors"
+        options={[
+          { label: "Yes", value: "yes" },
+          { label: "No", value: "no" },
+        ]}
+        containerStyleClasses={fieldContainerStyle}
+        labelStyleClasses={fieldLabelStyle}
+        selectStyleObject={fieldSelectStyleObject}
+      />
+      <FormTextComponent
+        label="Estimated Cost"
+        id="estimatedCost"
+        name="estimatedCost"
+        type="number"
+        labelStyleClasses={fieldLabelStyle}
+        containerStyleClasses={fieldContainerStyle}
+        inputStyleClasses={fieldInputStyle}
+      />
+    </>
   )
 }
 
 function ConfirmFormSection() {
 
-  
+
 
   return (
-    <div>
+    <>
       e
-    </div>
+    </>
   )
 }
 
@@ -206,6 +318,7 @@ function CreateEventForm({ setCurrentView, setIsModalVisible }) {
 
   const [activeSectionIndex, setActiveSectionIndex] = useState(0);
   const [lastSectionVisited, setLastSectionVisited] = useState(false);
+  const [formSectionAnimation, setFormSectionAnimation] = useState("animate-fade-left");
   const [sectionStates, setSectionStates] = useImmer([
     {
       sectionName: "Basic",
@@ -216,7 +329,7 @@ function CreateEventForm({ setCurrentView, setIsModalVisible }) {
     {
       sectionName: "Location",
       formFieldIds:
-        ["address", "latitude", "longitude", "space", "waterAvailability", "estimatedArea"],
+        ["address", "latitude", "longitude", "space", "waterAvailability", "estimatedArea", "targetPlantNumber"],
       status: "Untouched"
     },
     {
@@ -228,12 +341,12 @@ function CreateEventForm({ setCurrentView, setIsModalVisible }) {
     {
       sectionName: "Sponsors",
       formFieldIds:
-        ["acceptingSponsors"],
+        ["acceptingSponsors", "estimatedCost"],
       status: "Untouched"
     },
     {
       sectionName: "Confirm",
-      formFieldIds: ["eventPictures", "name", "description", "eventStartDate", "eventEndDate", "eventStartTime", "eventEndTime", "address", "latitude", "longitude", "participantLimit", "acceptingSponsors", "acceptingParticipants", "targetPlantNumber", "estimatedArea", "totalAmountRaised", "space", "waterAvailability"],
+      formFieldIds: ["eventPictures", "name", "description", "eventStartDate", "eventEndDate", "eventStartTime", "eventEndTime", "address", "latitude", "longitude", "participantLimit", "acceptingSponsors", "acceptingParticipants", "targetPlantNumber", "estimatedArea", "estimatedCost", "totalAmountRaised", "space", "waterAvailability"],
       status: "Untouched"
     }
   ]);
@@ -254,23 +367,24 @@ function CreateEventForm({ setCurrentView, setIsModalVisible }) {
   }
 
   const getSectionStatus = (formik, formFieldIds) => {
-    let noFieldTouched = true, noFieldNull = true;
+    let noFieldNull = true;
 
     for (const id of formFieldIds) {
       const fieldTouched = formik.touched[id];
 
       if (formik.errors[id] != null && fieldTouched != null) return "Error";
 
-      noFieldTouched = noFieldTouched && !fieldTouched;
       noFieldNull = fieldTouched && noFieldNull && !isEmptyField(formik.values[id]);
     }
 
-    if (noFieldNull) return "Completed";
-    return noFieldTouched ? "Untouched" : "Incomplete";
+    return (noFieldNull) ? "Completed" : "Incomplete";
   }
 
   const handleSectionChange = (formik, srcSectionIndex, targSectionIndex) => {
     if (targSectionIndex == sectionStates.length - 1) setLastSectionVisited(true);
+
+    const nextFormSectionAnimation = (srcSectionIndex > targSectionIndex) ? "animate-fade-right" : "animate-fade-left";
+    setFormSectionAnimation(nextFormSectionAnimation);
 
     setSectionStates((sectionStatesList) => {
       const nextSrcStatus = getSectionStatus(formik, sectionStatesList[srcSectionIndex].formFieldIds);
@@ -279,7 +393,7 @@ function CreateEventForm({ setCurrentView, setIsModalVisible }) {
       const nextTargStatus = getSectionStatus(formik, sectionStatesList[targSectionIndex].formFieldIds);
       sectionStatesList[targSectionIndex].status = nextTargStatus == "Completed" ? nextTargStatus : "Active";
 
-      if (lastSectionVisited) {
+      if (lastSectionVisited && targSectionIndex != sectionStatesList.length - 1) {
         const nextConfirmationStatus = getSectionStatus(formik, sectionStatesList[sectionStatesList.length - 1].formFieldIds);
         sectionStatesList[sectionStatesList.length - 1].status = nextConfirmationStatus;
       }
@@ -339,6 +453,7 @@ function CreateEventForm({ setCurrentView, setIsModalVisible }) {
           acceptingParticipants: "",
           targetPlantNumber: "",
           estimatedArea: "",
+          estimatedCost: "",
           totalAmountRaised: "",
           space: "",
           waterAvailability: "",
@@ -347,7 +462,7 @@ function CreateEventForm({ setCurrentView, setIsModalVisible }) {
         onSubmit={handleFormSubmit}
       >
 
-        <div className="flex flex-col items-center gap-8 w-[60%]">
+        <div className="flex flex-col items-center gap-8 w-[50vw]">
 
           <FormSectionsThread
             activeSectionIndex={activeSectionIndex}
@@ -355,11 +470,14 @@ function CreateEventForm({ setCurrentView, setIsModalVisible }) {
             handleSectionChange={handleSectionChange}
           />
 
-          <Form className={`relative flex justify-center py-5 px-8 shadow-[rgba(96,214,217,0.2)_3.5px_5.5px_16px_0px] rounded-lg w-full h-[80vh]`}>
+          <Form className={`relative flex justify-center p-5 shadow-[rgba(96,214,217,0.2)_3.5px_5.5px_16px_0px] rounded-lg w-full h-[100vh]`}>
 
-            <div className="h-[86%] w-full overflow-y-scroll">
+            <FormSectionContainer
+              key={activeSectionIndex}
+              animation={formSectionAnimation}
+            >
               {formSectionMap[activeSectionObj.sectionName]}
-            </div>
+            </FormSectionContainer>
 
             <FormTraversalButtons />
 

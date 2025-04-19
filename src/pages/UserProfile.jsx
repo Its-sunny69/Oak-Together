@@ -1,9 +1,5 @@
 import { FormTextComponent, SideNavBar, ImageUploadField, ProfileHeader2 } from "../components";
 import {
-    GCPIconPng,
-    CoinPng,
-    TrophyPng,
-    DefaultCoverPic,
     DefaultBadge,
     ProfileImg2,
     Trophy2Png,
@@ -14,6 +10,7 @@ import {
     LegendaryBadgeBG,
     EmptyBadgeImg,
     SampleCertificateImg,
+    GalleryIcon
 } from "../assets";
 import { useState, useEffect } from "react";
 import { useInterval } from "../hooks";
@@ -878,6 +875,7 @@ function ListItem({ date, time, address, name, type, space, waterAvailability, t
     const unformattedHours = time ? +timeArr[0] : 0;
     timeArr[0] = (+timeArr[0] % 12);
     timeArr[0] = (timeArr[0] < 10 ? "0" : "") + timeArr[0];
+    timeArr[0] = timeArr[0] == "00"? "12": timeArr[0];
 
     const dateBox = (
         <div className="flex flex-col w-[8vw] items-center px-3 pt-3 pb-4 rounded-lg shadow-[rgba(96,214,217,0.2)_2px_0px_4px_0px]">
@@ -1228,7 +1226,7 @@ function EditForm({ userData, setIsModalVisible }) {
     const dispatch = useDispatch();
 
     const handleSubmit = async (values, { setSubmitting }) => {
-        const imageFileObj = values.profilePic;
+        const imageFileObj = values.profilePic?.[0];
         const detailsObj = { ...values };
         delete detailsObj.profilePic;
 
@@ -1293,7 +1291,7 @@ function EditForm({ userData, setIsModalVisible }) {
             <h2 className="font-semibold text-2xl mb-8">Update Profile Details:</h2>
             <Formik
                 initialValues={{
-                    profilePic: null,
+                    profilePic: [],
                     name: userData?.name,
                     description: userData?.description,
                     address: userData?.address
@@ -1309,10 +1307,14 @@ function EditForm({ userData, setIsModalVisible }) {
                                 containerStyleClasses={defaultContainerStyle + " items-center "}
                                 labelStyleClasses={defaultLabelStyle}
                                 inputStyleClasses={defaultInputStyle}
-                                previewSizeClasses="w-44"
+                                previewStyleClasses="relative w-58 p-4 border-2 border-dashed border-[#60D6D9] rounded-lg flex items-center justify-center overflow-hidden cursor-pointer hover:border-[#2572CF]"
                                 id="profilePic"
                                 name="profilePic"
                                 label="Profile Picture (Optional)"
+                                placeholder="Upload Profile Picture"
+                                placeholderImg={GalleryIcon}
+                                placeholderTextStyleClasses="text-gray-300 text-base font-semibold"
+                                placeholderImgStyleClasses="w-[50%] rounded-lg opacity-70 "
                             />
                         }
                     </Field>

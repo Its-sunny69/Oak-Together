@@ -1,4 +1,3 @@
-import { useState, useEffect } from "react";
 import { useField } from "formik";
 
 function FormTextComponent({ label, inpRef, isTextArea, containerStyleClasses, labelStyleClasses, inputStyleClasses, ...props }) {

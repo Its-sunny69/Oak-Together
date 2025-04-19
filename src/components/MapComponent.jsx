@@ -416,6 +416,7 @@ function MapComponent({ currLocationCoords, setIsModalVisible }) {
           <Map
             defaultCenter={currLocationCoords}
             defaultZoom={17}
+            minZoom={3}
             streetViewControlOptions={{position: ControlPosition.RIGHT_CENTER}}
             cameraControlOptions={{position: ControlPosition.RIGHT_TOP}}
             mapId={import.meta.env.VITE_GMAP_MAP_STYLE_ID}
