@@ -61,7 +61,7 @@ function FormSelectMUI({
                     IconComponent={() => (
                         <ArrowDropDownIcon
                             style={{
-                                color: (hasError) ? errorColor : selectStyleObject.arrowColor || "#60D6D9",
+                                color: (hasError) ? errorColor : selectStyleObject.iconColor || "#60D6D9",
                                 marginRight: "8px"
                             }}
                         />
@@ -90,6 +90,7 @@ function FormSelectMUI({
                     ))}
                 </Select>
             </FormControl>
+            
             {hasError && (
                 <div className="text-sm" style={{ color: errorColor }}>
                     {meta.error}

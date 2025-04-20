@@ -1,4 +1,7 @@
 import * as Yup from "yup";
+import dayjs from "dayjs";
+import isSameOrAfter from "dayjs/plugin/isSameOrAfter.js"
+dayjs.extend(isSameOrAfter)
 
 const FILE_SIZE = 3 * 1024 * 1024; // 3 MB
 const SUPPORTED_FORMATS = ["image/jpg", "image/jpeg", "image/png"];
@@ -29,23 +32,62 @@ const postEventSchema = Yup.object({
 
   description: Yup.string()
     .trim()
+    .required("Required")
     .min(10, "Description should contain at least 10 characters.")
     .max(500, "Description should not exceed 500 characters."),
 
-  eventStartDate: Yup.date()
+  eventStartDate: Yup.string()
     .required("Required"),
 
-  eventEndDate: Yup.date()
-    .min(Yup.ref("eventStartDate"), "End date must be after start date.")
-    .required("Required"),
+  eventEndDate: Yup.string()
+    .required("Required")
+    .test("is-after-or-same-start-date", "End date cannot be before start date", function (value) {
+      const { eventStartDate } = this.parent;
+      if (!eventStartDate || !value) return true; // Skip if missing
+      return dayjs(value).isSameOrAfter(dayjs(eventStartDate), "day");
+    })
+    .test("max-3-month-gap", "Event duration cannot exceed 3 months", function (value) {
+      const { eventStartDate } = this.parent;
+      if (!eventStartDate || !value) return true;
+      return dayjs(value).diff(dayjs(eventStartDate), "month", true) <= 3;
+    }),
 
-  eventStartTime: Yup.string().required("Required"),
-  eventEndTime: Yup.string().required("Required"),
+  eventStartTime: Yup.string()
+    .required("Required")
+    .test("not-after-10pm", "Event cannot start after 10:00 PM if it's a one-day event", function (value) {
+      const { eventStartDate, eventEndDate } = this.parent;
+      if (!eventStartDate || !eventEndDate || !value) return true;
+      const sameDay = dayjs(eventStartDate).isSame(dayjs(eventEndDate), "day");
+      if (!sameDay) return true;
+
+      const [hour, minute] = value.split(":").map(Number);
+      const time = dayjs().hour(hour).minute(minute);
+      return time.isBefore(dayjs().hour(22).minute(0));
+    }),
+
+  eventEndTime: Yup.string()
+    .required("Required")
+    .test("min-gap-2-hours", "Event must be at least 2 hours long if on the same day", function (value) {
+      const { eventStartDate, eventEndDate, eventStartTime } = this.parent;
+      if (!eventStartDate || !eventEndDate || !eventStartTime || !value) return true;
+
+      const sameDay = dayjs(eventStartDate).isSame(dayjs(eventEndDate), "day");
+      if (!sameDay) return true;
+
+      const [startHour, startMinute] = eventStartTime.split(":").map(Number);
+      const [endHour, endMinute] = value.split(":").map(Number);
+
+      const start = dayjs().hour(startHour).minute(startMinute);
+      const end = dayjs().hour(endHour).minute(endMinute);
+
+      return end.diff(start, "minute") >= 120;
+    })
+  ,
 
   address: Yup.string().trim()
-          .min(5, "Address should be at least 5 characters long.")
-          .max(100, "Address should not exceed 100 characters.")
-          .required("Required"),
+    .min(5, "Address should be at least 5 characters long.")
+    .max(100, "Address should not exceed 100 characters.")
+    .required("Required"),
 
   latitude: Yup.number()
     .required("Required")

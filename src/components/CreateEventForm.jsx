@@ -1,7 +1,7 @@
-import { useState, useRef } from 'react'
+import { useState, useRef, useEffect } from 'react'
 import { useImmer } from "use-immer";
 import { Formik, Form, Field, useFormikContext } from "formik";
-import { FormTextComponent, PlaceAutocomplete, ImageUploadField, FormSelectMUI } from ".";
+import { FormTextComponent, PlaceAutocomplete, ImageUploadField, FormSelectMUI, FormDatePickerMUI, FormTimePickerMUI, MarkedLocationAutocomplete } from ".";
 import postEventSchema from '../schemas/postEventSchema';
 import { useDispatch } from 'react-redux';
 import { postEvent } from '../features/eventSlice';
@@ -11,19 +11,8 @@ import { faCircleCheck, faCircleXmark, faXmark } from '@fortawesome/free-solid-s
 import { APIProvider } from '@vis.gl/react-google-maps'
 import { faCircle, faCircleDot, faCircleQuestion } from '@fortawesome/free-regular-svg-icons';
 import { GalleryIcon } from '../assets';
+import dayjs from "dayjs";
 
-function getDateLimit(type, isMax) {
-  if (type != "date") return null;
-
-  const dateObj = new Date();
-  const year = dateObj.getFullYear();
-  let month = dateObj.getMonth() + 1, date = dateObj.getDate();
-
-  month = (month < 10) ? `0${month}` : month;
-  date = (date < 10) ? `0${date}` : date;
-
-  return isMax ? `${year}-12-31` : `${year}-${month}-${date}`;
-}
 
 function FormSectionsThread({ activeSectionIndex, sectionStates, handleSectionChange }) {
 
@@ -130,7 +119,7 @@ const fieldSelectStyleObject = {
   placeholderColor: "#a2a2a2",
   padding: "0rem",
   focusOutline: "2px solid #60D6D9",
-  arrowColor: "#60D6D9",
+  iconColor: "#60D6D9",
   hoverBgColor: "#60D6D9",
   hoverTextColor: "black",
 };
@@ -138,7 +127,9 @@ const fieldSelectStyleObject = {
 
 function BasicFormSection() {
 
+  const { values } = useFormikContext();
 
+  const selectedStartDate = values["eventStartDate"];
 
   return (
     <>
@@ -146,7 +137,7 @@ function BasicFormSection() {
         {({ form }) =>
           <ImageUploadField
             form={form}
-            containerStyleClasses={fieldContainerStyle + "  items-center "}
+            containerStyleClasses={fieldContainerStyle + " items-center "}
             labelStyleClasses={fieldLabelStyle}
             inputStyleClasses={fieldInputStyle}
             previewStyleClasses="relative w-full py-8 px-4 border-2 border-dashed border-[rgba(0,0,0,0.4)] rounded-2xl flex items-center justify-center overflow-hidden cursor-pointer hover:border-[#60D6D9]"
@@ -168,7 +159,7 @@ function BasicFormSection() {
         inputStyleClasses={fieldInputStyle}
         type="text"
       />
-      <FormTextComponent 
+      <FormTextComponent
         label="Description"
         id="description"
         name="description"
@@ -180,13 +171,47 @@ function BasicFormSection() {
       />
 
       <div className="flex gap-4">
-        <div className="flex flex-col gap-2">
-
-        </div>
-        <div className="flex flex-col gap-2">
-
-        </div>
+        <FormDatePickerMUI
+          name="eventStartDate"
+          id="eventStartDate"
+          label="Start Date"
+          containerStyleClasses={fieldContainerStyle}
+          labelStyleClasses={fieldLabelStyle}
+          pickerStyleObject={fieldSelectStyleObject}
+          minDate={dayjs()}
+          maxDate={dayjs().add(1, "year")}
+        />
+        <FormDatePickerMUI
+          name="eventEndDate"
+          id="eventEndDate"
+          label="End Date"
+          containerStyleClasses={fieldContainerStyle}
+          labelStyleClasses={fieldLabelStyle}
+          pickerStyleObject={fieldSelectStyleObject}
+          minDate={selectedStartDate ? dayjs(selectedStartDate) : dayjs()}
+          maxDate={dayjs().add(1, "year").add(4, "month")}
+        />
       </div>
+
+      <div className="flex gap-4">
+        <FormTimePickerMUI
+          name="eventStartTime"
+          id="eventStartTime"
+          label="Start Time"
+          containerStyleClasses={fieldContainerStyle}
+          labelStyleClasses={fieldLabelStyle}
+          pickerStyleObject={fieldSelectStyleObject}
+        />
+        <FormTimePickerMUI
+          name="eventEndTime"
+          id="eventEndTime"
+          label="End Time"
+          containerStyleClasses={fieldContainerStyle}
+          labelStyleClasses={fieldLabelStyle}
+          pickerStyleObject={fieldSelectStyleObject}
+        />
+      </div>
+
 
       {/* https://mui.com/x/react-date-pickers/date-picker/ */}
       {/* https://mui.com/x/react-date-pickers/time-picker/ */}
@@ -197,8 +222,185 @@ function BasicFormSection() {
 
 function LocationFormSection() {
 
+  const { values, touched, errors, setFieldValue, setFieldTouched, validateField } = useFormikContext();
+  const [selectedLocationObj, setSelectedLocationObj] = useState(null);
+  const [showClearIcon, setShowClearIcon] = useState(false);
+
+  const fieldNameToLocationProp = {
+    "address": selectedLocationObj?.position,
+    "latitude": selectedLocationObj?.position.locations,
+    "longitude": selectedLocationObj?.position.locations,
+    "space": selectedLocationObj,
+    "waterAvailability": selectedLocationObj,
+    "estimatedArea": selectedLocationObj
+  }
+
+  useEffect(() => {
+    const fieldList = ["address", "latitude", "longitude", "space", "waterAvailability", "estimatedArea"];
+    if (!selectedLocationObj) {
+
+      fieldList.forEach((fieldName) => {
+        setFieldValue(fieldName, "");
+      })
+
+      return;
+    }
+
+    fieldList.forEach((fieldName) => {
+      const nextValue = fieldNameToLocationProp[fieldName][fieldName];
+      setFieldValue(fieldName, nextValue);
+    })
+
+  }, [selectedLocationObj]);
+
+  const addressInputRef = useRef();
+
   return (
-    <>
+    <APIProvider apiKey={import.meta.env.VITE_GMAP_API_KEY} libraries={["geometry"]}>
+      <div>
+        <MarkedLocationAutocomplete
+          selectedLocationObj={selectedLocationObj}
+          setSelectedLocationObj={setSelectedLocationObj}
+          containerStyleClasses={fieldContainerStyle}
+          labelStyleClasses={fieldLabelStyle}
+          inputStyleClasses={fieldInputStyle}
+        />
+        <div className="flex items-center justify-center gap-3">
+          <div className="w-[30%] h-0 border-t-[0.2px] border-t-black"></div>
+          or
+          <div className="w-[30%] h-0 border-t-[0.5px] border-t-black"></div>
+        </div>
+      </div>
+
+      <PlaceAutocomplete
+        isEventForm
+        customInputRef={addressInputRef}
+        setInputValue={(value) => setFieldValue("address", value)}
+      >
+        <div className={fieldContainerStyle}>
+          <label htmlFor="address" className={fieldLabelStyle}>Address</label>
+          <div className="relative flex items-center">
+            <input
+              className={
+                fieldInputStyle + " w-full " +
+                ((touched.address && errors.address) ?
+                  " border-red-600" : "")
+              }
+              id="address"
+              name="address"
+              placeholder=""
+              type="text"
+              ref={addressInputRef}
+              value={values.address}
+              onBlur={() => setFieldTouched("address", true)}
+              onChange={(e) => {
+                setFieldValue("address", e.target.value);
+                setShowClearIcon(e.target.value.length > 0);
+              }}
+              style={{
+                backgroundColor: selectedLocationObj && values.address? "#E2E2E2" : ""
+              }}
+              disabled={selectedLocationObj != null && values.address}
+            />
+            {showClearIcon &&
+              <div
+                className="h-3/4 absolute right-1 flex items-center px-2 rounded-r-lg text-[14px] cursor-pointer bg-white"
+                onClick={() => {
+                  setShowClearIcon(false);
+                  setFieldValue("address", "");
+                }}
+              >
+                <FontAwesomeIcon icon={faXmark} />
+              </div>
+            }
+          </div>
+          {(touched.address && errors.address) ?
+            <div className="text-red-600 text-sm">
+              {errors.address ? errors.address : "Select a location from suggestion list"}
+            </div>
+            : null
+          }
+        </div>
+      </PlaceAutocomplete>
+
+      <div className="flex items-center gap-4">
+        <FormTextComponent
+          label="Latitude"
+          id="latitude"
+          name="latitude"
+          type="number"
+          labelStyleClasses={fieldLabelStyle}
+          containerStyleClasses={fieldContainerStyle}
+          inputStyleClasses={fieldInputStyle}
+          disabled={selectedLocationObj != null && values.latitude}
+          style={{
+            backgroundColor: selectedLocationObj && values.latitude ? "#E2E2E2" : ""
+          }}
+        />
+        <FormTextComponent
+          label="Longitude"
+          id="longitude"
+          name="longitude"
+          type="number"
+          labelStyleClasses={fieldLabelStyle}
+          containerStyleClasses={fieldContainerStyle}
+          inputStyleClasses={fieldInputStyle}
+          disabled={selectedLocationObj != null && values.longitude}
+          style={{
+            backgroundColor: selectedLocationObj && values.longitude ? "#E2E2E2" : ""
+          }}
+        />
+      </div>
+
+      <div className="flex items-center gap-4">
+        <FormSelectMUI
+          label="Space"
+          id="space"
+          name="space"
+          options={
+            ["PLAINS", "SLOPE", "HILL", "SPACIOUS", "CONJUSTED", "RIVERBANK"]
+              .map((opt) => { return { label: opt, value: opt } })
+          }
+          containerStyleClasses={fieldContainerStyle}
+          labelStyleClasses={fieldLabelStyle}
+          selectStyleObject={fieldSelectStyleObject}
+          disabled={selectedLocationObj != null && values.space}
+          style={{
+            backgroundColor: selectedLocationObj && values.space? "#E2E2E2" : ""
+          }}
+        />
+        <FormSelectMUI
+          label="Water Availability"
+          id="waterAvailability"
+          name="waterAvailability"
+          options={
+            ["PLENTY", "MODERATE", "SCARCE"]
+              .map((opt) => { return { label: opt, value: opt } })
+          }
+          containerStyleClasses={fieldContainerStyle}
+          labelStyleClasses={fieldLabelStyle}
+          selectStyleObject={fieldSelectStyleObject}
+          disabled={selectedLocationObj != null && values.waterAvailability}
+          style={{
+            backgroundColor: selectedLocationObj && values.waterAvailability? "#E2E2E2" : ""
+          }}
+        />
+      </div>
+
+      <FormTextComponent
+        label="Estimated Area"
+        id="estimatedArea"
+        name="estimatedArea"
+        type="number"
+        labelStyleClasses={fieldLabelStyle}
+        containerStyleClasses={fieldContainerStyle}
+        inputStyleClasses={fieldInputStyle}
+        disabled={selectedLocationObj != null && values.estimatedArea}
+        style={{
+          backgroundColor: selectedLocationObj && values.estimatedArea? "#E2E2E2" : ""
+        }}
+      />
+
       <FormTextComponent
         label="Target Plant Number"
         id="targetPlantNumber"
@@ -208,7 +410,7 @@ function LocationFormSection() {
         containerStyleClasses={fieldContainerStyle}
         inputStyleClasses={fieldInputStyle}
       />
-    </>
+    </APIProvider>
   )
 }
 
@@ -286,7 +488,6 @@ function ConfirmFormSection() {
 
 // To-do:
 // 1) Time validation for same date
-// 2) Upgrade the interface
 
 function CreateEventForm({ setCurrentView, setIsModalVisible }) {
 
@@ -366,15 +567,20 @@ function CreateEventForm({ setCurrentView, setIsModalVisible }) {
     return false;
   }
 
+  const unrequiredFieldIds = new Set(["eventPictures"]);
+
   const getSectionStatus = (formik, formFieldIds) => {
     let noFieldNull = true;
 
     for (const id of formFieldIds) {
-      const fieldTouched = formik.touched[id];
+      const fieldTouched = formik.touched[id] ?? false;
 
-      if (formik.errors[id] != null && fieldTouched != null) return "Error";
+      if (formik.errors[id] != null && fieldTouched) return "Error";
 
-      noFieldNull = fieldTouched && noFieldNull && !isEmptyField(formik.values[id]);
+      noFieldNull =
+        noFieldNull &&
+        (unrequiredFieldIds.has(id) || (fieldTouched && !isEmptyField(formik.values[id])));
+      // console.log("Field ID: " + id + ", noFieldNull: " + noFieldNull);
     }
 
     return (noFieldNull) ? "Completed" : "Incomplete";
@@ -389,6 +595,9 @@ function CreateEventForm({ setCurrentView, setIsModalVisible }) {
     setSectionStates((sectionStatesList) => {
       const nextSrcStatus = getSectionStatus(formik, sectionStatesList[srcSectionIndex].formFieldIds);
       sectionStatesList[srcSectionIndex].status = nextSrcStatus;
+
+      // console.log("Status of " + sectionStatesList[srcSectionIndex].sectionName + ": " + nextSrcStatus);
+      // console.log(formik.values);
 
       const nextTargStatus = getSectionStatus(formik, sectionStatesList[targSectionIndex].formFieldIds);
       sectionStatesList[targSectionIndex].status = nextTargStatus == "Completed" ? nextTargStatus : "Active";
@@ -470,7 +679,7 @@ function CreateEventForm({ setCurrentView, setIsModalVisible }) {
             handleSectionChange={handleSectionChange}
           />
 
-          <Form className={`relative flex justify-center p-5 shadow-[rgba(96,214,217,0.2)_3.5px_5.5px_16px_0px] rounded-lg w-full h-[100vh]`}>
+          <Form className={`relative flex justify-center p-5 shadow-[rgba(96,214,217,0.2)_3.5px_5.5px_16px_0px] rounded-lg w-full h-[92vh]`}>
 
             <FormSectionContainer
               key={activeSectionIndex}

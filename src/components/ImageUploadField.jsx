@@ -53,7 +53,7 @@ function ImageUploadField({ form, containerStyleClasses, labelStyleClasses, inpu
 
         setTimeout(() => {
             form.validateField(id);
-        }, 0);
+        }, 1000);
 
         e.stopPropagation();
     }
@@ -85,7 +85,7 @@ function ImageUploadField({ form, containerStyleClasses, labelStyleClasses, inpu
         form.setTouched({ ...form.touched, [id]: true });
         setTimeout(() => {
             form.validateField(id);
-        }, 0);
+        }, 150);
     }
 
     return (

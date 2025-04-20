@@ -4,8 +4,10 @@ import ContactBox from './ContactBox';
 import ContactUs from './ContactUs';
 import CreateEventForm from './CreateEventForm';
 import Footer from './Footer';
+import FormDatePickerMUI from './FormDatePickerMUI';
 import FormSelectComponent from './FormSelectComponent';
 import FormTextComponent from './FormTextComponent';
+import FormTimePickerMUI from './FormTimePickerMUI';
 import FormSelectMUI from './FormSelectMUI';
 import GeminiAI from './GeminiAI';
 import HeroSection from './HeroSection';
@@ -19,6 +21,7 @@ import LoginButton from './LoginButton';
 import LoginForm from './LoginForm';
 import MapComponent from './MapComponent';
 import MapPageContent from './MapPageContent';
+import MarkedLocationAutocomplete from "./MarkedLocationAutocomplete";
 import Navbar from './Navbar';
 import Organizations from './Organizations';
 import PlaceAutocomplete from "./PlaceAutocomplete";
@@ -40,8 +43,10 @@ export {
   ContactUs,
   CreateEventForm,
   Footer,
+  FormDatePickerMUI,
   FormSelectComponent,
   FormTextComponent,
+  FormTimePickerMUI,
   FormSelectMUI,
   GeminiAI,
   HeroSection,
@@ -55,6 +60,7 @@ export {
   LoginForm,
   MapComponent, 
   MapPageContent,
+  MarkedLocationAutocomplete,
   Navbar,
   Organizations,
   PlaceAutocomplete, 
