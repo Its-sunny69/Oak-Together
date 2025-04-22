@@ -24,8 +24,8 @@ const Markers = ({ markerCoordinates, markerStates, setSelectedLocationId, setSe
     return allMarkerCoordsList.filter((markerCoordsObj) => {
       const geohash = Geohash.encode(markerCoordsObj.lat, markerCoordsObj.lng, 9);
 
-      if(geohashSet.has(geohash)) return;
-      
+      if (geohashSet.has(geohash)) return;
+
       geohashSet.add(geohash);
       return markerCoordsObj;
     });
@@ -78,7 +78,7 @@ const Markers = ({ markerCoordinates, markerStates, setSelectedLocationId, setSe
       advancedMarkerElement.addListener("click", (e) => {
         if (showPostInterface) return; // might need to handle this differently later...
         setSelectedLocationId(id);
-        setSelectedLocationCoords({lat: e.latLng.lat(), lng: e.latLng.lng()});
+        setSelectedLocationCoords({ lat: e.latLng.lat(), lng: e.latLng.lng() });
         setEventSelected(type == "event");
       });
 
@@ -261,28 +261,30 @@ function MapComponent({ currLocationCoords, setIsModalVisible }) {
   )
 
   // PlaceAutocomplete search box
-  const [showClearIcon, setShowClearIcon] = useState(false);
-  const autocompleteInputRef = useRef(null);
+  const [addressInputText, setAddressInputText] = useState("");
+  const [addressInputFocused, setAddressInputFocused] = useState(false);
+  const addressInputRef = useRef();
+
+  const showClearIcon = addressInputText.length > 0;
+
   const autocompleteInput = (
     <input
-      className="p-3 w-[30vw] h-[100%] rounded-r-xl text-[14px] outline-none"
-      ref={autocompleteInputRef}
+      ref={addressInputRef}
+      className="p-3 w-[30vw] h-[100%] rounded-r-xl text-[14px] outline-none "
       placeholder="Search Location"
-      onFocus={() => {
-        const searchControlsDiv = autocompleteInputRef.current.parentNode;
-        searchControlsDiv.style.border = "3px solid #60D6D9";
-      }}
-      onBlur={() => {
-        const searchControlsDiv = autocompleteInputRef.current.parentNode;
-        searchControlsDiv.style.border = "1px solid #187BEC";
-      }}
-      onInput={() => {
-        setShowClearIcon(autocompleteInputRef.current.value.length > 0);
-      }}
+      value={addressInputText}
+      onChange={(e) => { setAddressInputText(e.target.value.trim()) }}
+      onFocus={() => { setAddressInputFocused(true); }}
+      onBlur={() => { setAddressInputFocused(false); }}
     />
   )
   const searchControls = (
-    <div className="relative flex items-center h-9 mt-3 rounded-xl shadow-lg border-[1px] border-[#187BEC] bg-white">
+    <div
+      className="relative flex items-center h-9 mt-3 rounded-xl shadow-lg bg-white"
+      style={{
+        border: addressInputFocused ? "3px solid #60D6D9" : "1px solid #187BEC"
+      }}
+    >
       <div className="h-full flex items-center pl-2 text-lg">
         <FontAwesomeIcon icon={faMagnifyingGlass} />
       </div>
@@ -291,9 +293,7 @@ function MapComponent({ currLocationCoords, setIsModalVisible }) {
         <div
           className="h-full absolute right-0 flex items-center px-2 rounded-r-xl text-lg text-red-500 cursor-pointer bg-white"
           onClick={() => {
-            autocompleteInputRef.current.value = "";
-            autocompleteInputRef.current.focus();
-            setShowClearIcon(false);
+            setAddressInputText("");
             setSearchedLocationCoords(null);
           }}
         >
@@ -304,9 +304,17 @@ function MapComponent({ currLocationCoords, setIsModalVisible }) {
   );
 
   // Handling place selection via PlaceAutocomplete
-  const handlePlaceSelect = (coords) => {
-    setSearchedLocationCoords(coords);
+  const handlePlaceSelect = (map, selectedPlace) => {
+    const locationCoords = selectedPlace.geometry.location;
+    const locationAddress = selectedPlace.formatted_address;
+    const nextCoords = { lat: locationCoords.lat(), lng: locationCoords.lng() }
+
+    map.setCenter(nextCoords);
+    setAddressInputText(locationAddress);
+    setSearchedLocationCoords(nextCoords);
   }
+
+  useEffect(() => { console.log("searched location changed!!") }, [searchedLocationCoords])
 
   // For keeping track of Selected Locations via Marker Clicks
   const [selectedLocationId, setSelectedLocationId] = useState(null);
@@ -417,8 +425,8 @@ function MapComponent({ currLocationCoords, setIsModalVisible }) {
             defaultCenter={currLocationCoords}
             defaultZoom={17}
             minZoom={3}
-            streetViewControlOptions={{position: ControlPosition.RIGHT_CENTER}}
-            cameraControlOptions={{position: ControlPosition.RIGHT_TOP}}
+            streetViewControlOptions={{ position: ControlPosition.RIGHT_CENTER }}
+            cameraControlOptions={{ position: ControlPosition.RIGHT_TOP }}
             mapId={import.meta.env.VITE_GMAP_MAP_STYLE_ID}
             draggableCursor={showPostInterface ? "default" : "grab"}
             onClick={(e) => {
@@ -447,7 +455,11 @@ function MapComponent({ currLocationCoords, setIsModalVisible }) {
 
           {!showPostInterface &&
             <MapControl position={ControlPosition.TOP_CENTER}>
-              <PlaceAutocomplete onPlaceSelect={handlePlaceSelect} customInputRef={autocompleteInputRef}>
+              <PlaceAutocomplete
+                onPlaceSelect={handlePlaceSelect}
+                customInputRef={addressInputRef}
+                usesMap
+              >
                 {searchControls}
               </PlaceAutocomplete>
             </MapControl>
@@ -461,8 +473,8 @@ function MapComponent({ currLocationCoords, setIsModalVisible }) {
             <LocationDetailComponent
               selectedLocationId={selectedLocationId}
               setSelectedLocationId={setSelectedLocationId}
-              selectedLocationCoords = {selectedLocationCoords}
-              setSelectedLocationCoords = {setSelectedLocationCoords}
+              selectedLocationCoords={selectedLocationCoords}
+              setSelectedLocationCoords={setSelectedLocationCoords}
               eventSelected={eventSelected}
               setEventSelected={setEventSelected}
             />

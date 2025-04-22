@@ -10,7 +10,7 @@ import { useDebounce } from '../hooks'
 function MarkedLocationAutocomplete({ selectedLocationObj, setSelectedLocationObj, containerStyleClasses, labelStyleClasses, inputStyleClasses }) {
 
     const [paramsObj, setParamsObj] = useState({
-        search: "",
+        search: selectedLocationObj? selectedLocationObj.name: "",
         page: 0,
         size: 5,
         sortOrder: "ASC",
@@ -47,9 +47,6 @@ function MarkedLocationAutocomplete({ selectedLocationObj, setSelectedLocationOb
                     onChange={(e) => {
                         setParamsObj({ ...paramsObj, search: e.target.value.trim() });
                         setSelectedLocationObj(null);
-                    }}
-                    style={{
-                        backgroundColor: selectedLocationObj ? "#E2E2E2" : ""
                     }}
                 />
                 <FontAwesomeIcon icon={faSortDown} className="absolute top-3 right-4 text-sm text-[#60D6D9]" />

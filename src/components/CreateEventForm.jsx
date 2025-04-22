@@ -1,10 +1,10 @@
 import { useState, useRef, useEffect } from 'react'
 import { useImmer } from "use-immer";
 import { Formik, Form, Field, useFormikContext } from "formik";
-import { FormTextComponent, PlaceAutocomplete, ImageUploadField, FormSelectMUI, FormDatePickerMUI, FormTimePickerMUI, MarkedLocationAutocomplete } from ".";
+import { FormTextComponent, ImageUploadField, FormSelectMUI, FormDatePickerMUI, FormTimePickerMUI, MarkedLocationAutocomplete, FormikPlaceAutocomplete } from ".";
 import postEventSchema from '../schemas/postEventSchema';
 import { useDispatch } from 'react-redux';
-import { postEvent } from '../features/eventSlice';
+import { postEvent, uploadImagesInEvent } from '../features/eventSlice';
 import toast from 'react-hot-toast';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faCircleCheck, faCircleXmark, faXmark } from '@fortawesome/free-solid-svg-icons';
@@ -12,7 +12,25 @@ import { APIProvider } from '@vis.gl/react-google-maps'
 import { faCircle, faCircleDot, faCircleQuestion } from '@fortawesome/free-regular-svg-icons';
 import { GalleryIcon } from '../assets';
 import dayjs from "dayjs";
+import { useDebounce } from '../hooks';
 
+const getFormattedAddress = async (lat, lng, setFormattedAddress, fieldId) => {
+  if (!window.google || !window.google.maps) return;
+
+  const geocoder = new window.google.maps.Geocoder();
+  const latLng = { lat, lng };
+  // console.log(latLng);
+
+  geocoder.geocode({ location: latLng }, (results, status) => {
+    if (status === "OK" && results[0]) {
+      setFormattedAddress(fieldId, results[0].formatted_address);
+      console.log("Geolocation address: " + results[0].formatted_address);
+    }
+    else {
+      console.error("Geocoder failed due to: " + status);
+    }
+  });
+};
 
 function FormSectionsThread({ activeSectionIndex, sectionStates, handleSectionChange }) {
 
@@ -220,11 +238,9 @@ function BasicFormSection() {
   )
 }
 
-function LocationFormSection() {
+function LocationFormSection({ selectedLocationObj, setSelectedLocationObj, placeSelected, setPlaceSelected }) {
 
-  const { values, touched, errors, setFieldValue, setFieldTouched, validateField } = useFormikContext();
-  const [selectedLocationObj, setSelectedLocationObj] = useState(null);
-  const [showClearIcon, setShowClearIcon] = useState(false);
+  const { values, touched, setFieldValue, setFieldTouched, validateField } = useFormikContext();
 
   const fieldNameToLocationProp = {
     "address": selectedLocationObj?.position,
@@ -232,28 +248,68 @@ function LocationFormSection() {
     "longitude": selectedLocationObj?.position.locations,
     "space": selectedLocationObj,
     "waterAvailability": selectedLocationObj,
-    "estimatedArea": selectedLocationObj
+    // "estimatedArea": selectedLocationObj
   }
 
+  const autofillFieldList = ["address", "latitude", "longitude", "space", "waterAvailability"]; // add estimatedArea in future?
+
   useEffect(() => {
-    const fieldList = ["address", "latitude", "longitude", "space", "waterAvailability", "estimatedArea"];
+
     if (!selectedLocationObj) {
-
-      fieldList.forEach((fieldName) => {
+      autofillFieldList.forEach((fieldName) => {
         setFieldValue(fieldName, "");
+        setTimeout(() => { validateField(fieldName) }, 500);
       })
-
       return;
     }
 
-    fieldList.forEach((fieldName) => {
+    autofillFieldList.forEach((fieldName) => {
       const nextValue = fieldNameToLocationProp[fieldName][fieldName];
+      // console.log(`${fieldName}: ${nextValue}`);
       setFieldValue(fieldName, nextValue);
+      if (!touched[fieldName]) setFieldTouched(fieldName, true);
+
+      setTimeout(() => { validateField(fieldName) }, 500);
     })
 
   }, [selectedLocationObj]);
 
-  const addressInputRef = useRef();
+  useEffect(() => {
+    if (!placeSelected && !selectedLocationObj) {
+      setFieldValue("latitude", "");
+      setFieldValue("longitude", "");
+
+      setTimeout(() => {
+        validateField("latitude");
+        validateField("longitude");
+      }, 500);
+    }
+  }, [placeSelected, values.address]);
+
+  const debouncedLat = useDebounce(values.latitude, 800);
+  const debouncedLng = useDebounce(values.longitude, 800);
+
+  // Problem !!!
+  useEffect(() => {
+    if (!selectedLocationObj && values.latitude && values.longitude) {
+      getFormattedAddress(values.latitude, values.longitude, setFieldValue, "address");
+      setPlaceSelected(true);
+    }
+  }, [debouncedLat, debouncedLng]);
+
+  const handlePlaceSelect = (selectedPlace) => {
+    const locationCoords = selectedPlace.geometry.location;
+    const nextAddress = selectedPlace.formatted_address;
+
+    setPlaceSelected(true);
+    setFieldValue("address", nextAddress);
+    setFieldValue("latitude", locationCoords.lat());
+    setFieldValue("longitude", locationCoords.lng());
+
+    setTimeout(() => {
+      autofillFieldList.slice(0, 3).forEach((fieldName) => { validateField(fieldName) });
+    }, 500);
+  }
 
   return (
     <APIProvider apiKey={import.meta.env.VITE_GMAP_API_KEY} libraries={["geometry"]}>
@@ -272,56 +328,21 @@ function LocationFormSection() {
         </div>
       </div>
 
-      <PlaceAutocomplete
-        isEventForm
-        customInputRef={addressInputRef}
-        setInputValue={(value) => setFieldValue("address", value)}
-      >
-        <div className={fieldContainerStyle}>
-          <label htmlFor="address" className={fieldLabelStyle}>Address</label>
-          <div className="relative flex items-center">
-            <input
-              className={
-                fieldInputStyle + " w-full " +
-                ((touched.address && errors.address) ?
-                  " border-red-600" : "")
-              }
-              id="address"
-              name="address"
-              placeholder=""
-              type="text"
-              ref={addressInputRef}
-              value={values.address}
-              onBlur={() => setFieldTouched("address", true)}
-              onChange={(e) => {
-                setFieldValue("address", e.target.value);
-                setShowClearIcon(e.target.value.length > 0);
-              }}
-              style={{
-                backgroundColor: selectedLocationObj && values.address? "#E2E2E2" : ""
-              }}
-              disabled={selectedLocationObj != null && values.address}
-            />
-            {showClearIcon &&
-              <div
-                className="h-3/4 absolute right-1 flex items-center px-2 rounded-r-lg text-[14px] cursor-pointer bg-white"
-                onClick={() => {
-                  setShowClearIcon(false);
-                  setFieldValue("address", "");
-                }}
-              >
-                <FontAwesomeIcon icon={faXmark} />
-              </div>
-            }
-          </div>
-          {(touched.address && errors.address) ?
-            <div className="text-red-600 text-sm">
-              {errors.address ? errors.address : "Select a location from suggestion list"}
-            </div>
-            : null
-          }
-        </div>
-      </PlaceAutocomplete>
+
+      <FormikPlaceAutocomplete
+        id="address"
+        name="address"
+        label="Address"
+        placeholder=""
+        type="text"
+        containerClassname={fieldContainerStyle}
+        inputClassname={fieldInputStyle + (selectedLocationObj ? " text-[rgba(0,0,0,0.38)] bg-[#E2E2E2]" : "")}
+        labelClassname={fieldLabelStyle}
+        handlePlaceSelect={handlePlaceSelect}
+        placeSelected={placeSelected}
+        setPlaceSelected={setPlaceSelected}
+        disabled={selectedLocationObj != null}
+      />
 
       <div className="flex items-center gap-4">
         <FormTextComponent
@@ -332,9 +353,10 @@ function LocationFormSection() {
           labelStyleClasses={fieldLabelStyle}
           containerStyleClasses={fieldContainerStyle}
           inputStyleClasses={fieldInputStyle}
-          disabled={selectedLocationObj != null && values.latitude}
+          disabled={selectedLocationObj != null}
           style={{
-            backgroundColor: selectedLocationObj && values.latitude ? "#E2E2E2" : ""
+            backgroundColor: selectedLocationObj ? "#E2E2E2" : "",
+            color: selectedLocationObj ? "rgba(0,0,0,0.38)" : ""
           }}
         />
         <FormTextComponent
@@ -345,9 +367,10 @@ function LocationFormSection() {
           labelStyleClasses={fieldLabelStyle}
           containerStyleClasses={fieldContainerStyle}
           inputStyleClasses={fieldInputStyle}
-          disabled={selectedLocationObj != null && values.longitude}
+          disabled={selectedLocationObj != null}
           style={{
-            backgroundColor: selectedLocationObj && values.longitude ? "#E2E2E2" : ""
+            backgroundColor: selectedLocationObj ? "#E2E2E2" : "",
+            color: selectedLocationObj ? "rgba(0,0,0,0.38)" : ""
           }}
         />
       </div>
@@ -364,9 +387,9 @@ function LocationFormSection() {
           containerStyleClasses={fieldContainerStyle}
           labelStyleClasses={fieldLabelStyle}
           selectStyleObject={fieldSelectStyleObject}
-          disabled={selectedLocationObj != null && values.space}
+          disabled={selectedLocationObj != null}
           style={{
-            backgroundColor: selectedLocationObj && values.space? "#E2E2E2" : ""
+            backgroundColor: selectedLocationObj ? "#E2E2E2" : ""
           }}
         />
         <FormSelectMUI
@@ -380,9 +403,9 @@ function LocationFormSection() {
           containerStyleClasses={fieldContainerStyle}
           labelStyleClasses={fieldLabelStyle}
           selectStyleObject={fieldSelectStyleObject}
-          disabled={selectedLocationObj != null && values.waterAvailability}
+          disabled={selectedLocationObj != null}
           style={{
-            backgroundColor: selectedLocationObj && values.waterAvailability? "#E2E2E2" : ""
+            backgroundColor: selectedLocationObj ? "#E2E2E2" : ""
           }}
         />
       </div>
@@ -395,10 +418,6 @@ function LocationFormSection() {
         labelStyleClasses={fieldLabelStyle}
         containerStyleClasses={fieldContainerStyle}
         inputStyleClasses={fieldInputStyle}
-        disabled={selectedLocationObj != null && values.estimatedArea}
-        style={{
-          backgroundColor: selectedLocationObj && values.estimatedArea? "#E2E2E2" : ""
-        }}
       />
 
       <FormTextComponent
@@ -470,6 +489,15 @@ function SponsorsFormSection() {
         containerStyleClasses={fieldContainerStyle}
         inputStyleClasses={fieldInputStyle}
       />
+      <FormTextComponent
+        label="Total Amount Raised"
+        id="totalAmountRaised"
+        name="totalAmountRaised"
+        type="number"
+        labelStyleClasses={fieldLabelStyle}
+        containerStyleClasses={fieldContainerStyle}
+        inputStyleClasses={fieldInputStyle}
+      />
     </>
   )
 }
@@ -487,35 +515,60 @@ function ConfirmFormSection() {
 
 
 // To-do:
-// 1) Time validation for same date
+// Create a preview for the form details on ConfirmSection
 
 function CreateEventForm({ setCurrentView, setIsModalVisible }) {
 
   const dispatch = useDispatch();
 
-  const handleFormSubmit = (values, { setSubmitting }) => {
-    return; // remove this line later
+  const handleFormSubmit = async (values, { setSubmitting }) => {
+    const imageUrls = [...values.eventPictures]; // raw list of image URLs
 
-    const postEventObj = Object.assign({}, values);
-    postEventObj["position"] = { address: values["position"] };
+    const postEventObj = {
+      ...values,
+      position: {
+        locations: {
+          latitude: values.latitude,
+          longitude: values.longitude,
+        },
+        address: values.address,
+      },
+      acceptingParticipants: values.acceptingParticipants === "yes",
+      acceptingSponsors: values.acceptingSponsors === "yes",
+    };
 
-    // console.log(postEventObj);
+    // Remove unneeded fields
+    delete postEventObj.address;
+    delete postEventObj.latitude;
+    delete postEventObj.longitude;
+    delete postEventObj.eventPictures;
 
-    dispatch(postEvent(postEventObj)).unwrap()
-      .then(() => {
-        toast.success("Event Creation Successful");
-        setIsModalVisible(true);
-      })
-      .catch((error) => {
-        toast.error(error.message, "error");
-        console.log(error);
-        console.log("What was sent? :");
-        console.log(values);
-      })
-      .finally(() => {
-        setSubmitting(false);
-      });
+    try {
+      const response = await dispatch(postEvent(postEventObj)).unwrap();
+      const { id: eventId } = response; // assuming response contains created event id
+
+      // Upload images only if non-empty
+      // Problem !!!
+      if (imageUrls.length > 0) {
+        await dispatch(
+          uploadImagesInEvent({
+            eventId,
+            imageUrls,
+          })
+        ).unwrap();
+      }
+
+      toast.success("Event Creation Successful");
+      setIsModalVisible(true);
+
+    } catch (error) {
+      toast.error(error.message || "Event creation failed", "error");
+      console.error("Error during event creation:", error);
+    } finally {
+      setSubmitting(false);
+    }
   };
+
 
   const [activeSectionIndex, setActiveSectionIndex] = useState(0);
   const [lastSectionVisited, setLastSectionVisited] = useState(false);
@@ -542,7 +595,7 @@ function CreateEventForm({ setCurrentView, setIsModalVisible }) {
     {
       sectionName: "Sponsors",
       formFieldIds:
-        ["acceptingSponsors", "estimatedCost"],
+        ["acceptingSponsors", "estimatedCost", "totalAmountRaised"],
       status: "Untouched"
     },
     {
@@ -552,9 +605,18 @@ function CreateEventForm({ setCurrentView, setIsModalVisible }) {
     }
   ]);
 
+  const [selectedLocationObj, setSelectedLocationObj] = useState(null); // for autofill using marked locations
+  const [placeSelected, setPlaceSelected] = useState(false); // for autofill using Google Autocomplete
+
   const formSectionMap = {
     "Basic": <BasicFormSection />,
-    "Location": <LocationFormSection />,
+    "Location":
+      <LocationFormSection
+        selectedLocationObj={selectedLocationObj}
+        setSelectedLocationObj={setSelectedLocationObj}
+        placeSelected={placeSelected}
+        setPlaceSelected={setPlaceSelected}
+      />,
     "Participants": <ParticipantsFormSection />,
     "Sponsors": <SponsorsFormSection />,
     "Confirm": <ConfirmFormSection />
@@ -597,7 +659,7 @@ function CreateEventForm({ setCurrentView, setIsModalVisible }) {
       sectionStatesList[srcSectionIndex].status = nextSrcStatus;
 
       // console.log("Status of " + sectionStatesList[srcSectionIndex].sectionName + ": " + nextSrcStatus);
-      // console.log(formik.values);
+      // console.log(formik.touched);
 
       const nextTargStatus = getSectionStatus(formik, sectionStatesList[targSectionIndex].formFieldIds);
       sectionStatesList[targSectionIndex].status = nextTargStatus == "Completed" ? nextTargStatus : "Active";
@@ -631,6 +693,7 @@ function CreateEventForm({ setCurrentView, setIsModalVisible }) {
           className="px-8 py-2 rounded-lg bg-gradient-120 shadow-md from-[#60D6D9] from-50% to-[#1566E7] to-100% hover:from-[#1566E7] hover:to-[#60D6D9] text-white font-medium active:scale-95 transition-all "
           onClick={() => {
             if (!isLastSection) handleSectionChange(formik, activeSectionIndex, activeSectionIndex + 1);
+            // console.log(formik);
           }}
           type={isLastSection ? "submit" : null} // for final form submission
         >

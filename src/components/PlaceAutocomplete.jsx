@@ -1,10 +1,10 @@
 import { useState, useEffect } from "react";
 import { useMap, useMapsLibrary } from "@vis.gl/react-google-maps";
 
-function PlaceAutocomplete({ isEventForm, onPlaceSelect, customInputRef, setInputValue, customContainerStyle, children}) {
+function PlaceAutocomplete({ usesMap, onPlaceSelect, customInputRef, customContainerStyle, children}) {
     const [placeAutocomplete, setPlaceAutocomplete] = useState(null);
     const places = useMapsLibrary("places");
-    const map = !isEventForm ? useMap() : null;
+    const map = usesMap ? useMap() : null;
 
     useEffect(() => {
         if (!places || !customInputRef.current) return;
@@ -22,18 +22,8 @@ function PlaceAutocomplete({ isEventForm, onPlaceSelect, customInputRef, setInpu
         placeAutocomplete.addListener("place_changed", () => {
             const selectedPlace = placeAutocomplete.getPlace();
             if (!selectedPlace.geometry) return;
-
-            setInputValue == null ?
-                customInputRef.current.value = selectedPlace.formatted_address :
-                setInputValue(selectedPlace.formatted_address);
-
-            if(isEventForm) return;
-            const locationCoords = selectedPlace.geometry.location;
-            // console.log(locationCoords)
-
-            const coords = { lat: locationCoords.lat(), lng: locationCoords.lng() };
-            map.setCenter(coords);
-            onPlaceSelect(coords);
+            
+            onPlaceSelect && (usesMap? onPlaceSelect(map, selectedPlace): onPlaceSelect(selectedPlace));
         });
     }, [onPlaceSelect, placeAutocomplete]);
     return (

@@ -84,10 +84,7 @@ const postEventSchema = Yup.object({
     })
   ,
 
-  address: Yup.string().trim()
-    .min(5, "Address should be at least 5 characters long.")
-    .max(100, "Address should not exceed 100 characters.")
-    .required("Required"),
+  address: Yup.string().trim().required("Required"),
 
   latitude: Yup.number()
     .required("Required")

@@ -479,6 +479,39 @@ export const deleteEventById = createAsyncThunk(
   }
 );
 
+export const uploadImagesInEvent = createAsyncThunk(
+  "event/uploadImagesInEvent",
+  async ({ eventId, imageUrls }, { rejectWithValue }) => {
+    try {
+      const response = await fetch(
+        `${apiUrl}/user-profiles/user-id/${userId}/events/event-id/${eventId}/images`,
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify(imageUrls), 
+        }
+      );
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        return rejectWithValue({
+          message: errorData.message || "Failed to upload images",
+        });
+      }
+
+      const data = await response.json();
+      console.log("uploadImagesInEvent res:", data);
+      return { eventId, images: data };
+    } catch (error) {
+      console.error("uploadImagesInEvent error:", error);
+      return rejectWithValue(error);
+    }
+  }
+);
+
+
 const eventSlice = createSlice({
   name: "event",
   initialState: {
@@ -616,7 +649,18 @@ const eventSlice = createSlice({
         state.allEvents = state.allEvents.filter(
           (event) => event.id !== eventId
         );
-      });
+      })
+      .addCase(uploadImagesInEvent.fulfilled, (state, action) => {
+        const { eventId, images } = action.payload;
+        const index = state.allEvents.findIndex((event) => event.id === eventId);
+      
+        if (index !== -1) {
+          state.allEvents[index] = {
+            ...state.allEvents[index],
+            eventImages: images, // or update field name as per API response
+          };
+        }
+      });      
   },
 });
 
