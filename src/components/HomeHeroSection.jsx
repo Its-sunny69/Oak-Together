@@ -7,10 +7,10 @@ function HomeHeroSection() {
 
     const mapImageDiv = (
         <div
-            className="flex gap-5 cursor-pointer w-[50%]"
+            className="flex gap-5 cursor-pointer w-[86%]"
             onClick={() => navigate("/map")}
         >
-            <img src={MapImg} className="rounded-lg" />
+            <img src={MapImg} className="rounded-lg w-[40vw]" />
         </div>
     )
 
@@ -22,7 +22,7 @@ function HomeHeroSection() {
     let countId = 0; // temporary id variable
 
     const barChart = (
-        <div className="flex flex-grow justify-between p-8 rounded-lg bg-gradient-to-r from-[#313860] to-[#151928] items-end h-3/4">
+        <div className="flex flex-grow justify-between p-8 rounded-lg bg-gradient-to-r from-[#313860] to-[#151928] items-end h-3/4 w-full">
             <div className="flex flex-col gap-3">
                 {measures.reverse().map(measure => <div className="text-white text-[10px] font-semibold" key={measure}>{measure}</div>)}
             </div>
@@ -63,9 +63,9 @@ function HomeHeroSection() {
     }
 
     return (
-        <div className="flex gap-2 py-6">
+        <div className="flex gap-3 py-6 w-full">
             {mapImageDiv}
-            <div className="flex flex-col px-4 gap-8 w-[60%] rounded-lg shadow-gray-200 shadow-lg">
+            <div className="flex flex-col px-4 gap-8 w-full rounded-lg shadow-[rgba(96,214,217,0.25)_0px_3.5px_10px_0px]">
                 {barChart}
                 <div className="px-2">
                     <h3 className="font-bold mb-1 text-[#2D3748]">Active Users</h3>

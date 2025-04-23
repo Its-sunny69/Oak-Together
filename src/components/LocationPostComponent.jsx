@@ -1,7 +1,7 @@
 import { useState, useRef, useEffect } from "react";
-import { Formik, Form } from "formik";
+import { Formik, Form,  } from "formik";
 import { postLocationSchema } from "../schemas";
-import { FormTextComponent, FormSelectComponent, PlaceAutocomplete } from ".";
+import { FormTextComponent, FormSelectComponent, PlaceAutocomplete, FormikPlaceAutocomplete } from ".";
 import toast from "react-hot-toast";
 import { useDispatch } from "react-redux";
 import { postLocation } from "../features/locationSlice";
@@ -12,7 +12,7 @@ import { faXmark } from "@fortawesome/free-solid-svg-icons";
     For autocomplete: https://developers.google.com/maps/documentation/javascript/examples/rgm-autocomplete#maps_rgm_autocomplete-javascript
 */
 
-const getFormattedAddress = async (lat, lng, setFormattedAddress, setShowClearIcon) => {
+const getFormattedAddress = async (lat, lng, setFieldValue, fieldId) => {
   if (!window.google || !window.google.maps) return;
 
   const geocoder = new window.google.maps.Geocoder();
@@ -21,8 +21,8 @@ const getFormattedAddress = async (lat, lng, setFormattedAddress, setShowClearIc
 
   geocoder.geocode({ location: latLng }, (results, status) => {
     if (status === "OK" && results[0]) {
-      setFormattedAddress("address", results[0].formatted_address);
-      setShowClearIcon(true);
+      setFieldValue(fieldId, results[0].formatted_address);
+      // console.log("Geolocation address: "+results[0].formatted_address);
     }
     else {
       console.error("Geocoder failed due to: " + status);
@@ -31,8 +31,6 @@ const getFormattedAddress = async (lat, lng, setFormattedAddress, setShowClearIc
 };
 
 function LocationPostComponent({ setShowPostInterface, setIsModalVisible, locationCoords, setLocationCoords }) {
-
-  const addressInputRef = useRef(null);
   const dispatch = useDispatch();
 
   const handleSubmit = (values, { setSubmitting }) => {
@@ -67,8 +65,6 @@ function LocationPostComponent({ setShowPostInterface, setIsModalVisible, locati
   const defaultLabelStyle = "text-sm";
   const defaultInputStyle = "p-1 w-full border-[1px] rounded-lg border-[#60d6d9] focus:outline-[#2572CF]";
 
-  const [showClearIcon, setShowClearIcon] = useState(false);
-
   const locationTypeOptions = ["Select location type", "PLANTED", "BARREN"];
   const waterAvailabilityOptions = [
     "Select water availability",
@@ -85,6 +81,17 @@ function LocationPostComponent({ setShowPostInterface, setIsModalVisible, locati
     "CONJUSTED",
     "RIVERBANK",
   ];
+
+  const [locationSelected, setLocationSelected] = useState(false);
+
+  const handlePlaceSelect = (map, selectedPlace) => {
+    const locationCoords = selectedPlace.geometry.location;
+    const nextCoords = { lat: locationCoords.lat(), lng: locationCoords.lng() }
+
+    map.setCenter(nextCoords);
+    setLocationSelected(true);
+    setLocationCoords(nextCoords);
+  }
 
   return (
     <div className="w-[49%] rounded-xl shadow-[rgba(96,214,217,0.2)_0px_0px_10px_3px] relative">
@@ -113,15 +120,21 @@ function LocationPostComponent({ setShowPostInterface, setIsModalVisible, locati
           validationSchema={postLocationSchema}
           onSubmit={handleSubmit}
         >
-          {({ errors, touched, values, setFieldValue, setFieldTouched }) => {
+          {({ values, setFieldValue }) => {
 
             useEffect(() => {
               if (locationCoords) {
                 // Using reverse geocoding API here to fetch address
-                getFormattedAddress(locationCoords.lat, locationCoords.lng, setFieldValue, setShowClearIcon);
+                getFormattedAddress(locationCoords.lat, locationCoords.lng, setFieldValue, "address");
               }
             }, [locationCoords, setFieldValue]);
 
+            useEffect(() => {
+              if(!locationSelected) {
+                setLocationCoords(null);
+              }
+            }, [locationSelected, values.address]);
+          
             return (
               <Form className="flex flex-col gap-4">
                 <FormTextComponent
@@ -161,56 +174,21 @@ function LocationPostComponent({ setShowPostInterface, setIsModalVisible, locati
                   ))}
                 </FormSelectComponent>
 
-                <PlaceAutocomplete
-                  onPlaceSelect={(coords) => setLocationCoords(coords)}
-                  customInputRef={addressInputRef}
-                  setInputValue={(value) => setFieldValue("address", value)}
-                >
-                  <div className={defaultContainerStyle}>
-                    <label className={defaultLabelStyle} htmlFor="address">Address</label>
-                    <div className="relative flex items-center">
-                      <input
-                        className={
-                          defaultInputStyle +
-                          ((touched.address && (errors.address || locationCoords == null)) ?
-                            " border-red-600" : "")
-                        }
-                        id="address"
-                        name="address"
-                        type="text"
-                        placeholder="Enter location address"
-                        ref={addressInputRef}
-                        value={values.address}
-                        onBlur={() => setFieldTouched("address", true)}
-                        onChange={(e) => {
-                          setFieldValue("address", e.target.value);
-                          setShowClearIcon(e.target.value.length > 0);
-                          setLocationCoords(null);
-                        }}
-                      />
-                      {showClearIcon &&
-                        <div
-                          className="h-3/4 absolute right-1 flex items-center px-2 rounded-r-lg text-[14px] cursor-pointer bg-white"
-                          onClick={() => {
-                            // addressInputRef.current.value = "";
-                            // addressInputRef.current.focus();
-                            setShowClearIcon(false);
-                            setFieldValue("address", "");
-                            setLocationCoords(null);
-                          }}
-                        >
-                          <FontAwesomeIcon icon={faXmark} />
-                        </div>
-                      }
-                    </div>
-                    {(touched.address && (errors.address || locationCoords == null)) ?
-                      <div className="text-red-600 text-sm">
-                        {errors.address ? errors.address : "Select a location from suggestion list"}
-                      </div>
-                      : null
-                    }
-                  </div>
-                </PlaceAutocomplete>
+                <FormikPlaceAutocomplete 
+                  id="address"
+                  name="address"
+                  label="Address"
+                  type="text"
+                  placeholder="Enter location address"
+                  containerClassname={defaultContainerStyle}
+                  inputClassname={defaultInputStyle}
+                  labelClassname={defaultLabelStyle}
+                  handlePlaceSelect={handlePlaceSelect}
+                  placeSelected={locationSelected}
+                  setPlaceSelected={setLocationSelected}
+                  selectionCompulsory
+                  usesMap
+                />
 
                 <FormSelectComponent
                   label="Water Availability"

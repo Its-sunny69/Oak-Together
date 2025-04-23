@@ -84,7 +84,7 @@ export const getEventsByFilterPagination = createAsyncThunk(
   async (paramsObj, { rejectWithValue }) => {
     console.log("paramsObj", paramsObj);
     try {
-     
+
       const sortOrder = paramsObj?.sortOrder || "DESC";
 
       let url = `${apiUrl}/user-profiles/user-id/${userId}/events/filters/spec?sortOrder=${sortOrder}`;
@@ -98,7 +98,7 @@ export const getEventsByFilterPagination = createAsyncThunk(
       Object.keys(paramsObj.filterObj || {}).forEach((key) => {
         const value = paramsObj.filterObj[key];
         if (value !== "" && value !== false && value !== undefined) {
-          if(key == "joinedEvents") {
+          if (key == "joinedEvents") {
             queryParams.append("participatedBy", userId);
             return;
           }
@@ -479,6 +479,28 @@ export const deleteEventById = createAsyncThunk(
   }
 );
 
+export const uploadImagesInEvent = createAsyncThunk(
+  "events/uploadImagesInEvent",
+  async ({ eventId, imageFiles }, { rejectWithValue }) => {
+    try {
+      const response = await fetch(`${apiUrl}/user-profiles/user-id/${userId}/events/event-id/${eventId}/images`, {
+        method: "POST",
+        body: imageFiles,
+        // DO NOT set Content-Type here; browser sets it automatically with boundary
+      });
+
+      if (!response.ok) throw new Error("Image upload failed");
+
+      return await response.json();
+    } catch (error) {
+      console.log(error)
+      return rejectWithValue(error.message);
+    }
+  }
+);
+
+
+
 const eventSlice = createSlice({
   name: "event",
   initialState: {
@@ -627,6 +649,17 @@ const eventSlice = createSlice({
         state.allEvents = state.allEvents.filter(
           (event) => event.id !== eventId
         );
+      })
+      .addCase(uploadImagesInEvent.fulfilled, (state, action) => {
+        const { eventId, images } = action.payload;
+        const index = state.allEvents.findIndex((event) => event.id === eventId);
+
+        if (index !== -1) {
+          state.allEvents[index] = {
+            ...state.allEvents[index],
+            eventImages: images, // or update field name as per API response
+          };
+        }
       });
   },
 });

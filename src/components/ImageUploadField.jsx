@@ -1,60 +1,127 @@
 import { useState, useEffect, useRef } from "react";
 import { ErrorMessage } from "formik";
-import { GalleryIcon } from "../assets";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faXmark } from "@fortawesome/free-solid-svg-icons";
 
-function ImageUploadField({ form, containerStyleClasses, labelStyleClasses, inputStyleClasses, previewSizeClasses, id, name, label }) {
-    const [previewSrc, setPreviewSrc] = useState(null);
+function ImageUploadField({ form, containerStyleClasses, labelStyleClasses, inputStyleClasses, previewStyleClasses, id, name, label, placeholder, placeholderImg, placeholderImgStyleClasses, placeholderTextStyleClasses }) {
+
     const fileInputRef = useRef(null);
 
-    const selectedFile = form.values[id];
+    const [previewSrcs, setPreviewSrcs] = useState([]); // List of preview sources for selected images
+    const selectedFiles = form.values[id];
+
     const FILE_SIZE_LIMIT = 3 * 1024 * 1024; // 3 MB;
     const SUPPORTED_FORMATS = ["image/jpg", "image/jpeg", "image/png"];
 
+    const isValidImage = (imageFile) => {
+        return imageFile.size <= FILE_SIZE_LIMIT && SUPPORTED_FORMATS.includes(imageFile.type);
+    }
+
     useEffect(() => {
-        if (selectedFile && selectedFile.size < FILE_SIZE_LIMIT && SUPPORTED_FORMATS.includes(selectedFile.type)) {
-            console.log(form.values[id])
-            const objectUrl = URL.createObjectURL(selectedFile);
-            setPreviewSrc(objectUrl);
+        if (Array.isArray(selectedFiles) && selectedFiles.length > 0) {
+            // Clear existing previews to avoid memory leaks
+            const nextPreviewSrcs =
+                selectedFiles
+                    .map(file =>
+                    ({
+                        imageName: file.name,
+                        imageUrl: URL.createObjectURL(file),
+                        isValid: isValidImage(file)
+                    }));
 
-            return () => URL.revokeObjectURL(objectUrl); // Cleanup
+            setPreviewSrcs(nextPreviewSrcs);
+
+            return () => {
+                nextPreviewSrcs.forEach(obj => URL.revokeObjectURL(obj.imageUrl));
+            };
         } else {
-            setPreviewSrc(null);
+            setPreviewSrcs([]);
         }
-    }, [selectedFile]);
+    }, [selectedFiles]);
 
-    const handleImageClick = () => {
+
+    const handlePreviewClick = () => {
         fileInputRef.current?.click();
     };
+
+    const handleImageRemoval = (e, imageName) => {
+        const nextPreviewSrcs = previewSrcs.filter((oldPreviewSrc) => imageName != oldPreviewSrc.imageName);
+        const nextFieldValue = form.values[id].filter((fileObj) => fileObj.name !== imageName);
+
+        setPreviewSrcs(nextPreviewSrcs);
+        form.setFieldValue(id, nextFieldValue);
+
+        setTimeout(() => {
+            form.validateField(id);
+        }, 1000);
+
+        e.stopPropagation();
+    }
+
+    const getUniqueImageFiles = (oldImageFiles, newImageFiles) => {
+        const addedImageNames = new Set();
+        const uniqueImageFiles = [];
+
+        oldImageFiles.forEach(file => {
+            addedImageNames.add(file.name);
+            uniqueImageFiles.push(file);
+        })
+        newImageFiles.forEach(file => {
+            if (addedImageNames.has(file.name)) return;
+            addedImageNames.add(file.name);
+            uniqueImageFiles.push(file);
+        })
+
+        return uniqueImageFiles;
+    }
+
+    const updateFieldValue = (e) => {
+        const newImageFiles = [...e.currentTarget.files];
+        const oldImageFiles = form.values[id];
+
+        const allUniqueImageFiles = getUniqueImageFiles(oldImageFiles, newImageFiles);
+
+        form.setFieldValue(id, allUniqueImageFiles);
+        form.setTouched({ ...form.touched, [id]: true });
+        setTimeout(() => {
+            form.validateField(id);
+        }, 150);
+    }
 
     return (
         <div className={containerStyleClasses}>
             <label className={labelStyleClasses} htmlFor={id}>{label}</label>
 
             <div
-                onClick={handleImageClick}
-                className={`relative ${previewSizeClasses} border-2 border-dashed border-[#60D6D9] rounded-lg flex items-center justify-center overflow-hidden cursor-pointer hover:border-[#2572CF] `}
+                onClick={handlePreviewClick}
+                className={previewStyleClasses}
             >
-                {previewSrc ?
-                    (
-                        <>
-                            <div className="absolute top-2 right-2">
-                                <FontAwesomeIcon
-                                    icon={faXmark}
-                                    className="text-red-500 bg-[rgba(255,255,255,0.75)] font-semibold text-xl rounded-full py-1 px-1.5"
-                                    onClick={(e) => {
-                                        setPreviewSrc(null);
-                                        e.stopPropagation();
-                                    }}
-                                />
-                            </div>
-                            <img src={previewSrc} alt="Preview" className="object-cover h-40 w-full rounded-lg" />
-                        </>
-                    ) :
-                    (
-                        <img src={GalleryIcon} className="w-full mix-blend-multiply rounded-lg opacity-25" />
-                    )
+                {previewSrcs.length > 0 ?
+                    <div className="flex gap-3 justify-center">
+                        {
+                            previewSrcs
+                                .map(({ imageName, imageUrl, isValid }, index) =>
+                                    <div className={`relative rounded-lg ${isValid ? "" : "border-2 border-[#D20000] shadow-[rgba(208,0,0,0.6)_2px_0px_10px_3px]"}`} key={index}>
+
+                                        <div className="absolute top-5 right-5">
+
+                                            <FontAwesomeIcon
+                                                icon={faXmark}
+                                                className="text-red-500 bg-[rgba(255,255,255,0.75)] font-semibold text-xl rounded-full py-1 px-1.5"
+                                                onClick={(e) => handleImageRemoval(e, imageName)}
+                                            />
+                                        </div>
+
+                                        <img src={imageUrl} alt="Preview" className="object-cover h-40 w-full rounded-lg" />
+                                    </div>
+                                )
+                        }
+                    </div>
+                    :
+                    <div className={`flex flex-col items-center`}>
+                        <img src={placeholderImg} className={placeholderImgStyleClasses} />
+                        <div className={placeholderTextStyleClasses}>{placeholder || "Upload Photo"}</div>
+                    </div>
                 }
             </div>
 
@@ -69,18 +136,17 @@ function ImageUploadField({ form, containerStyleClasses, labelStyleClasses, inpu
                     (form.errors[id] && form.touched[id] ? " border-red-600" : "")
                 }
                 hidden // hides the default UI for file input
-                onChange={(event) => {
-                    const file = event.currentTarget.files[0];
-                    form.setFieldValue(id, file);
-                    form.setTouched({ ...form.touched, [id]: true });
-                    setTimeout(() => {
-                        form.validateField(id);
-                    }, 0);
-                }}
+                onChange={updateFieldValue}
+                multiple
             />
 
             <ErrorMessage name={name}>
-                {(msg) => <div className="text-red-600 text-sm">{msg}</div>}
+                {
+                    (msg) =>
+                        <div className="flex flex-col gap-1 text-red-600 text-sm">
+                            {msg}
+                        </div>
+                }
             </ErrorMessage>
         </div>
     );

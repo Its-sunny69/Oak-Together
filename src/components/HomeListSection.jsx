@@ -1,4 +1,6 @@
+import { useDispatch, useSelector } from "react-redux";
 import { ProfileImg } from "../assets";
+import { getEventsByFilterPagination } from "../features/eventSlice";
 
 function HomeListSection() {
 
@@ -63,6 +65,11 @@ function HomeListSection() {
             </ul>
         </div>
     )
+
+    // const dispatch = useDispatch();
+    // const {getEventsByFilterPagination: eventsList} = useSelector((state) => state.events);
+
+    // useEffect(() => {dispatch(getEventsByFilterPagination())}, []); // need current location coords to show nearby events
 
     //Dummy data for nearby events
     const randomText = "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.";

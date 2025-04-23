@@ -1,9 +1,5 @@
-import { FormTextComponent, SideNavBar, ImageUploadField } from "../components";
+import { FormTextComponent, SideNavBar, ImageUploadField, ProfileHeader2 } from "../components";
 import {
-    GCPIconPng,
-    CoinPng,
-    TrophyPng,
-    DefaultCoverPic,
     DefaultBadge,
     ProfileImg2,
     Trophy2Png,
@@ -14,6 +10,7 @@ import {
     LegendaryBadgeBG,
     EmptyBadgeImg,
     SampleCertificateImg,
+    GalleryIcon
 } from "../assets";
 import { useState, useEffect } from "react";
 import { useInterval } from "../hooks";
@@ -878,6 +875,7 @@ function ListItem({ date, time, address, name, type, space, waterAvailability, t
     const unformattedHours = time ? +timeArr[0] : 0;
     timeArr[0] = (+timeArr[0] % 12);
     timeArr[0] = (timeArr[0] < 10 ? "0" : "") + timeArr[0];
+    timeArr[0] = timeArr[0] == "00"? "12": timeArr[0];
 
     const dateBox = (
         <div className="flex flex-col w-[8vw] items-center px-3 pt-3 pb-4 rounded-lg shadow-[rgba(96,214,217,0.2)_2px_0px_4px_0px]">
@@ -1221,14 +1219,12 @@ function LocationDisplay({ gradientBgStyle }) {
 }
 
 
-// To Do:
-// 1) Provide EDIT form to user on button click
 function EditForm({ userData, setIsModalVisible }) {
 
     const dispatch = useDispatch();
 
     const handleSubmit = async (values, { setSubmitting }) => {
-        const imageFileObj = values.profilePic;
+        const imageFileObj = values.profilePic?.[0];
         const detailsObj = { ...values };
         delete detailsObj.profilePic;
 
@@ -1293,6 +1289,7 @@ function EditForm({ userData, setIsModalVisible }) {
             <h2 className="font-semibold text-2xl mb-8">Update Profile Details:</h2>
             <Formik
                 initialValues={{
+                    profilePic: [],
                     name: userData?.name,
                     description: userData?.description,
                     address: userData?.address
@@ -1308,10 +1305,14 @@ function EditForm({ userData, setIsModalVisible }) {
                                 containerStyleClasses={defaultContainerStyle + " items-center "}
                                 labelStyleClasses={defaultLabelStyle}
                                 inputStyleClasses={defaultInputStyle}
-                                previewSizeClasses="w-44"
+                                previewStyleClasses="relative w-58 p-4 border-2 border-dashed border-[#60D6D9] rounded-lg flex items-center justify-center overflow-hidden cursor-pointer hover:border-[#2572CF]"
                                 id="profilePic"
                                 name="profilePic"
                                 label="Profile Picture (Optional)"
+                                placeholder="Upload Profile Picture"
+                                placeholderImg={GalleryIcon}
+                                placeholderTextStyleClasses="text-gray-300 text-base font-semibold"
+                                placeholderImgStyleClasses="w-[50%] rounded-lg opacity-70 "
                             />
                         }
                     </Field>
@@ -1477,51 +1478,51 @@ function UserProfile() {
 
     const gradientBgStyle = "bg-gradient-180 from-[#60D6D9] to-[#1846C4]"
 
-    const profileHeader = (
-        <div className="relative w-full h-[42vh]">
-            <div
-                className="absolute top-0 right-0 left-0 bottom-12 rounded-xl bg-[#60D6D9]"
-                style={{
-                    backgroundImage: `url(${DefaultCoverPic})`,
-                    backgroundSize: "cover",
-                    backgroundRepeat: "no-repeat"
-                }}
-            >
-            </div>
+    // const profileHeader = (
+    //     <div className="relative w-full h-[42vh]">
+    //         <div
+    //             className="absolute top-0 right-0 left-0 bottom-12 rounded-xl bg-[#60D6D9]"
+    //             style={{
+    //                 backgroundImage: `url(${DefaultCoverPic})`,
+    //                 backgroundSize: "cover",
+    //                 backgroundRepeat: "no-repeat"
+    //             }}
+    //         >
+    //         </div>
 
-            <div className="absolute top-2 right-2 flex gap-4">
-                <div className="flex gap-1 rounded-lg bg-white py-4 px-8 text-[18px] cursor-pointer">
-                    <img src={isSponsor ? GCPIconPng : CoinPng} alt="Coins" />
-                    <span>{userData?.points}</span>
-                </div>
-                <div className="flex gap-1 rounded-lg bg-white py-4 px-8 text-[18px] cursor-pointer">
-                    <img src={TrophyPng} alt="Trophies" />
-                    <span>{userData?.points}</span>
-                </div>
-            </div>
+    //         <div className="absolute top-2 right-2 flex gap-4">
+    //             <div className="flex gap-1 rounded-lg bg-white py-4 px-8 text-[18px] cursor-pointer">
+    //                 <img src={isSponsor ? GCPIconPng : CoinPng} alt="Coins" />
+    //                 <span>{userData?.points}</span>
+    //             </div>
+    //             <div className="flex gap-1 rounded-lg bg-white py-4 px-8 text-[18px] cursor-pointer">
+    //                 <img src={TrophyPng} alt="Trophies" />
+    //                 <span>{userData?.points}</span>
+    //             </div>
+    //         </div>
 
-            <div
-                className="absolute bottom-0 right-6 left-6 h-[18vh] py-2 pl-5 pr-8 rounded-xl bg-white shadow-[rgba(96,214,217,0.2)_0px_0px_10px_3px] flex justify-between items-center">
-                {nameIconDiv}
-                <div className="flex gap-8 items-center">
-                    {navDiv}
-                    {
-                        !guestView &&
-                        <button
-                            className={`rounded-lg ${gradientBgStyle} px-[1px] pt-[7px] pb-[6.5px] hover:to-[#60D6D9]`}
-                            onClick={() => setActiveView("Edit Form")}
-                        >
-                            <span className="rounded-[6.5px] px-6 py-2 font-medium text-transparent bg-white hover:text-[#60D6D9] active:text-white active:bg-transparent">
-                                <span className={`${gradientBgStyle} bg-clip-text`}>
-                                    EDIT
-                                </span>
-                            </span>
-                        </button>
-                    }
-                </div>
-            </div>
-        </div>
-    );
+    //         <div
+    //             className="absolute bottom-0 right-6 left-6 h-[18vh] py-2 pl-5 pr-8 rounded-xl bg-white shadow-[rgba(96,214,217,0.2)_0px_0px_10px_3px] flex justify-between items-center">
+    //             {nameIconDiv}
+    //             <div className="flex gap-8 items-center">
+    //                 {navDiv}
+    //                 {
+    //                     !guestView &&
+    //                     <button
+    //                         className={`rounded-lg ${gradientBgStyle} px-[1px] pt-[7px] pb-[6.5px] hover:to-[#60D6D9]`}
+    //                         onClick={() => setActiveView("Edit Form")}
+    //                     >
+    //                         <span className="rounded-[6.5px] px-6 py-2 font-medium text-transparent bg-white hover:text-[#60D6D9] active:text-white active:bg-transparent">
+    //                             <span className={`${gradientBgStyle} bg-clip-text`}>
+    //                                 EDIT
+    //                             </span>
+    //                         </span>
+    //                     </button>
+    //                 }
+    //             </div>
+    //         </div>
+    //     </div>
+    // );
 
     const viewMap = {
         "Overview": <OverViewDisplay activeView={activeView} userData={userData} />,
@@ -1548,7 +1549,25 @@ function UserProfile() {
         <div className="flex">
             <SideNavBar />
             <div className="relative flex flex-col gap-6 w-full px-4 pt-4 pb-8 items-center">
-                {profileHeader}
+                <ProfileHeader2 >
+                    {nameIconDiv}
+                    <div className="flex gap-8 items-center">
+                        {navDiv}
+                        {
+                            !guestView &&
+                            <button
+                                className={`rounded-lg ${gradientBgStyle} px-[1px] pt-[7px] pb-[6.5px] hover:to-[#60D6D9]`}
+                                onClick={() => setActiveView("Edit Form")}
+                            >
+                                <span className="rounded-[6.5px] px-6 py-2 font-medium text-transparent bg-white hover:text-[#60D6D9] active:text-white active:bg-transparent">
+                                    <span className={`${gradientBgStyle} bg-clip-text`}>
+                                        EDIT
+                                    </span>
+                                </span>
+                            </button>
+                        }
+                    </div>
+                </ProfileHeader2>
                 {viewMap[activeView]}
                 <div className="w-full">
                     {deleteAccountBtn}

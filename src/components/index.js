@@ -4,8 +4,12 @@ import ContactBox from './ContactBox';
 import ContactUs from './ContactUs';
 import CreateEventForm from './CreateEventForm';
 import Footer from './Footer';
+import FormikPlaceAutocomplete from './FormikPlaceAutocomplete';
+import FormDatePickerMUI from './FormDatePickerMUI';
 import FormSelectComponent from './FormSelectComponent';
+import FormSelectMUI from './FormSelectMUI';
 import FormTextComponent from './FormTextComponent';
+import FormTimePickerMUI from './FormTimePickerMUI';
 import GeminiAI from './GeminiAI';
 import HeroSection from './HeroSection';
 import HomeHeroSection from './HomeHeroSection';
@@ -18,11 +22,13 @@ import LoginButton from './LoginButton';
 import LoginForm from './LoginForm';
 import MapComponent from './MapComponent';
 import MapPageContent from './MapPageContent';
+import MarkedLocationAutocomplete from "./MarkedLocationAutocomplete";
 import Navbar from './Navbar';
 import Organizations from './Organizations';
 import PlaceAutocomplete from "./PlaceAutocomplete";
 import PriceCardList from './PriceCardList';
 import ProfileHeader from './ProfileHeader';
+import ProfileHeader2 from './ProfileHeader2';
 import SideImageSection from './SideImageSection';
 import SideNavBar from './SideNavBar';
 import SignUpButton from './SignUpButton';
@@ -38,8 +44,12 @@ export {
   ContactUs,
   CreateEventForm,
   Footer,
+  FormDatePickerMUI,
+  FormikPlaceAutocomplete,
   FormSelectComponent,
+  FormSelectMUI,
   FormTextComponent,
+  FormTimePickerMUI,
   GeminiAI,
   HeroSection,
   HomeHeroSection,
@@ -52,11 +62,13 @@ export {
   LoginForm,
   MapComponent, 
   MapPageContent,
+  MarkedLocationAutocomplete,
   Navbar,
   Organizations,
   PlaceAutocomplete, 
   PriceCardList,
-  ProfileHeader, 
+  ProfileHeader,
+  ProfileHeader2, 
   SideImageSection,
   SideNavBar,
   SignUpButton,
