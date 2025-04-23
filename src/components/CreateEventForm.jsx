@@ -1,7 +1,9 @@
-import { useState, useRef, useEffect } from 'react'
+import { useState, useEffect } from 'react'
 import { useImmer } from "use-immer";
 import { Formik, Form, Field, useFormikContext } from "formik";
 import { FormTextComponent, ImageUploadField, FormSelectMUI, FormDatePickerMUI, FormTimePickerMUI, MarkedLocationAutocomplete, FormikPlaceAutocomplete } from ".";
+import { Swiper, SwiperSlide } from 'swiper/react';
+import { Navigation } from "swiper/modules";
 import postEventSchema from '../schemas/postEventSchema';
 import { useDispatch } from 'react-redux';
 import { postEvent, uploadImagesInEvent } from '../features/eventSlice';
@@ -255,22 +257,27 @@ function LocationFormSection({ selectedLocationObj, setSelectedLocationObj, plac
 
   useEffect(() => {
 
-    if (!selectedLocationObj) {
+    if (selectedLocationObj) {
       autofillFieldList.forEach((fieldName) => {
-        setFieldValue(fieldName, "");
+        const nextValue = fieldNameToLocationProp[fieldName][fieldName];
+        // console.log(`${fieldName}: ${nextValue}`);
+        setFieldValue(fieldName, nextValue);
+        if (!touched[fieldName]) setFieldTouched(fieldName, true);
+
         setTimeout(() => { validateField(fieldName) }, 500);
-      })
+      });
+      setPlaceSelected(false); // setting place selected using 'Google's PlaceAutocomplete' as false
       return;
     }
 
-    autofillFieldList.forEach((fieldName) => {
-      const nextValue = fieldNameToLocationProp[fieldName][fieldName];
-      // console.log(`${fieldName}: ${nextValue}`);
-      setFieldValue(fieldName, nextValue);
-      if (!touched[fieldName]) setFieldTouched(fieldName, true);
+    if (placeSelected) return; // if google's autocomplete was used, then do not clear fields even it no location is selected by custom marked location autocomplete
 
+    // clear related fields as no location is selected using any autocomplete
+    autofillFieldList.forEach((fieldName) => {
+      setFieldValue(fieldName, "");
       setTimeout(() => { validateField(fieldName) }, 500);
     })
+    return;
 
   }, [selectedLocationObj]);
 
@@ -278,6 +285,9 @@ function LocationFormSection({ selectedLocationObj, setSelectedLocationObj, plac
     if (!placeSelected && !selectedLocationObj) {
       setFieldValue("latitude", "");
       setFieldValue("longitude", "");
+
+      if (!touched.latitude && touched.address) setFieldTouched("latitude", true);
+      if (!touched.latitude && touched.address) setFieldTouched("longitude", true);
 
       setTimeout(() => {
         validateField("latitude");
@@ -294,6 +304,7 @@ function LocationFormSection({ selectedLocationObj, setSelectedLocationObj, plac
     if (!selectedLocationObj && values.latitude && values.longitude) {
       getFormattedAddress(values.latitude, values.longitude, setFieldValue, "address");
       setPlaceSelected(true);
+      if (!touched.address) setFieldTouched("address", true);
     }
   }, [debouncedLat, debouncedLng]);
 
@@ -504,25 +515,150 @@ function SponsorsFormSection() {
 
 function ConfirmFormSection() {
 
+  const FieldPreview = ({ label, value }) => (
+    <div className="flex flex-col mb-3">
+      <span className="text-sm font-semibold text-gray-500">{label}</span>
+      <span className="text-base text-gray-800">{value ? value : "—"}</span>
+    </div>
+  );
 
+  const { values } = useFormikContext();
+
+  const shouldShowImagePreview =
+    values.eventPictures &&
+    values.eventPictures.length > 0 &&
+    values.eventPictures.length <= 3;
+
+  // Mapping fields to labels
+  const formFieldMap = {
+    name: "Name",
+    description: "Description",
+    eventStartDate: "Start Date",
+    eventEndDate: "End Date",
+    eventStartTime: "Start Time",
+    eventEndTime: "End Time",
+    address: "Address",
+    latitude: "Latitude",
+    longitude: "Longitude",
+    participantLimit: "Participant Limit",
+    acceptingSponsors: "Accepting Sponsors",
+    acceptingParticipants: "Accepting Participants",
+    targetPlantNumber: "Target Plant Number",
+    estimatedArea: "Estimated Area",
+    estimatedCost: "Estimated Cost",
+    totalAmountRaised: "Total Amount Raised",
+    space: "Space",
+    waterAvailability: "Water Availability"
+  };
+
+  const sections = [
+    {
+      name: "Basic",
+      fields: [
+        "eventPictures",
+        "name",
+        "description",
+        "eventStartDate",
+        "eventEndDate",
+        "eventStartTime",
+        "eventEndTime"
+      ]
+    },
+    {
+      name: "Location",
+      fields: [
+        "address",
+        "latitude",
+        "longitude",
+        "space",
+        "waterAvailability",
+        "estimatedArea",
+        "targetPlantNumber"
+      ]
+    },
+    {
+      name: "Participants",
+      fields: ["acceptingParticipants", "participantLimit"]
+    },
+    {
+      name: "Sponsors",
+      fields: ["acceptingSponsors", "estimatedCost", "totalAmountRaised"]
+    }
+  ];
 
   return (
-    <>
-      e
-    </>
-  )
+    <div className="flex flex-col gap-8 p-6 rounded-xl bg-gray-100 shadow-md">
+      <div className="text-2xl font-semibold text-gray-700">Event Preview</div>
+
+      {sections.map((section, index) => (
+        <div key={section.name}>
+          <div className="mb-2">
+            <h3 className="text-xl font-bold text-gray-800">{section.name}</h3>
+            <hr className="border-t border-gray-300 mt-2" />
+          </div>
+
+          <div className="mt-4">
+            {section.fields.map((field) => {
+              if (field === "eventPictures") {
+                return (
+                  shouldShowImagePreview && (
+                    <div key="eventPictures" className="mb-4">
+                      <p className="text-md font-medium text-gray-600 mb-2">
+                        Images
+                      </p>
+                      <Swiper
+                        modules={[Navigation]}
+                        spaceBetween={10}
+                        slidesPerView={2}
+                        navigation
+                        className="rounded-lg"
+                      >
+                        {values.eventPictures.map((file, index) => (
+                          <SwiperSlide key={index}>
+                            <img
+                              src={URL.createObjectURL(file)}
+                              alt={`Event Pic ${index + 1}`}
+                              className="h-40 w-full object-cover rounded-md shadow"
+                            />
+                          </SwiperSlide>
+                        ))}
+                      </Swiper>
+                    </div>
+                  )
+                );
+              }
+              else {
+                return (
+                  <FieldPreview
+                    key={field}
+                    label={formFieldMap[field] || field}
+                    value={values[field]}
+                  />
+                );
+              }
+            })}
+          </div>
+
+          {/* Add spacing after each section except the last */}
+          {index !== sections.length - 1 && (
+            <div className="mt-6 border-b border-gray-200" />
+          )}
+        </div>
+      ))}
+    </div>
+  );
 }
 
 
 // To-do:
 // Create a preview for the form details on ConfirmSection
 
-function CreateEventForm({ setCurrentView, setIsModalVisible }) {
+function CreateEventForm({ setIsModalVisible }) {
 
   const dispatch = useDispatch();
 
   const handleFormSubmit = async (values, { setSubmitting }) => {
-    const imageUrls = [...values.eventPictures]; // raw list of image URLs
+    const imageFiles = [...values.eventPictures]; // these should be File objects
 
     const postEventObj = {
       ...values,
@@ -537,7 +673,7 @@ function CreateEventForm({ setCurrentView, setIsModalVisible }) {
       acceptingSponsors: values.acceptingSponsors === "yes",
     };
 
-    // Remove unneeded fields
+    // Cleanup unused fields
     delete postEventObj.address;
     delete postEventObj.latitude;
     delete postEventObj.longitude;
@@ -545,17 +681,15 @@ function CreateEventForm({ setCurrentView, setIsModalVisible }) {
 
     try {
       const response = await dispatch(postEvent(postEventObj)).unwrap();
-      const { id: eventId } = response; // assuming response contains created event id
+      const { id: eventId } = response;
 
-      // Upload images only if non-empty
-      // Problem !!!
-      if (imageUrls.length > 0) {
-        await dispatch(
-          uploadImagesInEvent({
-            eventId,
-            imageUrls,
-          })
-        ).unwrap();
+      // If there are image files, upload them
+      if (imageFiles?.length > 0) {
+        const formData = new FormData();
+        imageFiles.forEach((file) => formData.append("images", file));
+        console.log(formData);
+
+        await dispatch(uploadImagesInEvent({ eventId, imageFiles: formData })).unwrap();
       }
 
       toast.success("Event Creation Successful");
@@ -568,7 +702,6 @@ function CreateEventForm({ setCurrentView, setIsModalVisible }) {
       setSubmitting(false);
     }
   };
-
 
   const [activeSectionIndex, setActiveSectionIndex] = useState(0);
   const [lastSectionVisited, setLastSectionVisited] = useState(false);
@@ -660,6 +793,7 @@ function CreateEventForm({ setCurrentView, setIsModalVisible }) {
 
       // console.log("Status of " + sectionStatesList[srcSectionIndex].sectionName + ": " + nextSrcStatus);
       // console.log(formik.touched);
+      // console.log(formik.values);
 
       const nextTargStatus = getSectionStatus(formik, sectionStatesList[targSectionIndex].formFieldIds);
       sectionStatesList[targSectionIndex].status = nextTargStatus == "Completed" ? nextTargStatus : "Active";
@@ -764,174 +898,3 @@ function CreateEventForm({ setCurrentView, setIsModalVisible }) {
 
 export default CreateEventForm
 
-
-// old code:
-// <APIProvider apiKey={import.meta.env.VITE_GMAP_API_KEY} libraries={["geometry"]}>
-//   <div className="flex mt-[10vh] justify-center w-full h-screen overflow-y-scroll">
-
-//     <Formik
-//       initialValues={{
-//         name: "",
-//         description: "",
-//         eventStartDate: "",
-//         eventEndDate: "",
-//         eventStartTime: "",
-//         eventEndTime: "",
-//         position: "",
-//         participantLimit: "",
-//         acceptingSponsors: false,
-//         acceptingParticipants: false,
-//         targetPlantNumber: "",
-//         estimatedArea: "",
-//         totalAmountRaised: "",
-//         space: "",
-//         waterAvailability: "",
-//       }}
-//       validationSchema={postEventSchema}
-//       onSubmit={handleFormSubmit}
-//     >
-//       {({ errors, touched, values, setFieldValue, setFieldTouched, formikProps }) => {
-
-//         console.log(errors)
-
-//         return (
-//           <Form
-//             className="flex flex-col gap-5 items-start justify-center pl-4 w-1/2 rounded-l-lg"
-//           >
-
-//             <PlaceAutocomplete
-//               isEventForm
-//               customInputRef={positionInputRef}
-//               setInputValue={(value) => setFieldValue("position", value)}
-//               customContainerStyle={{ width: "80%" }}
-//             >
-//               <div className={defaultContainerStyle}>
-//                 <label htmlFor="position">Address</label>
-//                 <div className="relative flex items-center">
-//                   <input
-//                     className={
-//                       defaultInputStyle + " w-full " +
-//                       ((touched.position && errors.position) ?
-//                         " border-red-600" : "")
-//                     }
-//                     id="position"
-//                     name="position"
-//                     type="text"
-//                     placeholder="Enter event location address"
-//                     ref={positionInputRef}
-//                     value={values.position}
-//                     onBlur={() => setFieldTouched("position", true)}
-//                     onChange={(e) => {
-//                       setFieldValue("position", e.target.value);
-//                       setShowClearIcon(e.target.value.length > 0);
-//                     }}
-//                   />
-//                   {showClearIcon &&
-//                     <div
-//                       className="h-3/4 absolute right-1 flex items-center px-2 rounded-r-lg text-[14px] cursor-pointer bg-white"
-//                       onClick={() => {
-//                         setShowClearIcon(false);
-//                         setFieldValue("position", "");
-//                       }}
-//                     >
-//                       <FontAwesomeIcon icon={faXmark} />
-//                     </div>
-//                   }
-//                 </div>
-//                 {(touched.position && errors.position) ?
-//                   <div className="text-red-600 text-sm">
-//                     {errors.position ? errors.position : "Select a location from suggestion list"}
-//                   </div>
-//                   : null
-//                 }
-//               </div>
-//             </PlaceAutocomplete>
-
-//             {formTextObjects.map(({ id, name, label, placeholder, type }) => (
-//               <div className="flex w-full flex-col items-start" key={label}>
-//                 <FormTextComponent
-//                   label={label}
-//                   containerStyleClasses={defaultContainerStyle}
-//                   inputStyleClasses={defaultInputStyle}
-//                   id={id}
-//                   name={name}
-//                   type={type}
-//                   isTextArea={type == "textarea"}
-//                   placeholder={placeholder ? placeholder : ""}
-//                   min={getDateLimit(type, false)}
-//                   max={getDateLimit(type, true)}
-//                 />
-//               </div>
-//             ))}
-
-//             {formSelectObjects.map(
-//               ({ id, name, label, defaultOptions }) => (
-//                 <div className="flex w-full flex-col items-start" key={label}>
-//                   <FormSelectComponent
-//                     label={label}
-//                     id={id}
-//                     name={name}
-//                     containerStyleClasses={defaultContainerStyle}
-//                     inputStyleClasses={defaultInputStyle}
-//                   >
-//                     <option value="">{defaultOptions[0]}</option>
-
-//                     {defaultOptions?.slice(1).map((option) => (
-//                       <option key={option} value={option}>
-//                         {option}
-//                       </option>
-//                     ))}
-//                   </FormSelectComponent>
-//                 </div>
-//               )
-//             )}
-
-//             {
-//               formCheckBoxObjects.map(
-//                 ({ id, name, label }) => (
-//                   <div className="relative w-full" key={id}>
-//                     <label className="flex items-center gap-2" htmlFor={id}>
-//                       <input
-//                         className="appearance-none w-6 h-6 border-2 border-teal-300 rounded-md checked:border-transparent checked:bg-teal-400 cursor-pointer"
-//                         id={id}
-//                         name={name}
-//                         type="checkbox"
-//                         checked={values[id]}
-//                         onBlur={() => setFieldTouched(id, true)}
-//                         onChange={() => setFieldValue(id, !values[id])}
-//                       />
-//                       {values[id] &&
-//                         <span className="absolute left-1 text-lg pointer-events-none text-white font-extrabold">
-//                           ✓
-//                         </span>
-//                       }
-//                       <span>{label}</span>
-//                     </label>
-//                   </div>
-//                 )
-//               )
-//             }
-
-//             <div className="flex flex-col gap-2 p-4 justify-center items-center w-[80%]">
-//               <button
-//                 className="px-[15%] py-2 rounded-lg bg-gradient-120 shadow-md from-[#83E2C1] from-50% to-[#1566E7] to-100% hover:from-[#1566E7] hover:to-[#83E2C1] text-white"
-//                 type="submit"
-//               >
-//                 Save
-//               </button>
-//               <span
-//                 className="text-red-600 text-center cursor-pointer hover:underline"
-//                 onClick={() => {
-//                   setCurrentView("event-search");
-//                 }}
-//               >
-//                 Cancel
-//               </span>
-//             </div>
-//           </Form>
-//         )
-//       }
-//       }
-//     </Formik>
-//   </div>
-// </APIProvider>

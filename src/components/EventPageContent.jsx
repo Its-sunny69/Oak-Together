@@ -229,7 +229,7 @@ function EventPageContent() {
   const eventFormDisplay = (
     <div className="relative flex flex-col items-start gap-1 w-full">
       
-      <CreateEventForm setCurrentView={setCurrentView} setIsModalVisible={setIsModalVisible} />
+      <CreateEventForm setIsModalVisible={setIsModalVisible} />
 
       {isModalVisible && (
         <div className="absolute inset-0 backdrop-blur-[2px] bg-gray-600/50 z-10 flex justify-center items-center">
