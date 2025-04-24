@@ -60,7 +60,7 @@ const geminiSlice = createSlice({
   name: "gemini",
   initialState: {
     geminiResponse: "",
-    intelligenceResponse: "",
+    intelligenceResponse: null,
   },
   reducers: {},
   extraReducers: (builder) => {
@@ -69,7 +69,27 @@ const geminiSlice = createSlice({
         state.geminiResponse = action.payload;
       })
       .addCase(intelligenceApi.fulfilled, (state, action) => {
-        state.intelligenceResponse = action.payload;
+        const payload = action.payload;
+
+        const transformedPayload = {
+          id: payload.id,
+          lastModified: payload.lastModified,
+          fertilizerRecommendations: payload.fertilizerRecommendations,
+          generalInfo: [
+            { plantingSeason: payload.plantingSeason },
+            { generalCareTips: payload.generalCareTips },
+          ],
+          benefits: [
+            { environmentalBenefit: payload.environmentalBenefit },
+            { ecologicalBenefit: payload.ecologicalBenefit },
+            { communityBenefit: payload.communityBenefit },
+            { economicBenefit: payload.economicBenefit },
+          ],
+        };
+
+        state.intelligenceResponse = transformedPayload;
+
+        console.log("getIntelligenceByEventId", state.intelligenceResponse);
       });
   },
 });

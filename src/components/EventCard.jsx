@@ -93,7 +93,7 @@ function EventCard({ event }) {
             className="bg-[#60D6D9] hover:bg-white hover:outline outline-1 outline-[#60D6D9] px-4 py-2 rounded-lg text-white hover:text-[#60D6D9] font-bold"
             onClick={handleOnRegister}
           >
-            Register
+            View Details
           </button>
         )}
       </div>

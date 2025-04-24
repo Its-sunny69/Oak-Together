@@ -9,6 +9,7 @@ import {
 } from "../features/eventSlice";
 import KeyboardArrowDownRoundedIcon from "@mui/icons-material/KeyboardArrowDownRounded";
 import {
+  LoadingAnimation,
   ProfileImg,
   Trophy2Png,
   Trophy3Png,
@@ -30,6 +31,7 @@ import {
 } from "@fortawesome/free-solid-svg-icons";
 import { useNavigate } from "react-router-dom";
 import toast from "react-hot-toast";
+import { DotLottieReact } from "@lottiefiles/dotlottie-react";
 
 function EventOverview({ eventId }) {
   const [readMore, setReadMore] = useState(false);
@@ -162,10 +164,6 @@ function EventOverview({ eventId }) {
       }
     }
   };
-
-  // useEffect(() => {
-  //   renderButton();
-  // }, [detail, userData]);
 
   return (
     <div className="my-10">
@@ -415,7 +413,14 @@ function EventOverview({ eventId }) {
           </div>
         </>
       ) : (
-        "Loading"
+        <div className="min-h-64 flex items-center justify-center font-semibold">
+          <DotLottieReact
+            src={LoadingAnimation}
+            loop
+            autoplay
+            style={{ width: 140, height: 140 }}
+          />
+        </div>
       )}
     </div>
   );

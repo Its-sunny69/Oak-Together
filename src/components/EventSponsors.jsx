@@ -2,6 +2,7 @@ import React, { useEffect } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { getSponsorsOfEventById } from "../features/eventSlice";
 import { LoadingAnimation, ProfileImg } from "../assets";
+import { DotLottieReact } from "@lottiefiles/dotlottie-react";
 
 function EventSponsors({ eventId }) {
   const sponsors = useSelector((state) => state.event.currentEvent.sponsors);
@@ -44,14 +45,12 @@ function EventSponsors({ eventId }) {
         )
       ) : (
         <div className="min-h-64 flex items-center justify-center font-semibold">
-          <lottie-player
+          <DotLottieReact
             src={LoadingAnimation}
-            background="transparent"
-            speed="1"
             loop
             autoplay
-            style={{ width: "300px", height: "300px" }}
-          ></lottie-player>
+            style={{ width: 140, height: 140 }}
+          />
         </div>
       )}
     </div>
