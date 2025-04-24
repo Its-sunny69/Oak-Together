@@ -1,7 +1,7 @@
 import React, { useEffect } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { getSponsorsOfEventById } from "../features/eventSlice";
-import { ProfileImg } from "../assets";
+import { LoadingAnimation, ProfileImg } from "../assets";
 
 function EventSponsors({ eventId }) {
   const sponsors = useSelector((state) => state.event.currentEvent.sponsors);
@@ -38,10 +38,21 @@ function EventSponsors({ eventId }) {
             </div>
           ))
         ) : (
-          <div className="min-h-64 flex items-center justify-center font-semibold">No Data Available</div>
+          <div className="min-h-64 flex items-center justify-center font-semibold">
+            No Data Available
+          </div>
         )
       ) : (
-        <div className="min-h-64 flex items-center justify-center font-semibold">Loading</div>
+        <div className="min-h-64 flex items-center justify-center font-semibold">
+          <lottie-player
+            src={LoadingAnimation}
+            background="transparent"
+            speed="1"
+            loop
+            autoplay
+            style={{ width: "300px", height: "300px" }}
+          ></lottie-player>
+        </div>
       )}
     </div>
   );
