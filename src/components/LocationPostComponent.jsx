@@ -1,7 +1,7 @@
 import { useState, useRef, useEffect } from "react";
 import { Formik, Form,  } from "formik";
 import { postLocationSchema } from "../schemas";
-import { FormTextComponent, FormSelectComponent, PlaceAutocomplete, FormikPlaceAutocomplete } from ".";
+import { FormTextComponent, FormSelectComponent, FormikPlaceAutocomplete } from ".";
 import toast from "react-hot-toast";
 import { useDispatch } from "react-redux";
 import { postLocation } from "../features/locationSlice";
@@ -95,7 +95,7 @@ function LocationPostComponent({ setShowPostInterface, setIsModalVisible, locati
 
   return (
     <div className="w-[49%] rounded-xl shadow-[rgba(96,214,217,0.2)_0px_0px_10px_3px] relative">
-      <h2 className="font-bold flex justify-between text-lg mb-4 px-3 pt-2 bg-white absolute top-0 w-full">
+      <h2 className="font-bold flex rounded-t-xl justify-between text-lg mb-4 px-3 pt-2 bg-white absolute top-0 w-full">
         Mark a new location
         <span
           className="cursor-pointer text-sm"
@@ -126,6 +126,7 @@ function LocationPostComponent({ setShowPostInterface, setIsModalVisible, locati
               if (locationCoords) {
                 // Using reverse geocoding API here to fetch address
                 getFormattedAddress(locationCoords.lat, locationCoords.lng, setFieldValue, "address");
+                setLocationSelected(true);
               }
             }, [locationCoords, setFieldValue]);
 

@@ -5,8 +5,8 @@ import { LocationDetailComponent, LocationPostComponent, PlaceAutocomplete } fro
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faMagnifyingGlass, faLocationDot } from "@fortawesome/free-solid-svg-icons";
 import { faCircleXmark } from "@fortawesome/free-regular-svg-icons";
-import { getLocationsUsingFilter } from '../features/locationSlice';
-import { getEventsByFilter } from "../features/eventSlice";
+import { getLocationsByFilterPagination } from '../features/locationSlice';
+import { getEventsByFilterPagination } from "../features/eventSlice";
 import { useDispatch, useSelector } from 'react-redux';
 import { MarkerClusterer } from '@googlemaps/markerclusterer';
 import Geohash from "ngeohash";
@@ -335,7 +335,19 @@ function MapComponent({ currLocationCoords, setIsModalVisible }) {
   const [markerCoordinates, setMarkerCoordinates] = useState({
     plantedCoordinates: [], barrenCoordinates: [], eventCoordinates: []
   });
+
   const dispatch = useDispatch();
+  const {
+    locationsByFilterPagination: locationList,
+    totalItems: totalLocationItems
+  } = useSelector((state) => state.location);
+  const {
+    eventsByFilterPagination: eventList,
+    totalItems: totalEventItems,
+  } = useSelector((state) => state.event);
+  const { user: userData } = useSelector((state) => state.user);
+
+  const userIsAdmin = userData?.role == "ADMIN";
 
   const setAllMarkers = (mapInstance) => {
     const mapCenter = mapInstance.getCenter();
@@ -344,68 +356,77 @@ function MapComponent({ currLocationCoords, setIsModalVisible }) {
     const mapNE = mapInstance.getBounds().getNorthEast();
     const radius = google.maps.geometry.spherical.computeDistanceBetween(mapCenter, mapNE);
 
-    const filterText =
-      centerCoords ?
-        `entityStatus=ACTIVE&latitudeCenter=${centerCoords.lat}&longitudeCenter=${centerCoords.lng}&radius=${radius}`
-        : "";
+    const filterByDistanceObj = {
+      entityStatus: "ACTIVE",
+      radius: radius,
+      latitudeCenter: centerCoords.lat,
+      longitudeCenter: centerCoords.lng,
+    }
 
-    // console.log(filterText);
-    dispatch(getLocationsUsingFilter(filterText)).unwrap()
-      .then((response) => {
-        const plantedCoords = [], barrenCoords = [];
+    const paramsObjLocation = {
+      page: 0,
+      size: Math.max(totalLocationItems, 5),
+      filterObj: filterByDistanceObj
+    }
 
-        response.forEach((locationObj) => {
-          const coordinateObj = {
-            id: locationObj.id,
-            lat: locationObj.position.locations.latitude,
-            lng: locationObj.position.locations.longitude,
-            type: locationObj.type.toLowerCase()
-          };
+    const paramsObjEvent = {
+      page: 0,
+      size: Math.max(totalEventItems, 5),
+      filterObj: {...filterByDistanceObj, approvalStatus: userIsAdmin? "": "APPROVED"}
+    }
 
-          switch (coordinateObj.type) {
-            case "planted":
-              plantedCoords.push(coordinateObj);
-              break;
-            case "barren":
-              barrenCoords.push(coordinateObj);
-              break;
-          }
-
-        });
-
-        setMarkerCoordinates((prevState) => {
-          const isSame =
-            JSON.stringify(prevState.plantedCoordinates) === JSON.stringify(plantedCoords) &&
-            JSON.stringify(prevState.barrenCoordinates) === JSON.stringify(barrenCoords);
-
-          if (isSame) return prevState; // Prevent unnecessary updates
-          return { ...prevState, plantedCoordinates: plantedCoords, barrenCoordinates: barrenCoords };
-        });
-
-      })
+    dispatch(getLocationsByFilterPagination(paramsObjLocation)).unwrap()
       .catch((error) => console.log(error));
 
-    dispatch(getEventsByFilter(filterText)).unwrap()
-      .then((response) => {
-        const eventCoords = [];
-
-        response.forEach((eventObj) => {
-          const coordinateObj = {
-            id: eventObj.id,
-            lat: eventObj.position.locations.latitude,
-            lng: eventObj.position.locations.longitude,
-            type: "event"
-          };
-
-          eventCoords.push(coordinateObj);
-        });
-
-        setMarkerCoordinates({
-          ...markerCoordinates,
-          eventCoordinates: eventCoords
-        })
-      })
+    dispatch(getEventsByFilterPagination(paramsObjEvent)).unwrap()
       .catch((error) => console.log(error));
+
+    const plantedCoords = [], barrenCoords = [], eventCoords = [];
+
+    locationList?.forEach((locationObj) => {
+      const coordinateObj = {
+        id: locationObj.id,
+        lat: locationObj.position.locations.latitude,
+        lng: locationObj.position.locations.longitude,
+        type: locationObj.type.toLowerCase()
+      };
+
+      switch (coordinateObj.type) {
+        case "planted":
+          plantedCoords.push(coordinateObj);
+          break;
+        case "barren":
+          barrenCoords.push(coordinateObj);
+          break;
+      }
+    });
+
+    eventList?.forEach((eventObj) => {
+      const coordinateObj = {
+        id: eventObj.id,
+        lat: eventObj.position.locations.latitude,
+        lng: eventObj.position.locations.longitude,
+        type: "event"
+      };
+
+      eventCoords.push(coordinateObj);
+    });
+
+    setMarkerCoordinates((prevState) => {
+      if(!locationList || !eventList) return prevState;
+      
+      const isSame =
+        JSON.stringify(prevState.plantedCoordinates) === JSON.stringify(plantedCoords) &&
+        JSON.stringify(prevState.barrenCoordinates) === JSON.stringify(barrenCoords) &&
+        JSON.stringify(prevState.eventCoordinates) === JSON.stringify(eventCoords)
+
+      if (isSame) return prevState; // Prevent unnecessary updates
+      return {
+        plantedCoordinates: plantedCoords,
+        barrenCoordinates: barrenCoords,
+        eventCoordinates: eventCoords
+      };
+    });
   }
 
   return (
@@ -435,8 +456,8 @@ function MapComponent({ currLocationCoords, setIsModalVisible }) {
             defaultCenter={currLocationCoords}
             defaultZoom={17}
             minZoom={3}
-            streetViewControlOptions={{  position: ControlPosition.RIGHT_CENTER  }}
-            cameraControlOptions={{  position: ControlPosition.RIGHT_TOP  }}
+            streetViewControlOptions={{ position: ControlPosition.RIGHT_CENTER }}
+            cameraControlOptions={{ position: ControlPosition.RIGHT_TOP }}
             mapId={import.meta.env.VITE_GMAP_MAP_STYLE_ID}
             draggableCursor={showPostInterface ? "default" : "grab"}
             onClick={(e) => {

@@ -101,8 +101,10 @@ export const getLocationsByFilterPagination = createAsyncThunk(
       if (paramsObj.page !== undefined) queryParams.append("page", paramsObj.page);
       if (paramsObj.size) queryParams.append("size", paramsObj.size);
 
-      if (queryParams.toString()) {
-        url += `&${queryParams.toString()}`;
+      // Append the constructed query string to the URL
+      const urlString = queryParams.toString();
+      if (urlString) {
+        url += `&${urlString}`;
       }
 
       console.log("Final Request URL:", url);

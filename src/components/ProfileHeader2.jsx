@@ -6,7 +6,7 @@ import { fetchUserById } from "../features/userSlice";
 const userId = 202;
 const isSponsor = false;
 
-function ProfileHeader2({ children }) {
+function ProfileHeader2({ children, absolutePositionObj }) {
 
     const dispatch = useDispatch();
     const { user: userData } = useSelector((state) => state.user);
@@ -37,7 +37,8 @@ function ProfileHeader2({ children }) {
             </div>
 
             <div
-                className="absolute bottom-0 right-6 left-6 h-[18vh] py-2 pl-5 pr-8 rounded-xl bg-white shadow-[rgba(96,214,217,0.2)_0px_0px_10px_3px] flex justify-between items-center"
+                className="absolute top-40 right-6 left-6 min-h-[18vh] py-2 pl-5 pr-8 rounded-xl bg-white shadow-[rgba(96,214,217,0.2)_0px_0px_10px_3px] flex justify-between items-center"
+                style={absolutePositionObj}
             >
                 {children}
             </div>

@@ -10,7 +10,6 @@ import FormSelectComponent from './FormSelectComponent';
 import FormSelectMUI from './FormSelectMUI';
 import FormTextComponent from './FormTextComponent';
 import FormTimePickerMUI from './FormTimePickerMUI';
-import GeminiAI from './GeminiAI';
 import HeroSection from './HeroSection';
 import HomeHeroSection from './HomeHeroSection';
 import HomeListSection from './HomeListSection';
@@ -50,7 +49,6 @@ export {
   FormSelectMUI,
   FormTextComponent,
   FormTimePickerMUI,
-  GeminiAI,
   HeroSection,
   HomeHeroSection,
   HomeListSection,

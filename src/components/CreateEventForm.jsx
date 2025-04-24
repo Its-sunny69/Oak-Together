@@ -9,7 +9,7 @@ import { useDispatch } from 'react-redux';
 import { postEvent, uploadImagesInEvent } from '../features/eventSlice';
 import toast from 'react-hot-toast';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faCircleCheck, faCircleXmark, faXmark } from '@fortawesome/free-solid-svg-icons';
+import { faCircleCheck, faCircleXmark } from '@fortawesome/free-solid-svg-icons';
 import { APIProvider } from '@vis.gl/react-google-maps'
 import { faCircle, faCircleDot, faCircleQuestion } from '@fortawesome/free-regular-svg-icons';
 import { GalleryIcon } from '../assets';

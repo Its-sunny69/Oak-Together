@@ -3,18 +3,13 @@ import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
 const apiUrl = import.meta.env.VITE_SERVER_API_URL;
 const userId = 202;
 
+// Gemini GET API
 export const geminiApi = createAsyncThunk(
   "gemini/response",
   async (params, { rejectWithValue }) => {
     try {
       const response = await fetch(
-        `${apiUrl}/user-profiles/user-id/${userId}/intel/prompt?${params}`,
-        {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-        }
+        `${apiUrl}/user-profiles/user-id/${userId}/intel/prompt?${params}`
       );
 
       if (!response.ok) {
@@ -34,18 +29,13 @@ export const geminiApi = createAsyncThunk(
   }
 );
 
+// Intelligence GET API
 export const intelligenceApi = createAsyncThunk(
   "intelligence/response",
   async (params, { rejectWithValue }) => {
     try {
       const response = await fetch(
-        `${apiUrl}/user-profiles/user-id/${userId}/intel/position?${params}`,
-        {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-        }
+        `${apiUrl}/user-profiles/user-id/${userId}/intel/position?${params}`
       );
 
       if (!response.ok) {
@@ -56,7 +46,7 @@ export const intelligenceApi = createAsyncThunk(
       }
 
       const data = await response.json();
-      console.log("gemini res:", data);
+      console.log("intel res:", data);
       return data;
     } catch (error) {
       console.error(error);
@@ -75,10 +65,10 @@ const geminiSlice = createSlice({
   extraReducers: (builder) => {
     builder
       .addCase(geminiApi.fulfilled, (state, action) => {
-        state.output = action.payload;
+        state.geminiResponse = action.payload;
       })
       .addCase(intelligenceApi.fulfilled, (state, action) => {
-        state.output = action.payload;
+        state.intelligenceResponse = action.payload;
       });
   },
 });

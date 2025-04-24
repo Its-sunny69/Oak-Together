@@ -90,6 +90,8 @@ function LocationDetailComponent({ selectedLocationId, setSelectedLocationId, se
 
     function colorCodedAQI(aqi) {
 
+        if(aqi == null) return null;
+
         const colors = ["green", "yellow", "orange", "red", "purple", "maroon"];
         const limits = [50, 100, 150, 200, 300]
         let selectedIndex = 0;
@@ -149,22 +151,26 @@ function LocationDetailComponent({ selectedLocationId, setSelectedLocationId, se
     const descriptiveDetailsList = [
         { imageSrc: HandWithPenPng, title: "Description", content: descriptionContent },
         { imageSrc: LocationInfoIcon, title: "Location Info", content: locDetailsContent },
-        { imageSrc: SeasonPng, title: "AQI", content: AQIContent }
+        !eventSelected && { imageSrc: SeasonPng, title: "AQI", content: AQIContent }
     ]
 
     let descriptiveDetailsId = 0;
     const descriptiveDetailsRow = (
         <div className="flex p-4 gap-3 overflow-x-scroll">
-            {descriptiveDetailsList.map(({ imageSrc, title, content }) =>
-            (
-                <DescriptiveDetailsBox
-                    key={descriptiveDetailsId++}
-                    imageSrc={imageSrc}
-                    title={title}
-                    content={content}
-                />
-            )
-            )}
+            {descriptiveDetailsList.map((detailObj) => {
+
+                if(!detailObj) return;
+
+                const { imageSrc, title, content } = detailObj;
+                return (
+                    <DescriptiveDetailsBox
+                        key={descriptiveDetailsId++}
+                        imageSrc={imageSrc}
+                        title={title}
+                        content={content}
+                    />
+                )
+            })}
         </div>
     )
 
@@ -192,7 +198,7 @@ function LocationDetailComponent({ selectedLocationId, setSelectedLocationId, se
             {shortDetailsRow}
             {descriptiveDetailsRow}
 
-            {!eventSelected &&
+            {!eventSelected && locationById.type == "PLANTED" &&
                 <div className="flex w-full justify-end">
                     <button
                         className="px-6 py-2 rounded-lg bg-gradient-120 shadow-md from-[#60D6D9] from-50% to-[#1566E7] to-100% hover:from-[#1566E7] hover:to-[#60D6D9] text-white font-medium flex justify-center items-center active:scale-95 transition-all"

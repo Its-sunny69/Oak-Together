@@ -112,8 +112,9 @@ export const getEventsByFilterPagination = createAsyncThunk(
       if (paramsObj.size) queryParams.append("size", paramsObj.size);
 
       // Append the constructed query string to the URL
-      if (queryParams.toString()) {
-        url += `&${queryParams.toString()}`;
+      const urlString = queryParams.toString();
+      if (urlString) {
+        url += `&${urlString}`;
       }
 
       console.log("Final Request URL:", url);
