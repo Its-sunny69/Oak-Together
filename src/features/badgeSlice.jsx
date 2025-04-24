@@ -1,12 +1,12 @@
 import { createAsyncThunk, createSlice } from "@reduxjs/toolkit";
 
 const apiUrl = import.meta.env.VITE_SERVER_API_URL; // Replace with actual
-const userId = 202; // Replace or dynamically fetch
 
 // Thunk: Get All Badges
 export const getAllBadges = createAsyncThunk(
   "badge/getAllBadges",
-  async (_, { rejectWithValue }) => {
+  async (_, { rejectWithValue, getState }) => {
+    const userId = getState().user.user;
     try {
       const response = await fetch(
         `${apiUrl}/user-profiles/user-id/${userId}/badges`
@@ -29,11 +29,11 @@ export const getAllBadges = createAsyncThunk(
   }
 );
 
-
 // Thunk: Get All Badges By Filter (Separate slice)
 export const getAllBadgesByFilter = createAsyncThunk(
   "badge/getAllBadgesByFilter",
-  async (pageSize, { rejectWithValue }) => {
+  async (pageSize, { rejectWithValue, getState }) => {
+    const userId = getState().user.user;
     try {
       const response = await fetch(
         `${apiUrl}/user-profiles/user-id/${userId}/badges/filter?sortBy=id&&pageSize=${pageSize}`
@@ -59,7 +59,8 @@ export const getAllBadgesByFilter = createAsyncThunk(
 // Thunk: Get Badges By Filter + Pagination
 export const getBadgesByFilter = createAsyncThunk(
   "badge/getBadgesByFilter",
-  async (queryParams, { rejectWithValue }) => {
+  async (queryParams, { rejectWithValue, getState }) => {
+    const userId = getState().user.user;
     try {
       const response = await fetch(
         `${apiUrl}/user-profiles/user-id/${userId}/badges/filter?${queryParams}`
@@ -85,7 +86,8 @@ export const getBadgesByFilter = createAsyncThunk(
 // Thunk: Get Badge By ID
 export const getBadgeById = createAsyncThunk(
   "badge/getBadgeById",
-  async ({ userId, badgeId }, { rejectWithValue }) => {
+  async (badgeId, { rejectWithValue, getState }) => {
+    const userId = getState().user.user;
     try {
       const response = await fetch(
         `${apiUrl}/user-profiles/user-id/${userId}/badges/badge-id/${badgeId}`
@@ -108,7 +110,6 @@ export const getBadgeById = createAsyncThunk(
   }
 );
 
-
 // Badge Slice
 const badgeSlice = createSlice({
   name: "badge",
@@ -128,7 +129,7 @@ const badgeSlice = createSlice({
       })
       .addCase(getAllBadgesByFilter.fulfilled, (state, action) => {
         state.allBadgesByFilter = action.payload.content || action.payload;
-      })      
+      })
       .addCase(getBadgesByFilter.fulfilled, (state, action) => {
         state.badgesByFilter = action.payload.content || action.payload;
         state.totalPages = action.payload.page?.totalPages || 0;
@@ -137,7 +138,7 @@ const badgeSlice = createSlice({
       .addCase(getBadgeById.fulfilled, (state, action) => {
         console.log(action.payload);
         state.badgeById = action.payload;
-      });      
+      });
   },
 });
 

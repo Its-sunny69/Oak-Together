@@ -42,6 +42,8 @@ import LocationInfoIcon from "./location_info.png";
 import GCPIconPng from "./gcp.png";
 import DefaultBadge from "./default_badge.png";
 import Trophy2Png from "./trophy2.png";
+import Trophy3Png from "./Trophy3.png";
+import Trophy4Png from "./trophy4.png";
 import CommonBadgeBG from "./common_badge_bg.png";
 import RareBadgeBG from "./rare_badge_bg.png";
 import EpicBadgeBG from "./epic_badge_bg.png";
@@ -49,7 +51,10 @@ import LegendaryBadgeBG from "./legendary_badge_bg.png";
 import SampleEventImg from "./sample_event_img.png"
 import EmptyBadgeImg from "./empty_badge_img.png";
 import SampleCertificateImg from "./sample_certificate_img.png"
-import ScrollTestPng from "./scroll test1.png"
+import ScrollTest1Png from "./scroll test1.png"
+import ScrollTest2Png from "./scroll test2.png"
+import ScrollTest3Png from "./scroll test3.png"
+import FinancePng from "./finance.png"
 
 export {
   LogoPng,
@@ -95,7 +100,11 @@ export {
   GCPIconPng,
   DefaultBadge,
   Trophy2Png,
-  ScrollTestPng,
+  Trophy3Png,
+  Trophy4Png,
+  ScrollTest1Png,
+  ScrollTest2Png,
+  ScrollTest3Png,
   CommonBadgeBG,
   RareBadgeBG,
   EpicBadgeBG,
@@ -104,4 +113,5 @@ export {
   EmptyBadgeImg,
   SampleCertificateImg,
   GradientPeople,
+  FinancePng,
 };

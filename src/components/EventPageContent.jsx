@@ -10,23 +10,21 @@ import { FolderCopyRounded } from "@mui/icons-material";
 import { faArrowLeft, faArrowRight } from "@fortawesome/free-solid-svg-icons";
 import CreateEventForm from "./CreateEventForm";
 import MessageModal from "./MessageModal";
+import { useNavigate } from "react-router-dom";
 
 function EventPageContent() {
-
   const [isModalVisible, setIsModalVisible] = useState(false);
   const [currentView, setCurrentView] = useState("event-search");
-  
+
   const [selectedEventId, setSelectedEventId] = useState(null);
 
-  const handleRegisterClick = (nextEventId) => {
-    setCurrentView("event-details");
-    setSelectedEventId(nextEventId);
-  }
+  const navigate = useNavigate();
 
   const dispatch = useDispatch();
   const { eventsByFilterPagination, totalPages, totalItems } = useSelector(
     (state) => state.event
   );
+  const userData = useSelector((state) => state.user.userData);
 
   const [sortBy, setSortBy] = useState("eventStartDate");
   const [isSearchInputValid, setIsSearchInputValid] = useState(true);
@@ -54,6 +52,7 @@ function EventPageContent() {
       estimatedCostLessThan: "",
       estimatedAreaMoreThan: "",
       estimatedAreaLessThan: "",
+      approvalStatus: userData?.role !== "ADMIN" ? "APPROVED" : "",
     },
   });
 
@@ -70,7 +69,6 @@ function EventPageContent() {
       setIsSearchInputValid(true);
       dispatch(getEventsByFilterPagination(paramsObj));
     }
-
   }, [paramsObj, dispatch]);
 
   useEffect(() => {
@@ -136,14 +134,13 @@ function EventPageContent() {
                   onChange={(e) => {
                     isSearchInputValid
                       ? setParamsObj((prev) => ({
-                        ...prev,
-                        size: Number(e.target.value),
-                        page: 0,
-                      }))
+                          ...prev,
+                          size: Number(e.target.value),
+                          page: 0,
+                        }))
                       : "";
                   }}
                 >
-
                   {eventPerPage.map((option, index) => (
                     <option
                       key={index}
@@ -183,12 +180,14 @@ function EventPageContent() {
             marginPagesDisplayed={2}
             pageCount={Math.max(totalPages, 1)}
             previousLabel={<FontAwesomeIcon icon={faArrowLeft} />}
-            previousClassName={`page-item ${paramsObj.page === 0 ? "opacity-50 pointer-events-none" : ""
-              }`}
-            nextClassName={`page-item ${paramsObj.page === totalPages - 1
-              ? "opacity-50 pointer-events-none"
-              : ""
-              }`}
+            previousClassName={`page-item ${
+              paramsObj.page === 0 ? "opacity-50 pointer-events-none" : ""
+            }`}
+            nextClassName={`page-item ${
+              paramsObj.page === totalPages - 1
+                ? "opacity-50 pointer-events-none"
+                : ""
+            }`}
             pageLinkClassName="page-link"
             previousLinkClassName="page-link"
             nextLinkClassName="page-link"
@@ -204,11 +203,7 @@ function EventPageContent() {
           {/* Event List */}
           <div>
             {eventsByFilterPagination?.map((event) => (
-              <EventCard
-                key={event.id}
-                event={event}
-                onRegisterClick={handleRegisterClick}
-              />
+              <EventCard key={event.id} event={event} />
             ))}
           </div>
         </>
@@ -218,7 +213,7 @@ function EventPageContent() {
 
       <button
         className="px-6 py-2 ml-4 rounded-lg bg-gradient-120 shadow-md from-[#60D6D9] from-50% to-[#1566E7] to-100% hover:from-[#1566E7] hover:to-[#60D6D9] text-white font-medium flex justify-center items-center gap-2 active:scale-95 transition-all fixed bottom-4 right-4"
-        onClick={() => setCurrentView('create-event-form')}
+        onClick={() => setCurrentView("create-event-form")}
       >
         Create Event
       </button>
@@ -239,7 +234,10 @@ function EventPageContent() {
           Close
         </div>
       </h2>
-      <CreateEventForm setCurrentView={setCurrentView} setIsModalVisible={setIsModalVisible} />
+      <CreateEventForm
+        setCurrentView={setCurrentView}
+        setIsModalVisible={setIsModalVisible}
+      />
 
       {isModalVisible && (
         <div className="absolute inset-0 backdrop-blur-[2px] bg-gray-600/50 z-10 flex justify-center items-center">
@@ -254,27 +252,18 @@ function EventPageContent() {
     </div>
   );
 
-  const eventDetailsDisplay = (
-    <>
-
-    </>
-  );
+  const eventDetailsDisplay = <></>;
 
   const viewMap = {
     "event-search": eventSearchDisplay,
     "create-event-form": eventFormDisplay,
-    "event-details": eventDetailsDisplay
-  }
+    "event-details": eventDetailsDisplay,
+  };
 
   return (
     <div className="pt-6 pr-4 w-full">
       <ProfileHeader />
-      <div className="pt-4 w-full">
-
-        {viewMap[currentView]}
-
-        
-      </div>
+      <div className="pt-4 w-full">{viewMap[currentView]}</div>
     </div>
   );
 }

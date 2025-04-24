@@ -65,7 +65,13 @@ export const loginUser = createAsyncThunk(
 
       if (!response.ok) throw new Error("Login failed");
 
-      return await response.json();
+      const data = await response.json();
+
+      if (!localStorage.getItem("userId")) {
+        localStorage.setItem("userId", data.id);
+      }
+
+      return data;
     } catch (error) {
       return rejectWithValue(error.message);
     }
@@ -172,13 +178,13 @@ export const setPrimaryBadge = createAsyncThunk(
   }
 );
 
-
 const userSlice = createSlice({
   name: "users",
   initialState: {
     users: [],
     token: "",
-    user: null,
+    user: localStorage.getItem("userId") || null,
+    userData: null,
     status: "idle",
     error: null,
   },
@@ -198,34 +204,39 @@ const userSlice = createSlice({
         state.error = action.payload;
       })
       .addCase(fetchUserById.fulfilled, (state, action) => {
-        state.user = action.payload;
+        state.user = action.payload.id;
+        state.userData = action.payload;
       })
       .addCase(loginUser.fulfilled, (state, action) => {
-        state.user = action.payload;
+        state.user = action.payload.id;
+        state.userData = action.payload;
+
+        console.log(state.user);
       })
       .addCase(registerUser.fulfilled, (state, action) => {
-        state.user = action.payload;
+        state.user = action.payload.id;
+        state.userData = action.payload;
         state.users.push(action.payload);
       })
       .addCase(uploadProfilePicture.fulfilled, (state, action) => {
-        state.user = { 
-          ...state.user, 
-          profilePicture: action.payload.profilePicture 
+        state.userData = {
+          ...state.user,
+          profilePicture: action.payload.profilePicture,
         };
       })
       .addCase(deactivateUser.fulfilled, (state) => {
         state.user = null;
+        state.userData = null;
       })
       .addCase(updateUserById.fulfilled, (state, action) => {
-        state.user = action.payload;
+        state.userData = action.payload;
       })
       .addCase(setPrimaryBadge.fulfilled, (state, action) => {
-        state.user = {
+        state.userData = {
           ...state.user,
-          primaryBadge: action.payload.primaryBadge, 
+          primaryBadge: action.payload.primaryBadge,
         };
-      })
-      ;
+      });
   },
 });
 

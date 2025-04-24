@@ -1,11 +1,13 @@
 import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
 
 const apiUrl = import.meta.env.VITE_SERVER_API_URL;
-const userId = 202;
 
 export const getAllEvents = createAsyncThunk(
   "event/getAllEvents",
-  async (_, { rejectWithValue }) => {
+  async (_, { rejectWithValue, getState }) => {
+    const userId = getState().user.user;
+
+    console.log("userId event", userId);
     try {
       const response = await fetch(
         `${apiUrl}/user-profiles/user-id/${userId}/events/filters/spec?sortOrder=DESC`
@@ -30,7 +32,8 @@ export const getAllEvents = createAsyncThunk(
 
 export const getEventById = createAsyncThunk(
   "event/getEventById",
-  async (id, { rejectWithValue }) => {
+  async (id, { rejectWithValue, getState }) => {
+    const userId = getState().user.user;
     try {
       const response = await fetch(
         `${apiUrl}/user-profiles/user-id/${userId}/events/event-id/${id}`
@@ -53,9 +56,96 @@ export const getEventById = createAsyncThunk(
   }
 );
 
+export const getParticipantsOfEventById = createAsyncThunk(
+  "event/getParticipantsOfEventById",
+  async (id, { rejectWithValue, getState }) => {
+    const userId = getState().user.user;
+
+    console.log(userId);
+    try {
+      const response = await fetch(
+        `${apiUrl}/user-profiles/user-id/${userId}/events/event-id/${id}/participants`
+      );
+
+      if (!response.ok) {
+        const errorData = await response.json(); // Get error details
+        return rejectWithValue({
+          message:
+            errorData.message ||
+            "Failed to get all participants of event by id",
+        });
+      }
+
+      const data = await response.json();
+      console.log("getParticipantsOfEventById res:", data);
+      return data;
+    } catch (error) {
+      console.error(error);
+      return rejectWithValue(error);
+    }
+  }
+);
+
+export const getSponsorsOfEventById = createAsyncThunk(
+  "event/getSponsorsOfEventById",
+  async (id, { rejectWithValue, getState }) => {
+    const userId = getState().user.user;
+    try {
+      const response = await fetch(
+        `${apiUrl}/user-profiles/user-id/${userId}/events/event-id/${id}/sponsors`
+      );
+
+      if (!response.ok) {
+        const errorData = await response.json(); // Get error details
+        return rejectWithValue({
+          message:
+            errorData.message || "Failed to get all sponsors of event by id",
+        });
+      }
+
+      const data = await response.json();
+      console.log("getSponsorsOfEventById res:", data);
+      return data;
+    } catch (error) {
+      console.error(error);
+      return rejectWithValue(error);
+    }
+  }
+);
+
+export const getIntelligenceByEventId = createAsyncThunk(
+  "event/getIntelligenceByEventId",
+  async (id, { rejectWithValue, getState }) => {
+    const userId = getState().user.user;
+    try {
+      const response = await fetch(
+        `${apiUrl}/user-profiles/user-id/${userId}/events/event-id/${id}/intelligence`
+      );
+
+      if (!response.ok) {
+        const errorData = await response.json(); // Get error details
+        return rejectWithValue({
+          message:
+            errorData.message || "Failed to get intelligence by event id",
+        });
+      }
+
+      const data = await response.json();
+      console.log("getIntelligenceByEventId res:", data);
+      return data;
+    } catch (error) {
+      console.error(error);
+      return rejectWithValue(error);
+    }
+  }
+);
+
 export const getEventsByFilter = createAsyncThunk(
   "event/getEventsByFilter",
-  async (params, { rejectWithValue }) => {
+  async (params, { rejectWithValue, getState }) => {
+    const userId = getState().user.user;
+
+    console.log("userId event", userId);
     try {
       const response = await fetch(
         `${apiUrl}/user-profiles/user-id/${userId}/events/filters?${params}`
@@ -81,10 +171,9 @@ export const getEventsByFilter = createAsyncThunk(
 export const getEventsByFilterPagination = createAsyncThunk(
   "event/getEventsByFilterPagination",
 
-  async (paramsObj, { rejectWithValue }) => {
-    console.log("paramsObj", paramsObj);
+  async (paramsObj, { rejectWithValue, getState }) => {
+    const userId = getState().user.user;
     try {
-     
       const sortOrder = paramsObj?.sortOrder || "DESC";
 
       let url = `${apiUrl}/user-profiles/user-id/${userId}/events/filters/spec?sortOrder=${sortOrder}`;
@@ -135,7 +224,8 @@ export const getEventsByFilterPagination = createAsyncThunk(
 
 export const getUnapprovedEvents = createAsyncThunk(
   "event/getUnapprovedEvents",
-  async (_, { rejectWithValue }) => {
+  async (_, { rejectWithValue, getState }) => {
+    const userId = getState().user.user;
     try {
       const response = await fetch(
         `${apiUrl}/user-profiles/user-id/${userId}/events/unapproved`
@@ -160,15 +250,19 @@ export const getUnapprovedEvents = createAsyncThunk(
 
 export const postEvent = createAsyncThunk(
   "event/postEvent",
-  async (postEventObj, { rejectWithValue }) => {
+  async (postEventObj, { rejectWithValue, getState }) => {
+    const userId = getState().user.user;
     try {
-      const response = await fetch(`${apiUrl}/user-profiles/user-id/${userId}/events`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify(postEventObj),
-      });
+      const response = await fetch(
+        `${apiUrl}/user-profiles/user-id/${userId}/events`,
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify(postEventObj),
+        }
+      );
 
       if (!response.ok) {
         const errorData = await response.json(); // Get error details
@@ -189,10 +283,11 @@ export const postEvent = createAsyncThunk(
 
 export const approveEventById = createAsyncThunk(
   "event/approveEventById",
-  async (id, { rejectWithValue }) => {
+  async (id, { rejectWithValue, getState }) => {
+    const userId = getState().user.user;
     try {
       const response = await fetch(
-        `${apiUrl}/user-profiles/user-id/2/events/event-id/${id}/verify-event/approval-status/APPROVED`
+        `${apiUrl}/user-profiles/user-id/${userId}/events/event-id/${id}/verify-event/approval-status/APPROVED`
       );
 
       if (!response.ok) {
@@ -214,10 +309,11 @@ export const approveEventById = createAsyncThunk(
 
 export const updateEventById = createAsyncThunk(
   "event/updateEventById",
-  async (updateEventObj, { rejectWithValue }) => {
+  async (updateEventObj, { rejectWithValue, getState }) => {
+    const userId = getState().user.user;
     try {
       const response = await fetch(
-        `${apiUrl}/user-profiles/user-id/2/events/event-id/${updateEventObj.id}`,
+        `${apiUrl}/user-profiles/user-id/${userId}/events/event-id/${updateEventObj.id}`,
         {
           method: "PUT",
           headers: {
@@ -246,7 +342,8 @@ export const updateEventById = createAsyncThunk(
 
 export const enrollInEventById = createAsyncThunk(
   "event/enrollInEventById",
-  async (id, { rejectWithValue }) => {
+  async (id, { rejectWithValue, getState }) => {
+    const userId = getState().user.user;
     try {
       const response = await fetch(
         `${apiUrl}/user-profiles/user-id/${userId}/events/event-id/${id}/enroll`,
@@ -277,7 +374,8 @@ export const enrollInEventById = createAsyncThunk(
 
 export const withdrawFromEventById = createAsyncThunk(
   "event/withdrawFromEventById",
-  async (id, { rejectWithValue }) => {
+  async (id, { rejectWithValue, getState }) => {
+    const userId = getState().user.user;
     try {
       const response = await fetch(
         `${apiUrl}/user-profiles/user-id/${userId}/events/event-id/${id}/withdraw`,
@@ -308,7 +406,8 @@ export const withdrawFromEventById = createAsyncThunk(
 
 export const sponsorEvent = createAsyncThunk(
   "event/sponsorEvent",
-  async (paramsObj, { rejectWithValue }) => {
+  async (paramsObj, { rejectWithValue, getState }) => {
+    const userId = getState().user.user;
     try {
       const response = await fetch(
         `${apiUrl}/user-profiles/user-id/${userId}/events/event-id/${paramsObj.id}/sponsor/amount/${paramsObj.amount}`,
@@ -339,10 +438,11 @@ export const sponsorEvent = createAsyncThunk(
 
 export const startEventById = createAsyncThunk(
   "event/startEventById",
-  async (id, { rejectWithValue }) => {
+  async (id, { rejectWithValue, getState }) => {
+    const userId = getState().user.user;
     try {
       const response = await fetch(
-        `${apiUrl}/user-profiles/user-id/2/events/event-id/${id}/start`
+        `${apiUrl}/user-profiles/user-id/${userId}/events/event-id/${id}/start`
       );
 
       if (!response.ok) {
@@ -364,10 +464,11 @@ export const startEventById = createAsyncThunk(
 
 export const endEventById = createAsyncThunk(
   "event/endEventById",
-  async (id, { rejectWithValue }) => {
+  async (id, { rejectWithValue, getState }) => {
+    const userId = getState().user.user;
     try {
       const response = await fetch(
-        `${apiUrl}/user-profiles/user-id/2/events/event-id/${id}/end`
+        `${apiUrl}/user-profiles/user-id/${userId}/events/event-id/${id}/end`
       );
 
       if (!response.ok) {
@@ -389,7 +490,8 @@ export const endEventById = createAsyncThunk(
 
 export const markAttendance = createAsyncThunk(
   "event/markAttendance",
-  async (paramsObj, { rejectWithValue }) => {
+  async (paramsObj, { rejectWithValue, getState }) => {
+    const userId = getState().user.user;
     try {
       const response = await fetch(
         `${apiUrl}/user-profiles/user-id/${userId}/events/event-id/${paramsObj.id}/attendance?${paramsObj.location}`
@@ -414,10 +516,11 @@ export const markAttendance = createAsyncThunk(
 
 export const verifyEvent = createAsyncThunk(
   "event/verifyEvent",
-  async (eventObj, { rejectWithValue }) => {
+  async (eventObj, { rejectWithValue, getState }) => {
+    const userId = getState().user.user;
     try {
       const response = await fetch(
-        `${apiUrl}/user-profiles/user-id/2/events/event-id/${eventObj.id}/verify-completion`,
+        `${apiUrl}/user-profiles/user-id/${userId}/events/event-id/${eventObj.id}/verify-completion`,
         {
           method: "PUT",
           headers: {
@@ -446,7 +549,8 @@ export const verifyEvent = createAsyncThunk(
 
 export const deleteEventById = createAsyncThunk(
   "event/deleteEventById",
-  async (id, { rejectWithValue }) => {
+  async (id, { rejectWithValue, getState }) => {
+    const userId = getState().user.user;
     try {
       const response = await fetch(
         `${apiUrl}/user-profiles/user-id/${userId}/events/event-id/${id}`,
@@ -479,6 +583,7 @@ const eventSlice = createSlice({
   name: "event",
   initialState: {
     allEvents: [],
+    currentEvent: {},
     eventsByFilter: [],
     eventsByFilterPagination: [],
     totalPages: 0,
@@ -491,6 +596,49 @@ const eventSlice = createSlice({
       .addCase(getAllEvents.fulfilled, (state, action) => {
         console.log(action.payload);
         state.allEvents = action.payload.content;
+      })
+      .addCase(getEventById.fulfilled, (state, action) => {
+        state.currentEvent = action.payload;
+      })
+      .addCase(getParticipantsOfEventById.fulfilled, (state, action) => {
+        state.currentEvent = {
+          ...state.currentEvent,
+          participants: action.payload,
+        };
+        console.log("getParticipantsOfEventById", state.currentEvent);
+      })
+      .addCase(getSponsorsOfEventById.fulfilled, (state, action) => {
+        state.currentEvent = {
+          ...state.currentEvent,
+          sponsors: action.payload,
+        };
+        console.log("getSponsorsOfEventById", state.currentEvent);
+      })
+      .addCase(getIntelligenceByEventId.fulfilled, (state, action) => {
+        const payload = action.payload;
+
+        const transformedPayload = {
+          id: payload.id,
+          lastModified: payload.lastModified,
+          fertilizerRecommendations: payload.fertilizerRecommendations,
+          generalInfo: [
+            { plantingSeason: payload.plantingSeason },
+            { generalCareTips: payload.generalCareTips },
+          ],
+          benefits: [
+            { environmentalBenefit: payload.environmentalBenefit },
+            { ecologicalBenefit: payload.ecologicalBenefit },
+            { communityBenefit: payload.communityBenefit },
+            { economicBenefit: payload.economicBenefit },
+          ],
+        };
+
+        state.currentEvent = {
+          ...state.currentEvent,
+          intelligence: transformedPayload,
+        };
+
+        console.log("getIntelligenceByEventId", state.currentEvent);
       })
       .addCase(getEventsByFilter.fulfilled, (state, action) => {
         console.log(action.payload);
@@ -531,6 +679,8 @@ const eventSlice = createSlice({
             eventParticipants: action.payload.eventParticipants,
           };
         }
+
+        // state.currentEvent.participants = 
       })
       .addCase(withdrawFromEventById.fulfilled, (state, action) => {
         const index = state.allEvents.findIndex(

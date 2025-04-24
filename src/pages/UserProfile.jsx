@@ -1106,7 +1106,7 @@ function UserProfile() {
         </div>
     );
 
-    const optionsList = ["Overview", "Badges", "Events", "Locations"];
+    const optionsList = ["Overview", "Badges", "Events", "Locations",];
 
     const navDiv = (
         <ul className="flex gap-8 font-medium">

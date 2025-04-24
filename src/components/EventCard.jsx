@@ -7,8 +7,14 @@ import {
   faCircleDollarToSlot,
   faTrophy,
 } from "@fortawesome/free-solid-svg-icons";
+import { useNavigate } from "react-router-dom";
 
-function EventCard({ event, onRegisterClick }) {
+function EventCard({ event }) {
+  const navigate = useNavigate();
+
+  const handleOnRegister = () => {
+    navigate(`/events/details/${event.id}`)
+  }
 
   return (
     <div
@@ -85,7 +91,7 @@ function EventCard({ event, onRegisterClick }) {
         ) : (
           <button 
             className="bg-[#60D6D9] hover:bg-white hover:outline outline-1 outline-[#60D6D9] px-4 py-2 rounded-lg text-white hover:text-[#60D6D9] font-bold"
-            onClick={() => onRegisterClick(event?.id)}
+            onClick={handleOnRegister}
           >
             Register
           </button>

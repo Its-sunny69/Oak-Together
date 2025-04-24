@@ -3,7 +3,7 @@ import ArrowForwardIosRoundedIcon from "@mui/icons-material/ArrowForwardIosRound
 import TipsAndUpdatesRoundedIcon from "@mui/icons-material/TipsAndUpdatesRounded";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faFilter, faXmark } from "@fortawesome/free-solid-svg-icons";
-import { useDispatch } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
 import { getEventsByFilterPagination } from "../features/eventSlice";
 import { SearchRounded } from "@mui/icons-material";
 
@@ -13,6 +13,8 @@ function Filter({ paramsObj, setParamsObj, isSearchInputValid }) {
 
   const [showFilter, setShowFilter] = useState(false);
   const [selectedName, setSelectedName] = useState("");
+
+  const userData = useSelector((state) => state.user.userData);
 
   const statusType = ["UPCOMING", "ONGOING", "COMPLETED"];
   const spaceTypes = [
@@ -99,6 +101,7 @@ function Filter({ paramsObj, setParamsObj, isSearchInputValid }) {
         estimatedCostLessThan: "",
         estimatedAreaMoreThan: "",
         estimatedAreaLessThan: "",
+        approvalStatus: userData?.role !== "ADMIN" ? "APPROVED" : "",
       },
       search: "",
       page: 0,
@@ -147,7 +150,7 @@ function Filter({ paramsObj, setParamsObj, isSearchInputValid }) {
           }
           min="3"
         />
-       
+
         <button className="p-2 mx-1" onClick={handleSearch}>
           <SearchRounded className="text-[#60d6d9]" sx={{ fontSize: 30 }} />
         </button>
@@ -171,7 +174,13 @@ function Filter({ paramsObj, setParamsObj, isSearchInputValid }) {
         )}
       </div>
       {console.log(isSearchInputValid)}
-      {isSearchInputValid ? "" : <div className="text-red-400 text-sm px-4">Please Enter minimum 3 characters to search!</div> }
+      {isSearchInputValid ? (
+        ""
+      ) : (
+        <div className="text-red-400 text-sm px-4">
+          Please Enter minimum 3 characters to search!
+        </div>
+      )}
 
       <div
         className={`bg-gradient-120 shadow-[rgba(96,214,217,0.2)_0px_0px_10px_3px] border border-[#60D6D9]  mt-3 py-2 px-4 rounded-lg grid grid-cols-6 gap-6 ${

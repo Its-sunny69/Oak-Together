@@ -1,11 +1,11 @@
 import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
 
 const apiUrl = import.meta.env.VITE_SERVER_API_URL;
-const userId = 202;
 
 export const getAllLocations = createAsyncThunk(
   "location/getAllLocations",
-  async (_, { rejectWithValue }) => {
+  async (_, { rejectWithValue, getState }) => {
+    const userId = getState().user.user;
     try {
       const response = await fetch(
         `${apiUrl}/user-profiles/user-id/${userId}/locations`
@@ -30,7 +30,8 @@ export const getAllLocations = createAsyncThunk(
 
 export const getLocationById = createAsyncThunk(
   "location/getLocationById",
-  async (id, { rejectWithValue }) => {
+  async (id, { rejectWithValue, getState }) => {
+    const userId = getState().user.user;
     try {
       const response = await fetch(
         `${apiUrl}/user-profiles/user-id/${userId}/locations/location-id/${id}`
@@ -55,7 +56,8 @@ export const getLocationById = createAsyncThunk(
 
 export const getLocationsUsingFilter = createAsyncThunk(
   "location/getLocationsUsingFilter",
-  async (params, { rejectWithValue }) => {
+  async (params, { rejectWithValue, getState }) => {
+    const userId = getState().user.user;
     try {
       const response = await fetch(
         `${apiUrl}/user-profiles/user-id/${userId}/locations/filter?${params}`
@@ -78,10 +80,64 @@ export const getLocationsUsingFilter = createAsyncThunk(
   }
 );
 
+export const getCurreentLocationsAQI = createAsyncThunk(
+  "location/getCurreentLocationsAQI",
+  async (params, { rejectWithValue, getState }) => {
+    const userId = getState().user.user;
+    try {
+      const response = await fetch(
+        `${apiUrl}/user-profiles/user-id/${userId}/aqi/coordinates?lat=${params.lat}&lng=${params.lng}`
+      );
+
+      if (!response.ok) {
+        const errorData = await response.json(); // Get error details
+        return rejectWithValue({
+          message: errorData.message || "Failed to get current location AQI",
+        });
+      }
+
+      const data = await response.json();
+      console.log("getCurreentLocationsAQI res:", data);
+      return data;
+    } catch (error) {
+      console.error(error);
+      return rejectWithValue(error);
+    }
+  }
+);
+
+export const getCurreentEventLocationsAQI = createAsyncThunk(
+  "location/getCurreentEventLocationsAQI",
+  async (params, { rejectWithValue, getState }) => {
+    const userId = getState().user.user;
+    try {
+      const response = await fetch(
+        `${apiUrl}/user-profiles/user-id/${userId}/aqi/coordinates?lat=${params.lat}&lng=${params.lng}`
+      );
+
+      if (!response.ok) {
+        const errorData = await response.json(); // Get error details
+        return rejectWithValue({
+          message:
+            errorData.message || "Failed to get current event location AQI",
+        });
+      }
+
+      const data = await response.json();
+      console.log("getCurreentEventLocationsAQI res:", data);
+      return data;
+    } catch (error) {
+      console.error(error);
+      return rejectWithValue(error);
+    }
+  }
+);
+
 export const getLocationsByFilterPagination = createAsyncThunk(
   "location/getLocationsByFilterPagination",
-  async (paramsObj, { rejectWithValue }) => {
+  async (paramsObj, { rejectWithValue, getState }) => {
     console.log("paramsObj", paramsObj);
+    const userId = getState().user.user;
     try {
       const sortOrder = paramsObj?.sortOrder || "DESC";
       let url = `${apiUrl}/user-profiles/user-id/${userId}/locations/filter/spec?sortOrder=${sortOrder}`;
@@ -98,7 +154,8 @@ export const getLocationsByFilterPagination = createAsyncThunk(
       });
 
       if (paramsObj.sortBy) queryParams.append("sortBy", paramsObj.sortBy);
-      if (paramsObj.page !== undefined) queryParams.append("page", paramsObj.page);
+      if (paramsObj.page !== undefined)
+        queryParams.append("page", paramsObj.page);
       if (paramsObj.size) queryParams.append("size", paramsObj.size);
 
       if (queryParams.toString()) {
@@ -112,7 +169,9 @@ export const getLocationsByFilterPagination = createAsyncThunk(
       if (!response.ok) {
         const errorData = await response.json();
         return rejectWithValue({
-          message: errorData.message || "Failed to get locations with filter and pagination",
+          message:
+            errorData.message ||
+            "Failed to get locations with filter and pagination",
         });
       }
 
@@ -126,10 +185,10 @@ export const getLocationsByFilterPagination = createAsyncThunk(
   }
 );
 
-
 export const postLocation = createAsyncThunk(
   "location/postLocation",
-  async (postLocationObj, { rejectWithValue }) => {
+  async (postLocationObj, { rejectWithValue, getState }) => {
+    const userId = getState().user.user;
     try {
       const response = await fetch(
         `${apiUrl}/user-profiles/user-id/${userId}/locations`,
@@ -161,7 +220,8 @@ export const postLocation = createAsyncThunk(
 
 export const updateLocationById = createAsyncThunk(
   "location/updateLocationById",
-  async (updateLocationObj, { rejectWithValue }) => {
+  async (updateLocationObj, { rejectWithValue, getState }) => {
+    const userId = getState().user.user;
     try {
       const response = await fetch(
         `${apiUrl}/user-profiles/user-id/${userId}/locations/location-id/${updateLocationObj.id}`,
@@ -193,7 +253,8 @@ export const updateLocationById = createAsyncThunk(
 
 export const waterLocationWithId = createAsyncThunk(
   "location/waterLocationWithId",
-  async (paramsObj, { rejectWithValue }) => {
+  async (paramsObj, { rejectWithValue, getState }) => {
+    const userId = getState().user.user;
     try {
       const response = await fetch(
         `${apiUrl}/user-profiles/user-id/${userId}/locations/location-id/${paramsObj.id}/watered?${paramsObj.params}`,
@@ -225,7 +286,8 @@ export const waterLocationWithId = createAsyncThunk(
 
 export const deactivateLocationWithId = createAsyncThunk(
   "location/deactivateLocationWithId",
-  async (id, { rejectWithValue }) => {
+  async (id, { rejectWithValue, getState }) => {
+    const userId = getState().user.user;
     try {
       const response = await fetch(
         `${apiUrl}/user-profiles/user-id/${userId}/locations/location-id/${id}`,
@@ -260,9 +322,10 @@ const locationSlice = createSlice({
     allLocations: [],
     locationById: null,
     locationsUsingFilter: [],
+    currentLocationAqi: {},
     locationsByFilterPagination: [],
     locationsTotalPages: 0,
-    locationsTotalItems: 0
+    locationsTotalItems: 0,
   },
   reducers: {},
   extraReducers: (builder) => {
@@ -273,6 +336,9 @@ const locationSlice = createSlice({
       .addCase(getLocationById.fulfilled, (state, action) => {
         state.locationById = action.payload;
       })
+      .addCase(getCurreentLocationsAQI.fulfilled, (state, action) => {
+        state.currentLocationAqi = action.payload;
+      })
       .addCase(getLocationsUsingFilter.fulfilled, (state, action) => {
         state.locationsUsingFilter = action.payload;
       })
@@ -281,7 +347,7 @@ const locationSlice = createSlice({
         state.locationsByFilterPagination = action.payload.content;
         state.locationsTotalPages = action.payload.page.totalPages;
         state.locationsTotalItems = action.payload.page.totalElements;
-      })      
+      })
       .addCase(postLocation.fulfilled, (state, action) => {
         state.allLocations.push(action.payload);
       })
