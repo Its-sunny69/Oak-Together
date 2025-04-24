@@ -42,22 +42,6 @@ function EventDetail({ eventId }) {
     Analysis: <EventAnalysis eventId={eventId} />,
   };
 
-  const handleActiveView = (option) => {
-    if (option == "Overview") {
-      dispatch(getEventById(eventId));
-    } else if (option == "Participants") {
-      dispatch(getParticipantsOfEventById(eventId));
-    } else if (option == "Sponsors") {
-      dispatch(getSponsorsOfEventById(eventId));
-    } else if (option == "Analysis") {
-      dispatch(getIntelligenceByEventId(eventId));
-    } else {
-      console.log("Error in Active View Selection");
-    }
-
-    setActiveView(option);
-  };
-
   return (
     <div className="pt-6 pr-4 w-full overflow-hidden">
       <div className=" relative mb-10">

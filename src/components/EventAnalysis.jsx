@@ -17,7 +17,7 @@ import "swiper/css";
 import "swiper/css/navigation";
 import "swiper/css/pagination";
 import "swiper/css/scrollbar";
-import { FinancePng, ScrollTest1Png } from "../assets";
+import { FinancePng, LoadingAnimation, ScrollTest1Png } from "../assets";
 import { useDispatch, useSelector } from "react-redux";
 import { getIntelligenceByEventId } from "../features/eventSlice";
 import {
@@ -25,9 +25,9 @@ import {
   getCurreentLocationsAQI,
 } from "../features/locationSlice";
 import Skeleton from "@mui/material/Skeleton";
+import { DotLottieReact } from "@lottiefiles/dotlottie-react";
 
 function EventAnalysis({ eventId }) {
-
   const [count, setCount] = useState(0);
   const [currentAQI, setCurrentAQI] = useState({});
   const intelligence = useSelector(
@@ -396,7 +396,14 @@ function EventAnalysis({ eventId }) {
           </div>
         </>
       ) : (
-        "Loading"
+        <div className="min-h-64 flex items-center justify-center font-semibold">
+          <DotLottieReact
+            src={LoadingAnimation}
+            loop
+            autoplay
+            style={{ width: 140, height: 140 }}
+          />
+        </div>
       )}
     </div>
   );

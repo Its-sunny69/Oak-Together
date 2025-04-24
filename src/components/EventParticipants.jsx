@@ -2,7 +2,7 @@ import React, { useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { getParticipantsOfEventById } from "../features/eventSlice";
 import { LoadingAnimation, ProfileImg } from "../assets";
-
+import { DotLottieReact } from "@lottiefiles/dotlottie-react";
 
 function EventParticipants({ eventId }) {
   const participants = useSelector(
@@ -49,7 +49,12 @@ function EventParticipants({ eventId }) {
         )
       ) : (
         <div className="min-h-64 flex items-center justify-center font-semibold">
-          <Lottie animationData={LoadingAnimation} loop={true} />
+          <DotLottieReact
+            src={LoadingAnimation}
+            loop
+            autoplay
+            style={{ width: 140, height: 140 }}
+          />
         </div>
       )}
     </div>
