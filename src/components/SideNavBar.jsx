@@ -1,8 +1,13 @@
 import { LogoPng } from "../assets";
 import { useNavigate } from "react-router-dom";
+import { useDispatch, useSelector } from "react-redux";
+import { logoutUser } from "../features/userSlice";
+import toast from "react-hot-toast";
 
 function SideNavBar({selectedPageName}) {
     
+    const userData = useSelector((state) => state.user.userData);
+    const dispatch = useDispatch();
     const navigate = useNavigate();
 
     const NavbarListItem = ({ item }) => {
@@ -28,6 +33,13 @@ function SideNavBar({selectedPageName}) {
         "Leaderboards"
     ];
 
+    const handleLogout = () => {
+        localStorage.removeItem("userId");
+        dispatch(logoutUser()); // <-- clear Redux state
+        toast.success(`User ${userData?.name} has been logged out successfully.`);
+        navigate("/");
+    }
+
     return (
         <div className="flex flex-col items-center gap-8 w-1/6 min-w-[280px] py-2 px-4 justify-start">
             <h2 className="flex font-bold items-center  w-11/12 gap-2 p-2 border-b-2 border-[#83e2c1]">
@@ -38,8 +50,13 @@ function SideNavBar({selectedPageName}) {
                 {navbarItems.map(item => <NavbarListItem key={item} item={item} />)}
             </ul>
             <div className="flex flex-col gap-8 mb-8">
-                <p className="cursor-pointer hover:opacity-[0.8]">Settings</p>
-                <p className="text-red-500 cursor-pointer hover:font-semibold ">LOGOUT</p>
+                {/* <p className="cursor-pointer hover:opacity-[0.8]">Settings</p> */}
+                <p 
+                className="text-red-500 cursor-pointer hover:font-semibold "
+                onClick={handleLogout}
+                >
+                    LOGOUT
+                </p>
             </div>
         </div>
     )

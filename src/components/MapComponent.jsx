@@ -345,7 +345,7 @@ function MapComponent({ currLocationCoords, setIsModalVisible }) {
     eventsByFilterPagination: eventList,
     totalItems: totalEventItems,
   } = useSelector((state) => state.event);
-  const { user: userData } = useSelector((state) => state.user);
+  const userData = useSelector((state) => state.user.userData);
 
   const userIsAdmin = userData?.role == "ADMIN";
 
@@ -509,6 +509,7 @@ function MapComponent({ currLocationCoords, setIsModalVisible }) {
               eventSelected={eventSelected}
               setEventSelected={setEventSelected}
               currLocationCoords={currLocationCoords}
+              isAdmin={userIsAdmin}
             />
           }
 
