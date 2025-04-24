@@ -3,15 +3,12 @@ import { DefaultCoverPic, GCPIconPng, CoinPng, TrophyPng } from "../assets"
 import { useDispatch, useSelector } from "react-redux"
 import { fetchUserById } from "../features/userSlice";
 
-const userId = 202;
-const isSponsor = false;
-
 function ProfileHeader2({ children, absolutePositionObj }) {
 
     const dispatch = useDispatch();
-    const { user: userData } = useSelector((state) => state.user);
+    const { userData } = useSelector((state) => state.user);
 
-    useEffect(() => { dispatch(fetchUserById(userId)) }, []);
+    const isSponsor = userData?.role == "ORGANIZATION"
 
     return (
         <div className="relative w-full h-[42vh] animate-fade-down transition-all">

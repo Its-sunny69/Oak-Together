@@ -56,6 +56,7 @@ import GalleryIcon from "./gallery-icon.png";
 import ScrollTest2Png from "./scroll test2.png"
 import ScrollTest3Png from "./scroll test3.png"
 import FinancePng from "./finance.png"
+import LoadingAnimation from "./loading.lottie"
 
 export {
   LogoPng,
@@ -114,6 +115,7 @@ export {
   EmptyBadgeImg,
   SampleCertificateImg,
   GradientPeople,
-  GalleryIcon
+  GalleryIcon,
   FinancePng,
+  LoadingAnimation
 };

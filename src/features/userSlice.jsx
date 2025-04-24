@@ -273,7 +273,7 @@ const userSlice = createSlice({
       })
       .addCase(uploadProfilePicture.fulfilled, (state, action) => {
         state.userData = {
-          ...state.user,
+          ...state.userData,
           profilePicture: action.payload.profilePicture,
         };
       })
@@ -286,7 +286,7 @@ const userSlice = createSlice({
       })
       .addCase(setPrimaryBadge.fulfilled, (state, action) => {
         state.userData = {
-          ...state.user,
+          ...state.userData,
           primaryBadge: action.payload.primaryBadge,
         };
       });

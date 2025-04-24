@@ -41,7 +41,7 @@ function EventSponsors({ eventId }) {
           <div className="min-h-64 flex items-center justify-center font-semibold">No Data Available</div>
         )
       ) : (
-        <div>Loading</div>
+        <div className="min-h-64 flex items-center justify-center font-semibold">Loading</div>
       )}
     </div>
   );

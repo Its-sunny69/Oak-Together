@@ -19,6 +19,7 @@ import EventDetail from "./components/EventDetail";
 import { useDispatch, useSelector } from "react-redux";
 import { fetchUserById, loginUser } from "./features/userSlice";
 import PrivateRoute from "./PrivateRoute";
+import "@lottiefiles/lottie-player";
 
 function App() {
   const userId = useSelector((state) => state.user.user);

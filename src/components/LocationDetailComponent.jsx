@@ -12,7 +12,7 @@ import toast from "react-hot-toast";
 function LocationDetailComponent({ selectedLocationId, setSelectedLocationId, selectedLocationCoords, setSelectedLocationCoords, eventSelected, currLocationCoords }) {
 
     const { locationById } = useSelector((state) => state.location);
-    const { eventById } = useSelector((state) => state.event);
+    const { currentEvent: eventById } = useSelector((state) => state.event);
 
     const dispatch = useDispatch();
 
@@ -198,7 +198,7 @@ function LocationDetailComponent({ selectedLocationId, setSelectedLocationId, se
             {shortDetailsRow}
             {descriptiveDetailsRow}
 
-            {!eventSelected && locationById.type == "PLANTED" &&
+            {!eventSelected && locationById?.type == "PLANTED" &&
                 <div className="flex w-full justify-end">
                     <button
                         className="px-6 py-2 rounded-lg bg-gradient-120 shadow-md from-[#60D6D9] from-50% to-[#1566E7] to-100% hover:from-[#1566E7] hover:to-[#60D6D9] text-white font-medium flex justify-center items-center active:scale-95 transition-all"

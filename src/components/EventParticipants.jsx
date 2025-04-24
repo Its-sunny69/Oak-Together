@@ -1,7 +1,8 @@
 import React, { useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { getParticipantsOfEventById } from "../features/eventSlice";
-import { ProfileImg } from "../assets";
+import { LoadingAnimation, ProfileImg } from "../assets";
+
 
 function EventParticipants({ eventId }) {
   const participants = useSelector(
@@ -19,7 +20,10 @@ function EventParticipants({ eventId }) {
       {participants ? (
         participants.length !== 0 ? (
           participants.map((participant, index) => (
-            <div key={index} className="px-4 py-2 my-4 flex justify-between items-center broder rounded-xl shadow-[3.5px_5.5px_16px_0px_#60d6d973]">
+            <div
+              key={index}
+              className="px-4 py-2 my-4 flex justify-between items-center broder rounded-xl shadow-[3.5px_5.5px_16px_0px_#60d6d973]"
+            >
               <div className="flex">
                 <img src={ProfileImg} alt="" className="" />
 
@@ -39,10 +43,14 @@ function EventParticipants({ eventId }) {
             </div>
           ))
         ) : (
-          "NA"
+          <div className="min-h-64 flex items-center justify-center font-semibold">
+            No Data Available
+          </div>
         )
       ) : (
-        <div>Loading</div>
+        <div className="min-h-64 flex items-center justify-center font-semibold">
+          <Lottie animationData={LoadingAnimation} loop={true} />
+        </div>
       )}
     </div>
   );

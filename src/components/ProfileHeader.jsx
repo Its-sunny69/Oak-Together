@@ -4,15 +4,12 @@ import { useDispatch, useSelector } from "react-redux";
 import { useEffect } from "react";
 import { fetchUserById } from "../features/userSlice";
 
-const userId = 202;
-
 function ProfileHeader() {
 
     const navigate = useNavigate();
-    const dispatch = useDispatch();
 
-    const { user: userData } = useSelector((state) => state.user);
-    useEffect(() => { dispatch(fetchUserById(userId)) }, []);
+    const { userData } = useSelector((state) => state.user);
+    const isSponsor = userData?.role == "ORGANIZATION"
 
     const userInfo = (
         <div
@@ -41,7 +38,6 @@ function ProfileHeader() {
 
     // Temporary variable:
     let unseenNotifs = true
-    const isSponsor = false;
 
     const bellIcon = (
         <button className="relative rounded-lg py-1 px-4 shadow-md shadow-[#60D6D9]/30 hover:shadow-inherit hover:opacity-50">
