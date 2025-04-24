@@ -1,19 +1,40 @@
 import { GCPIconPng, CoinPng, DoorBellPng, ProfileImg, TrophyPng } from "../assets";
 import { useNavigate } from "react-router-dom";
+import { useDispatch, useSelector } from "react-redux";
+import { useEffect } from "react";
+import { fetchUserById } from "../features/userSlice";
+
+const userId = 202;
 
 function ProfileHeader() {
 
     const navigate = useNavigate();
+    const dispatch = useDispatch();
+
+    const { user: userData } = useSelector((state) => state.user);
+    useEffect(() => { dispatch(fetchUserById(userId)) }, []);
 
     const userInfo = (
         <div
-            className="flex justify-left items-center w-3/5 gap-2 pl-4 py-2 text-sm rounded-lg shadow-md shadow-[#60D6D9]/30 cursor-pointer"
+            className="flex justify-left items-center w-3/5 gap-3 pl-4 py-2 text-sm rounded-lg shadow-md shadow-[#60D6D9]/30 cursor-pointer"
             onClick={() => navigate("/profile")}
         >
-            <img src={ProfileImg} className="w-[10%]" />
+            <div
+                style={{
+                    backgroundImage: `url(${userData?.profilePicture?.url ?? ProfileImg})`,
+                    backgroundPosition: "center",
+                    backgroundSize: "cover",
+                    backgroundRepeat: "no-repeat",
+                    width: "4vw",
+                    height: "4vw"
+                }}
+                className="rounded-full"
+            >
+
+            </div>
             <div>
-                <h3 className="font-semibold">John Doe</h3>
-                <p className="text-[#3BA5DA]">Bio-planto-logist</p>
+                <h3 className="font-semibold">{userData?.name ?? "User Name"}</h3>
+                <p className="text-[#3BA5DA]">{userData?.role ?? "User Role"}</p>
             </div>
         </div>
     )
@@ -32,8 +53,8 @@ function ProfileHeader() {
     // clicking on the icon will navigate user to marketplace
     const coinIcon = (
         <div className="flex items-center gap-2 px-8 py-2 rounded-lg shadow-md shadow-[#60D6D9]/30 cursor-pointer">
-            <img src={isSponsor? GCPIconPng: CoinPng} alt="Coins" />
-            <span>1020</span>
+            <img src={isSponsor ? GCPIconPng : CoinPng} alt="Coins" />
+            <span>{userData?.points}</span>
         </div>
     )
 
@@ -41,7 +62,7 @@ function ProfileHeader() {
     const trophyIcon = (
         <div className="flex items-center gap-2 px-8 py-2 rounded-lg shadow-md shadow-[#60D6D9]/30 cursor-pointer">
             <img src={TrophyPng} className="w-8 h-8" />
-            <span>1340</span>
+            <span>{userData?.points}</span>
         </div>
     )
 

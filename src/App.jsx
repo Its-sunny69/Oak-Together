@@ -13,6 +13,8 @@ import {
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { Toaster } from "react-hot-toast";
 import EventInfo from "./pages/EventInfo";
+import { LocalizationProvider } from '@mui/x-date-pickers';
+import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
 import EventDetail from "./components/EventDetail";
 import { useDispatch, useSelector } from "react-redux";
 import { fetchUserById, loginUser } from "./features/userSlice";
@@ -29,6 +31,7 @@ function App() {
   return (
     <>
       <div>
+      <LocalizationProvider dateAdapter={AdapterDayjs}>
         <BrowserRouter>
           <Toaster
             position="top-center"
@@ -106,6 +109,7 @@ function App() {
             />
           </Routes>
         </BrowserRouter>
+        </LocalizationProvider>
       </div>
     </>
   );

@@ -128,6 +128,7 @@ function SignUpForm() {
 
     dispatch(registerUser(values)).unwrap()
       .then((response) => {
+        // console.log(response);
         toast.success("Sign-up successful");
         navigate("/login");
       })
@@ -168,7 +169,7 @@ function SignUpForm() {
                 id={id}
                 name={name}
                 type={type}
-                isTextArea={id == "description"}
+                isTextArea={type == "textarea"}
                 placeholder={placeholder}
               />
             </div>

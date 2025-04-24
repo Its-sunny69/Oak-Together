@@ -158,8 +158,10 @@ export const getLocationsByFilterPagination = createAsyncThunk(
         queryParams.append("page", paramsObj.page);
       if (paramsObj.size) queryParams.append("size", paramsObj.size);
 
-      if (queryParams.toString()) {
-        url += `&${queryParams.toString()}`;
+      // Append the constructed query string to the URL
+      const urlString = queryParams.toString();
+      if (urlString) {
+        url += `&${urlString}`;
       }
 
       console.log("Final Request URL:", url);
@@ -253,11 +255,11 @@ export const updateLocationById = createAsyncThunk(
 
 export const waterLocationWithId = createAsyncThunk(
   "location/waterLocationWithId",
-  async (paramsObj, { rejectWithValue, getState }) => {
+  async ({locationId, coordsString}, { rejectWithValue, getState }) => {
     const userId = getState().user.user;
     try {
       const response = await fetch(
-        `${apiUrl}/user-profiles/user-id/${userId}/locations/location-id/${paramsObj.id}/watered?${paramsObj.params}`,
+        `${apiUrl}/user-profiles/user-id/${userId}/locations/location-id/${locationId}/watered?${coordsString}`,
         {
           method: "PUT",
           headers: {
@@ -324,8 +326,8 @@ const locationSlice = createSlice({
     locationsUsingFilter: [],
     currentLocationAqi: {},
     locationsByFilterPagination: [],
-    locationsTotalPages: 0,
-    locationsTotalItems: 0,
+    totalPages: 0,
+    totalItems: 0
   },
   reducers: {},
   extraReducers: (builder) => {
@@ -345,9 +347,9 @@ const locationSlice = createSlice({
       .addCase(getLocationsByFilterPagination.fulfilled, (state, action) => {
         console.log("getLocationsByFilterPagination res:", action.payload);
         state.locationsByFilterPagination = action.payload.content;
-        state.locationsTotalPages = action.payload.page.totalPages;
-        state.locationsTotalItems = action.payload.page.totalElements;
-      })
+        state.totalPages = action.payload.page.totalPages;
+        state.totalItems = action.payload.page.totalElements;
+      })      
       .addCase(postLocation.fulfilled, (state, action) => {
         state.allLocations.push(action.payload);
       })

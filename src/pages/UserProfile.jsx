@@ -1,9 +1,5 @@
-import { SideNavBar } from "../components";
+import { FormTextComponent, SideNavBar, ImageUploadField, ProfileHeader2 } from "../components";
 import {
-    GCPIconPng,
-    CoinPng,
-    TrophyPng,
-    DefaultCoverPic,
     DefaultBadge,
     ProfileImg2,
     Trophy2Png,
@@ -13,19 +9,28 @@ import {
     EpicBadgeBG,
     LegendaryBadgeBG,
     EmptyBadgeImg,
-    SampleCertificateImg
+    SampleCertificateImg,
+    GalleryIcon
 } from "../assets";
 import { useState, useEffect } from "react";
 import { useInterval } from "../hooks";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { motion } from "framer-motion"
-import { faAngleDown, faAngleUp, faCircleInfo, faClock, faLocationDot, faLayerGroup, faDroplet, faUsers, faSeedling, faLock, faUnlock } from "@fortawesome/free-solid-svg-icons";
+import { faAngleDown, faAngleUp, faCircleInfo, faClock, faLocationDot, faLayerGroup, faDroplet, faUsers, faSeedling, faLock, faUnlock, faArrowRight, faArrowLeft, faXmark } from "@fortawesome/free-solid-svg-icons";
 import { Tooltip } from "react-tooltip";
-import { fetchUserById, setPrimaryBadge } from "../features/userSlice";
-import { getAllBadges, getAllBadgesByFilter, getBadgesByFilter, getBadgeById } from "../features/badgeSlice";
+import { deactivateUser, fetchUserById, setPrimaryBadge } from "../features/userSlice";
+import { getAllBadgesByFilter, getBadgesByFilter } from "../features/badgeSlice";
 import { useDispatch, useSelector } from "react-redux";
 import { getEventsByFilterPagination } from "../features/eventSlice";
 import { getLocationsByFilterPagination } from "../features/locationSlice";
+import { updateUserById, uploadProfilePicture } from "../features/userSlice";
+import { Formik, Form, Field } from "formik";
+import MessageModal from "../components/MessageModal";
+import userEditSchema from "../schemas/userEditSchema";
+import { useNavigate } from "react-router-dom";
+import toast from "react-hot-toast";
+import ReactPaginate from "react-paginate";
+import { loginSchema } from "../schemas";
 
 // temporary variables for ease in UI Development
 const userId = 202;
@@ -280,10 +285,11 @@ const badgeDetailsByRarity = {
 
 
 // Overview:
-// To-do:
-// 1) Update statsList to reflect real user data
+
 function BadgeAndStats({ activeView, selectedBadge, trophyCount }) {
-    
+
+    // can update statsList to reflect real user data (will require changes in user data response body from server)
+
     const statsList = [
         isSponsor ?
             {
@@ -626,7 +632,7 @@ function OverViewDisplay({ activeView, userData }) {
     );
 
     return (
-        <div className="flex flex-col gap-6 transition-all animate-fade-up">
+        <div className="flex flex-col gap-6 transition-all animate-fade-up w-full">
             {infoSection}
             {listSection}
         </div>
@@ -711,9 +717,7 @@ function BadgeCard({ rarity, id, name, description, badgeImgUrl, selectedBadgeId
 }
 
 
-// To Do:
-// 1) Use Pagination
-function BadgeDisplay({ selectedBadge }) {
+function BadgeDisplay({ selectedBadge }) {  // might require pagination in future
 
     const handleBadgeClick = (badgeId) => {
         dispatch(setPrimaryBadge({ userId: userId, badgeId: badgeId }));
@@ -807,7 +811,10 @@ function FilterButtonRow({ activeListCategory, setActiveListCategory, buttonText
                             key={index}
                             text={buttonText}
                             isActive={activeListCategory == buttonText}
-                            handleClick={() => setActiveListCategory(buttonText)}
+                            handleClick={() => {
+                                console.log(buttonText);
+                                setActiveListCategory(buttonText);
+                            }}
                         />
                     )
                 }
@@ -835,7 +842,7 @@ function ListDisplay(
     }) {
 
     return (
-        <div className="flex flex-col gap-4">
+        <div className="flex flex-col gap-4 w-full">
             <FilterButtonRow
                 activeListCategory={activeListCategory}
                 setActiveListCategory={setActiveListCategory}
@@ -849,8 +856,7 @@ function ListDisplay(
 }
 
 // To-do:
-// 1) Show participant count for events using appropriate data from server
-// 2) Handle 'View' button action for both locations and events
+// 1) Handle 'View' button action for both locations and events
 function ListItem({ date, time, address, name, type, space, waterAvailability, targetPlantNumber, numberOfParticipants, gradientBgStyle }) {
 
     const isLocation = time == null;
@@ -869,6 +875,7 @@ function ListItem({ date, time, address, name, type, space, waterAvailability, t
     const unformattedHours = time ? +timeArr[0] : 0;
     timeArr[0] = (+timeArr[0] % 12);
     timeArr[0] = (timeArr[0] < 10 ? "0" : "") + timeArr[0];
+    timeArr[0] = timeArr[0] == "00"? "12": timeArr[0];
 
     const dateBox = (
         <div className="flex flex-col w-[8vw] items-center px-3 pt-3 pb-4 rounded-lg shadow-[rgba(96,214,217,0.2)_2px_0px_4px_0px]">
@@ -890,7 +897,7 @@ function ListItem({ date, time, address, name, type, space, waterAvailability, t
                     </>
                 }
             </div>
-            <div className={`lex items-center gap-2 ${isLocation? "": "w-[30vw]"}`}>
+            <div className={`lex items-center gap-2 ${isLocation ? "" : "w-[30vw]"}`}>
                 {isLocation ?
                     <div>
                         <FontAwesomeIcon icon={faLayerGroup} className="text-[#3BA5DA] -ml-1.5 mr-2" />
@@ -950,8 +957,6 @@ function ListItem({ date, time, address, name, type, space, waterAvailability, t
     )
 }
 
-// To-do:
-// 2) Use pagination for easy search and traversal
 
 // Events:
 function EventDisplay({ gradientBgStyle }) {
@@ -969,18 +974,40 @@ function EventDisplay({ gradientBgStyle }) {
     }
 
     const [activeEventListCategory, setActiveEventListCategory] = useState(isSponsor ? "Sponsored" : "Participated");
-    const paramsObj = {size: 10, filterObj: filterObjByCategory[activeEventListCategory]} // Might need to handle page size differently later (if using pagination)
-    
+
+    const [paramsObj, setParamsObj] = useState({
+        page: 0,
+        size: 5,
+        sortOrder: "ASC",
+        filterObj: filterObjByCategory[activeEventListCategory]
+    })
+    useEffect(() => {
+        setParamsObj((prev) => ({
+            ...prev,
+            page: 0, // reset to first page
+            filterObj: filterObjByCategory[activeEventListCategory],
+        }));
+    }, [activeEventListCategory]);
+
 
     const dispatch = useDispatch();
-    useEffect(() => { 
+    useEffect(() => {
         dispatch(getEventsByFilterPagination(paramsObj))
-    }, [activeEventListCategory, dispatch]);
+    }, [paramsObj, dispatch]);
     // it might be possible to replace above useEffect with something else (will require identifying correct component structure and state handling)
 
-    const {eventsByFilterPagination: eventList} = useSelector((state) => state.event);
+    const { eventsByFilterPagination: eventList, totalPages, totalItems } = useSelector((state) => state.event);
 
-    // const eventList = eventAndLocationListObj[activeEventListCategory]; // static data
+    // const eventList = eventAndLocationListObj[activeEventListCategory]; // for using static data
+
+    const handlePageClick = (event) => {
+        setParamsObj({
+            ...paramsObj,
+            page: event.selected,
+        })
+    }
+
+    const eventPerPage = ["5", "10", "15"];
 
     return (
         <ListDisplay
@@ -988,8 +1015,63 @@ function EventDisplay({ gradientBgStyle }) {
             setActiveListCategory={setActiveEventListCategory}
             buttonTexts={[isSponsor ? "Sponsored" : "Participated", "Created"]}
             listType={"Event"}
-            listCount={eventList.length}
+            listCount={totalItems}
         >
+            <div className="relative flex items-center justify-between ">
+                <div className="absolute flex items-center gap-2 w-[20%] left-1">
+                    <div className="font-semibold text-md">Page Size:</div>
+                    <select
+                        name="eventPerPage"
+                        id="event-per-page"
+                        className="p-1 w-16 h-[4vh] border-[1px] rounded-lg border-[#60d6d9] focus:outline-[#2572CF]"
+                        value={paramsObj.size}
+                        onChange={(e) => {
+                            setParamsObj((prev) => ({
+                                ...prev,
+                                size: Number(e.target.value),
+                                page: 0,
+                            }))
+                        }}
+                    >
+
+                        {eventPerPage.map((option, index) => (
+                            <option
+                                key={index}
+                                value={option}
+                                defaultValue={option == 10}
+                            >
+                                {option}
+                            </option>
+                        ))}
+                    </select>
+                </div>
+                <ReactPaginate
+                    nextLabel={<FontAwesomeIcon icon={faArrowRight} />}
+                    onPageChange={handlePageClick}
+                    forcePage={paramsObj.page}
+                    pageRangeDisplayed={3}
+                    marginPagesDisplayed={2}
+                    pageCount={Math.max(totalPages, 1)}
+                    previousLabel={<FontAwesomeIcon icon={faArrowLeft} />}
+                    previousClassName={`page-item ${paramsObj.page === 0 ? "opacity-50 pointer-events-none" : ""
+                        }`}
+                    nextClassName={`page-item ${paramsObj.page === totalPages - 1
+                        ? "opacity-50 pointer-events-none"
+                        : ""
+                        }`}
+                    pageLinkClassName="page-link"
+                    previousLinkClassName="page-link"
+                    nextLinkClassName="page-link"
+                    breakLabel="..."
+                    breakClassName="page-item"
+                    breakLinkClassName="page-link"
+                    renderOnZeroPageCount={null}
+                    containerClassName="pagination flex justify-center items-center my-4 w-full"
+                    pageClassName="page-item px-3 py-1 border border-[#60d6d9] rounded-md mx-2"
+                    activeClassName="active bg-[#60d6d9] text-white"
+                />
+            </div>
+
             {eventList.map((
                 {
                     eventStartDate,
@@ -1008,7 +1090,7 @@ function EventDisplay({ gradientBgStyle }) {
                     name={name}
                     type={eventStatus}
                     targetPlantNumber={targetPlantNumber}
-                    numberOfParticipants={numberOfParticipants}
+                    numberOfParticipants={numberOfParticipants ?? 0}
                     gradientBgStyle={gradientBgStyle}
                 />
             )}
@@ -1017,28 +1099,46 @@ function EventDisplay({ gradientBgStyle }) {
 }
 
 // Locations:
-// To-do:
-// 1) Use Pagination
 function LocationDisplay({ gradientBgStyle }) {
 
     const filterObjByCategory = {
         "Marked": {
             markedBy: userId
         }
-    }
+    };
 
     const [activeLocationListCategory, setActiveLocationListCategory] = useState("Marked");
-    const paramsObj = {size: 10, filterObj: filterObjByCategory[activeLocationListCategory]}; // Might need to handle page size differently later (if using pagination)
+
+    const [paramsObj, setParamsObj] = useState({
+        page: 0,
+        size: 5,
+        sortOrder: "ASC",
+        filterObj: filterObjByCategory[activeLocationListCategory]
+    });
+
+    useEffect(() => {
+        setParamsObj((prev) => ({
+            ...prev,
+            page: 0,
+            filterObj: filterObjByCategory[activeLocationListCategory],
+        }));
+    }, [activeLocationListCategory]);
 
     const dispatch = useDispatch();
-    useEffect(() => { 
-        dispatch(getLocationsByFilterPagination(paramsObj))
-    }, [activeLocationListCategory, dispatch]);
-    // it might be possible to replace above useEffect with something else (will require identifying correct component structure and state handling)
+    useEffect(() => {
+        dispatch(getLocationsByFilterPagination(paramsObj));
+    }, [paramsObj, dispatch]);
 
-    const {locationsByFilterPagination: locationList} = useSelector((state) => state.location);
+    const { locationsByFilterPagination: locationList, totalPages, totalItems } = useSelector((state) => state.location);
 
-    // const locationList = eventAndLocationListObj[activeLocationListCategory]; // static data
+    const handlePageClick = (event) => {
+        setParamsObj((prev) => ({
+            ...prev,
+            page: event.selected
+        }));
+    };
+
+    const locationsPerPage = ["5", "10", "15"];
 
     return (
         <ListDisplay
@@ -1046,8 +1146,54 @@ function LocationDisplay({ gradientBgStyle }) {
             setActiveListCategory={setActiveLocationListCategory}
             buttonTexts={["Marked"]}
             listType={"Location"}
-            listCount={locationList.length}
+            listCount={totalItems}
         >
+            <div className="relative flex items-center justify-between ">
+                <div className="absolute flex items-center gap-2 w-[20%] left-1">
+                    <div className="font-semibold text-md">Page Size:</div>
+                    <select
+                        name="locationsPerPage"
+                        id="location-per-page"
+                        className="p-1 w-16 h-[4vh] border-[1px] rounded-lg border-[#60d6d9] focus:outline-[#2572CF]"
+                        value={paramsObj.size}
+                        onChange={(e) => {
+                            setParamsObj((prev) => ({
+                                ...prev,
+                                size: Number(e.target.value),
+                                page: 0,
+                            }));
+                        }}
+                    >
+                        {locationsPerPage.map((option, index) => (
+                            <option key={index} value={option}>
+                                {option}
+                            </option>
+                        ))}
+                    </select>
+                </div>
+                <ReactPaginate
+                    nextLabel={<FontAwesomeIcon icon={faArrowRight} />}
+                    onPageChange={handlePageClick}
+                    forcePage={paramsObj.page}
+                    pageRangeDisplayed={3}
+                    marginPagesDisplayed={2}
+                    pageCount={Math.max(totalPages, 1)}
+                    previousLabel={<FontAwesomeIcon icon={faArrowLeft} />}
+                    previousClassName={`page-item ${paramsObj.page === 0 ? "opacity-50 pointer-events-none" : ""}`}
+                    nextClassName={`page-item ${paramsObj.page === totalPages - 1 ? "opacity-50 pointer-events-none" : ""}`}
+                    pageLinkClassName="page-link"
+                    previousLinkClassName="page-link"
+                    nextLinkClassName="page-link"
+                    breakLabel="..."
+                    breakClassName="page-item"
+                    breakLinkClassName="page-link"
+                    renderOnZeroPageCount={null}
+                    containerClassName="pagination flex justify-center items-center my-4 w-full"
+                    pageClassName="page-item px-3 py-1 border border-[#60d6d9] rounded-md mx-2"
+                    activeClassName="active bg-[#60d6d9] text-white"
+                />
+            </div>
+
             {locationList.map((
                 {
                     markedOn,
@@ -1073,15 +1219,220 @@ function LocationDisplay({ gradientBgStyle }) {
 }
 
 
-// To Do:
-// 1) Provide EDIT form to user on button click
-// 2) Handle user detail updates made by the user and 'put' them on server via the form
-// 3) Fetch server data for Sponsored Events, Recent Activites and My Certificates.
+function EditForm({ userData, setIsModalVisible }) {
+
+    const dispatch = useDispatch();
+
+    const handleSubmit = async (values, { setSubmitting }) => {
+        const imageFileObj = values.profilePic?.[0];
+        const detailsObj = { ...values };
+        delete detailsObj.profilePic;
+
+        // console.log(imageFileObj);
+
+        try {
+            if (imageFileObj) {
+                const formData = new FormData();
+                formData.append("image", imageFileObj);
+
+                const imgResponse = await dispatch(
+                    uploadProfilePicture({ userId, formData })
+                ).unwrap();
+
+                // console.log("Image uploaded:", imgResponse);
+            }
+
+            let newDetails = true;
+
+            for (const key in detailsObj) {
+                if (userData[key] != detailsObj[key]) {
+                    newDetails = true;
+                    break;
+                }
+            }
+
+            if (newDetails) {
+                const detailsResponse = await dispatch(updateUserById({ userId, updateData: detailsObj })).unwrap();
+                // console.log("Details updated:", detailsResponse); 
+            }
+
+            toast.success("Details updated for user: " + userData?.name);
+
+            if (imageFileObj || newDetails) setIsModalVisible(true);
+            // Optionally close modal or show toast here
+        } catch (error) {
+            toast.error(error.message, "error");
+            console.error("Profile update failed:", error);
+            // Optional: show toast or alert
+        } finally {
+            setSubmitting(false);
+        }
+    };
+
+
+    const defaultContainerStyle = "flex flex-col gap-1 w-full";
+    const defaultLabelStyle = " font-semibold";
+    const defaultInputStyle = "p-1 w-full border-[1px] rounded-lg border-[#60d6d9] focus:outline-[#2572CF]";
+
+    const inputTextFields = [
+        { label: "Name", id: "name", name: "name", type: "text" },
+        { label: "Description (Optional)", id: "description", name: "description", type: "textarea" },
+        { label: "Address", id: "address", name: "address", type: "textarea" },
+    ];
+
+    // Profile Picture (POST)
+    // Name (PUT)
+    // Description (PUT)
+    // Address (PUT)
+    return (
+        <div className="w-[50%] animate-fade-up transition-all shadow-[rgba(96,214,217,0.2)_0px_0px_10px_8px] rounded-lg px-8 py-4">
+            <h2 className="font-semibold text-2xl mb-8">Update Profile Details:</h2>
+            <Formik
+                initialValues={{
+                    profilePic: [],
+                    name: userData?.name,
+                    description: userData?.description,
+                    address: userData?.address
+                }}
+                validationSchema={userEditSchema}
+                onSubmit={handleSubmit}
+            >
+                <Form className="flex flex-col gap-4 items-center">
+                    <Field name="profilePic">
+                        {({ form }) =>
+                            <ImageUploadField
+                                form={form}
+                                containerStyleClasses={defaultContainerStyle + " items-center "}
+                                labelStyleClasses={defaultLabelStyle}
+                                inputStyleClasses={defaultInputStyle}
+                                previewStyleClasses="relative w-58 p-4 border-2 border-dashed border-[#60D6D9] rounded-lg flex items-center justify-center overflow-hidden cursor-pointer hover:border-[#2572CF]"
+                                id="profilePic"
+                                name="profilePic"
+                                label="Profile Picture (Optional)"
+                                placeholder="Upload Profile Picture"
+                                placeholderImg={GalleryIcon}
+                                placeholderTextStyleClasses="text-gray-300 text-base font-semibold"
+                                placeholderImgStyleClasses="w-[50%] rounded-lg opacity-70 "
+                            />
+                        }
+                    </Field>
+
+                    {inputTextFields.map(({ label, id, name, type }) =>
+                        <FormTextComponent
+                            key={id}
+                            label={label}
+                            id={id}
+                            name={name}
+                            type={type}
+                            containerStyleClasses={defaultContainerStyle}
+                            inputStyleClasses={defaultInputStyle}
+                            labelStyleClasses={defaultLabelStyle}
+                            isTextArea={type == "textarea"}
+                        />
+                    )}
+
+                    <button
+                        className="w-1/2 py-2 mt-8 font-semibold rounded-lg bg-gradient-120 shadow-md from-[#83E2C1] to-[#1566E7] hover:from-[#1566E7] hover:to-[#83E2C1] text-white"
+                        type="submit"
+                    >
+                        Update Details
+                    </button>
+                </Form>
+            </Formik>
+        </div>
+    );
+}
+
+function DeleteFormModal({ userName, setIsModalVisible }) {
+
+    const dispatch = useDispatch();
+    const navigate = useNavigate();
+
+    const handleSubmit = (values, { setSubmitting }) => {
+        const { email, password } = values;
+
+        // !!! Replace '1407' with 'userId' once delete endpoint is fixed !!!
+        dispatch(deactivateUser({ userId: 1407, email: email, password: password })).unwrap()
+            .then(() => {
+                toast.success(`${userName ?? "User"}'s account has been scheduled for deletion.`);
+                setIsModalVisible(false)
+                navigate("/");
+            })
+            .catch((error) => {
+                console.log(error);
+                toast.error(error.message, "error");
+            })
+            .finally(() => {
+                setSubmitting(false);
+            })
+    }
+
+    const defaultContainerStyle = "flex flex-col gap-1 w-full";
+    const defaultLabelStyle = " font-semibold";
+    const defaultInputStyle = "p-1 w-full border-[1px] rounded-lg border-[#60d6d9] focus:outline-[#2572CF]";
+
+    return (
+        <div className="bg-white px-8 pt-2 pb-6 rounded-xl">
+            <div className="text-right w-full text-2xl font-medium text-red-500 cursor-pointer">
+                <FontAwesomeIcon
+                    icon={faXmark}
+                    className="-mr-4"
+                    onClick={() => setIsModalVisible(false)}
+                />
+            </div>
+            <h2 className="font-bold text-xl mb-1">Are you sure about the deletion?</h2>
+            <p className="font-medium mb-6">Enter your credentials to proceed</p>
+            <Formik
+                initialValues={{
+                    email: "",
+                    password: "",
+                }}
+                validationSchema={loginSchema}
+                onSubmit={handleSubmit}
+            >
+                <Form className="flex flex-col gap-3 justify-center">
+                    <FormTextComponent
+                        id="email"
+                        name="email"
+                        label="Email"
+                        type="email"
+                        containerStyleClasses={defaultContainerStyle}
+                        labelStyleClasses={defaultLabelStyle}
+                        inputStyleClasses={defaultInputStyle}
+                    />
+                    <FormTextComponent
+                        id="password"
+                        name="password"
+                        label="Password"
+                        type="password"
+                        containerStyleClasses={defaultContainerStyle}
+                        labelStyleClasses={defaultLabelStyle}
+                        inputStyleClasses={defaultInputStyle}
+                    />
+                    <div className="flex flex-col items-center gap-2 w-full">
+                        <button
+                            className="mt-8 py-2 px-10 w-fit rounded-lg text-white font-medium bg-gradient-135 from-[#FF0000] to-[#654398] hover:from-[#654398] hover:to-[#FF0000]"
+                            type="submit"
+                        >
+                            Delete Account
+                        </button>
+                    </div>
+                </Form>
+            </Formik>
+        </div>
+    )
+}
+
+// Fetch server data for Sponsored Events, Recent Activites and My Certificates. 
+// Make the DELETE button perform its function
 function UserProfile() {
 
     const [activeView, setActiveView] = useState("Overview");
+    const [isModalVisible, setIsModalVisible] = useState(false);
+    const [isDeleteFormModalVisible, setIsDeleteFormModalVisible] = useState(false);
 
     const dispatch = useDispatch();
+    const navigate = useNavigate();
 
     useEffect(() => { dispatch(fetchUserById(userId)) }, []);
     const { user: userData } = useSelector((state) => state.user);
@@ -1092,7 +1443,8 @@ function UserProfile() {
                 style={{
                     backgroundImage: `url(${userData?.profilePicture?.url ?? ProfileImg2})`,
                     backgroundPosition: "center",
-                    backgroundSize: "contain",
+                    backgroundSize: "cover",
+                    backgroundRepeat: "no-repeat",
                     width: "6vw",
                     height: "6vw",
                     borderRadius: "0.5rem"
@@ -1126,47 +1478,51 @@ function UserProfile() {
 
     const gradientBgStyle = "bg-gradient-180 from-[#60D6D9] to-[#1846C4]"
 
-    const profileHeader = (
-        <div className="relative w-full h-[42vh]">
-            <div
-                className="absolute top-0 right-0 left-0 bottom-12 rounded-xl bg-[#60D6D9]"
-                style={{
-                    backgroundImage: `url(${DefaultCoverPic})`,
-                    backgroundSize: "cover",
-                    backgroundRepeat: "no-repeat"
-                }}
-            >
-            </div>
+    // const profileHeader = (
+    //     <div className="relative w-full h-[42vh]">
+    //         <div
+    //             className="absolute top-0 right-0 left-0 bottom-12 rounded-xl bg-[#60D6D9]"
+    //             style={{
+    //                 backgroundImage: `url(${DefaultCoverPic})`,
+    //                 backgroundSize: "cover",
+    //                 backgroundRepeat: "no-repeat"
+    //             }}
+    //         >
+    //         </div>
 
-            <div className="absolute top-2 right-40 flex gap-1 rounded-lg bg-white py-4 px-8 text-[18px] cursor-pointer">
-                <img src={isSponsor ? GCPIconPng : CoinPng} alt="Coins" />
-                <span>{userData?.points}</span>
-            </div>
+    //         <div className="absolute top-2 right-2 flex gap-4">
+    //             <div className="flex gap-1 rounded-lg bg-white py-4 px-8 text-[18px] cursor-pointer">
+    //                 <img src={isSponsor ? GCPIconPng : CoinPng} alt="Coins" />
+    //                 <span>{userData?.points}</span>
+    //             </div>
+    //             <div className="flex gap-1 rounded-lg bg-white py-4 px-8 text-[18px] cursor-pointer">
+    //                 <img src={TrophyPng} alt="Trophies" />
+    //                 <span>{userData?.points}</span>
+    //             </div>
+    //         </div>
 
-            <div className="absolute top-2 right-2 flex gap-2 rounded-lg bg-white px-8 py-4 text-[18px] cursor-pointer">
-                <img src={TrophyPng} alt="Trophies" />
-                <span>{userData?.points}</span>
-            </div>
-
-            <div
-                className="absolute bottom-0 right-6 left-6 h-[18vh] py-2 pl-5 pr-8 rounded-xl bg-white shadow-[rgba(96,214,217,0.2)_0px_0px_10px_3px] flex justify-between items-center">
-                {nameIconDiv}
-                <div className="flex gap-8 items-center">
-                    {navDiv}
-                    {
-                        !guestView &&
-                        <button className={`rounded-lg ${gradientBgStyle} px-[1px] pt-[7px] pb-[6.5px] hover:to-[#60D6D9]`}>
-                            <span className="rounded-[6.5px] px-6 py-2 font-medium text-transparent bg-white hover:text-[#60D6D9] active:text-white active:bg-transparent">
-                                <span className={`${gradientBgStyle} bg-clip-text`}>
-                                    EDIT
-                                </span>
-                            </span>
-                        </button>
-                    }
-                </div>
-            </div>
-        </div>
-    );
+    //         <div
+    //             className="absolute bottom-0 right-6 left-6 h-[18vh] py-2 pl-5 pr-8 rounded-xl bg-white shadow-[rgba(96,214,217,0.2)_0px_0px_10px_3px] flex justify-between items-center">
+    //             {nameIconDiv}
+    //             <div className="flex gap-8 items-center">
+    //                 {navDiv}
+    //                 {
+    //                     !guestView &&
+    //                     <button
+    //                         className={`rounded-lg ${gradientBgStyle} px-[1px] pt-[7px] pb-[6.5px] hover:to-[#60D6D9]`}
+    //                         onClick={() => setActiveView("Edit Form")}
+    //                     >
+    //                         <span className="rounded-[6.5px] px-6 py-2 font-medium text-transparent bg-white hover:text-[#60D6D9] active:text-white active:bg-transparent">
+    //                             <span className={`${gradientBgStyle} bg-clip-text`}>
+    //                                 EDIT
+    //                             </span>
+    //                         </span>
+    //                     </button>
+    //                 }
+    //             </div>
+    //         </div>
+    //     </div>
+    // );
 
     const viewMap = {
         "Overview": <OverViewDisplay activeView={activeView} userData={userData} />,
@@ -1175,30 +1531,61 @@ function UserProfile() {
                 selectedBadge={userData?.primaryBadge}
             />,
         "Events": <EventDisplay gradientBgStyle={gradientBgStyle} />,
-        "Locations": <LocationDisplay gradientBgStyle={gradientBgStyle} />
+        "Locations": <LocationDisplay gradientBgStyle={gradientBgStyle} />,
+        "Edit Form": <EditForm userData={userData} setIsModalVisible={setIsModalVisible} />
 
     }
 
     const deleteAccountBtn = (
         <button
             className={"mt-2 py-2 px-10 w-fit rounded-lg text-white font-medium bg-gradient-135 from-[#FF0000] to-[#654398] hover:from-[#654398] hover:to-[#FF0000]"}
-            onClick={() => deleteAccount()}
+            onClick={() => setIsDeleteFormModalVisible(true)}
         >
             Delete Account
         </button>
     );
 
-    function deleteAccount() {
-        console.log("Delete Button Pressed");
-    }
-
     return (
         <div className="flex">
             <SideNavBar />
-            <div className="flex flex-col gap-6 w-full px-4 pt-4 pb-8">
-                {profileHeader}
+            <div className="relative flex flex-col gap-6 w-full px-4 pt-4 pb-8 items-center">
+                <ProfileHeader2 >
+                    {nameIconDiv}
+                    <div className="flex gap-8 items-center">
+                        {navDiv}
+                        {
+                            !guestView &&
+                            <button
+                                className={`rounded-lg ${gradientBgStyle} px-[1px] pt-[7px] pb-[6.5px] hover:to-[#60D6D9]`}
+                                onClick={() => setActiveView("Edit Form")}
+                            >
+                                <span className="rounded-[6.5px] px-6 py-2 font-medium text-transparent bg-white hover:text-[#60D6D9] active:text-white active:bg-transparent">
+                                    <span className={`${gradientBgStyle} bg-clip-text`}>
+                                        EDIT
+                                    </span>
+                                </span>
+                            </button>
+                        }
+                    </div>
+                </ProfileHeader2>
                 {viewMap[activeView]}
-                {deleteAccountBtn}
+                <div className="w-full">
+                    {deleteAccountBtn}
+                </div>
+                {isModalVisible && activeView == "Edit Form" &&
+                    <div className=" absolute inset-0 backdrop-blur-[2px] bg-gray-600/50 z-10 flex justify-center items-center">
+                        <MessageModal
+                            setIsModalVisible={setIsModalVisible}
+                            task="Details Updated"
+                            message="The profile details have been successfully updated and will reflect on your profile in a moment"
+                        />
+                    </div>
+                }
+                {isDeleteFormModalVisible &&
+                    <div className=" absolute inset-0 backdrop-blur-[2px] bg-gray-600/50 z-10 flex justify-center items-center">
+                        <DeleteFormModal userEmail={userData?.name} setIsModalVisible={setIsDeleteFormModalVisible} />
+                    </div>
+                }
             </div>
         </div>
     )

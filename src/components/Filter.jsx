@@ -41,8 +41,6 @@ function Filter({ paramsObj, setParamsObj, isSearchInputValid }) {
     "Estimated Area",
   ];
 
-  const dispatch = useDispatch();
-
   const handleCheckboxChange = (e) => {
     const { name, value, checked } = e.target;
 
@@ -94,7 +92,9 @@ function Filter({ paramsObj, setParamsObj, isSearchInputValid }) {
         waterAvailability: [],
         participantLimitMoreThan: "",
         participantLimitLessThan: "",
-        participatedBy: "",
+        participantsMoreThan: "",
+        participantsLessThan: "",
+        numberOfParticipants: "",
         targetPlantNumberMoreThan: "",
         targetPlantNumberLessThan: "",
         estimatedCostMoreThan: "",
@@ -112,7 +112,6 @@ function Filter({ paramsObj, setParamsObj, isSearchInputValid }) {
     setTempParamsObj(resetParams); // Reset locally
     setParamsObj(resetParams); // Reset globally
 
-    dispatch(getEventsByFilterPagination(resetParams));
   };
 
   useEffect(() => {
@@ -129,12 +128,10 @@ function Filter({ paramsObj, setParamsObj, isSearchInputValid }) {
     }
 
     setParamsObj(tempParamsObj);
-    dispatch(getEventsByFilterPagination(tempParamsObj));
   };
 
   const handleFilter = () => {
     setParamsObj(tempParamsObj);
-    dispatch(getEventsByFilterPagination(tempParamsObj));
   };
 
   return (
@@ -406,7 +403,7 @@ function Filter({ paramsObj, setParamsObj, isSearchInputValid }) {
                   <input
                     className="px-2 py-1 font-normal border-[1px] rounded-lg border-[#60d6d9] focus:outline-[#2572CF]"
                     type="number"
-                    placeholder="Minimun value"
+                    placeholder="Minimum value"
                     name="participantLimitMoreThan"
                     min="0"
                     onChange={handleInputChange}
@@ -427,14 +424,36 @@ function Filter({ paramsObj, setParamsObj, isSearchInputValid }) {
             )}
 
             {selectedName == "No. Of Participants" && (
-              <div className="flex flex-col w-[60%] animate-fade-right">
+              <div className="flex flex-col w-[70%] animate-fade-right">
                 <label className="my-1 flex justify-between items-center font-medium">
-                  <span className="mr-4">Participants No.</span>
+                  <span className="mr-4">More Than:</span>
                   <input
                     className="px-2 py-1 font-normal border-[1px] rounded-lg border-[#60d6d9] focus:outline-[#2572CF]"
                     type="number"
-                    placeholder="No. Of Participants"
-                    name="participatedBy"
+                    placeholder="Minimum value"
+                    name="participantsMoreThan"
+                    min="0"
+                    onChange={handleInputChange}
+                  />
+                </label>
+                <label className="my-1 flex justify-between items-center font-medium">
+                  <span className="mr-4">Less Than:</span>
+                  <input
+                    className="px-2 py-1 font-normal border-[1px] rounded-lg border-[#60d6d9] focus:outline-[#2572CF]"
+                    type="number"
+                    placeholder="Maximum value"
+                    name="participantsLessThan"
+                    min="0"
+                    onChange={handleInputChange}
+                  />
+                </label>
+                <label className="my-1 flex justify-between items-center font-medium">
+                  <span className="mr-4">Exact Participant Count:</span>
+                  <input
+                    className="px-2 py-1 font-normal border-[1px] rounded-lg border-[#60d6d9] focus:outline-[#2572CF]"
+                    type="number"
+                    placeholder="Maximum value"
+                    name="numberOfParticipants"
                     min="0"
                     onChange={handleInputChange}
                   />

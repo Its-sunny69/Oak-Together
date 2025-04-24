@@ -52,6 +52,7 @@ import SampleEventImg from "./sample_event_img.png"
 import EmptyBadgeImg from "./empty_badge_img.png";
 import SampleCertificateImg from "./sample_certificate_img.png"
 import ScrollTest1Png from "./scroll test1.png"
+import GalleryIcon from "./gallery-icon.png";
 import ScrollTest2Png from "./scroll test2.png"
 import ScrollTest3Png from "./scroll test3.png"
 import FinancePng from "./finance.png"
@@ -113,5 +114,6 @@ export {
   EmptyBadgeImg,
   SampleCertificateImg,
   GradientPeople,
+  GalleryIcon
   FinancePng,
 };

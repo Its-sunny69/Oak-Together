@@ -5,9 +5,9 @@ import { LocationDetailComponent, LocationPostComponent, PlaceAutocomplete } fro
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faMagnifyingGlass, faLocationDot } from "@fortawesome/free-solid-svg-icons";
 import { faCircleXmark } from "@fortawesome/free-regular-svg-icons";
-import { getLocationsUsingFilter } from '../features/locationSlice';
-import { getEventsByFilter } from "../features/eventSlice";
-import { useDispatch } from 'react-redux';
+import { getLocationsByFilterPagination } from '../features/locationSlice';
+import { getEventsByFilterPagination } from "../features/eventSlice";
+import { useDispatch, useSelector } from 'react-redux';
 import { MarkerClusterer } from '@googlemaps/markerclusterer';
 import Geohash from "ngeohash";
 
@@ -24,8 +24,8 @@ const Markers = ({ markerCoordinates, markerStates, setSelectedLocationId, setSe
     return allMarkerCoordsList.filter((markerCoordsObj) => {
       const geohash = Geohash.encode(markerCoordsObj.lat, markerCoordsObj.lng, 9);
 
-      if(geohashSet.has(geohash)) return;
-      
+      if (geohashSet.has(geohash)) return;
+
       geohashSet.add(geohash);
       return markerCoordsObj;
     });
@@ -72,13 +72,14 @@ const Markers = ({ markerCoordinates, markerStates, setSelectedLocationId, setSe
 
       const advancedMarkerElement = new google.maps.marker.AdvancedMarkerElement({
         position: { lat: lat, lng: lng },
-        content: markerDOM
+        content: markerDOM,
+        zIndex: 100
       });
 
       advancedMarkerElement.addListener("click", (e) => {
         if (showPostInterface) return; // might need to handle this differently later...
         setSelectedLocationId(id);
-        setSelectedLocationCoords({lat: e.latLng.lat(), lng: e.latLng.lng()});
+        setSelectedLocationCoords({ lat: e.latLng.lat(), lng: e.latLng.lng() });
         setEventSelected(type == "event");
       });
 
@@ -162,20 +163,29 @@ function MapComponent({ currLocationCoords, setIsModalVisible }) {
     <AdvancedMarker
       position={currLocationCoords}
       onClick={() => { }}
-      onMouseEnter={() => setCurrentTooltipVisible(true)}
-      onMouseLeave={() => setCurrentTooltipVisible(false)}
+      zIndex={0}
     >
-      <div className="relative">
-        <span className="text-2xl font-extrabold rounded-full py-2 px-3 shadow-sm shadow-emerald-400 bg-blue-200 bg-opacity-45 border-blue-700 border-[1px] ">📍</span>
-        {currentTooltipVisible &&
-          <div
-            className="p-3 whitespace-nowrap text-sm z-10 bg-black bg-opacity-80 font-medium text-white rounded-md font-[Arial] absolute -top-12 -right-2.5">
-            Current Location
-          </div>
-        }
+      <div
+        className="relative"
+        onMouseEnter={() => setCurrentTooltipVisible(true)}
+        onMouseLeave={() => setCurrentTooltipVisible(false)}
+      >
+        <span
+          className="text-2xl font-extrabold rounded-full py-2 px-3 shadow-sm shadow-emerald-400 bg-blue-200 bg-opacity-45 border-blue-700 border-[1px]"
+        >
+          📍
+        </span>
+
+        <div
+          className={`absolute -top-12 -right-2.5 z-10 p-3 whitespace-nowrap text-sm bg-black bg-opacity-80 font-medium text-white rounded-md font-[Arial] transition-opacity duration-150 ${currentTooltipVisible ? "opacity-100" : "opacity-0"
+            } pointer-events-none`}
+        >
+          Current Location
+        </div>
       </div>
     </AdvancedMarker>
-  )
+  );
+
 
   // Map filter checkbox collection
   const texts = ["Planted Locations", "Barren Locations", "Events"];
@@ -261,28 +271,30 @@ function MapComponent({ currLocationCoords, setIsModalVisible }) {
   )
 
   // PlaceAutocomplete search box
-  const [showClearIcon, setShowClearIcon] = useState(false);
-  const autocompleteInputRef = useRef(null);
+  const [addressInputText, setAddressInputText] = useState("");
+  const [addressInputFocused, setAddressInputFocused] = useState(false);
+  const addressInputRef = useRef();
+
+  const showClearIcon = addressInputText.length > 0;
+
   const autocompleteInput = (
     <input
-      className="p-3 w-[30vw] h-[100%] rounded-r-xl text-[14px] outline-none"
-      ref={autocompleteInputRef}
+      ref={addressInputRef}
+      className="p-3 w-[30vw] h-[100%] rounded-r-xl text-[14px] outline-none "
       placeholder="Search Location"
-      onFocus={() => {
-        const searchControlsDiv = autocompleteInputRef.current.parentNode;
-        searchControlsDiv.style.border = "3px solid #60D6D9";
-      }}
-      onBlur={() => {
-        const searchControlsDiv = autocompleteInputRef.current.parentNode;
-        searchControlsDiv.style.border = "1px solid #187BEC";
-      }}
-      onInput={() => {
-        setShowClearIcon(autocompleteInputRef.current.value.length > 0);
-      }}
+      value={addressInputText}
+      onChange={(e) => { setAddressInputText(e.target.value.trim()) }}
+      onFocus={() => { setAddressInputFocused(true); }}
+      onBlur={() => { setAddressInputFocused(false); }}
     />
   )
   const searchControls = (
-    <div className="relative flex items-center h-9 mt-3 rounded-xl shadow-lg border-[1px] border-[#187BEC] bg-white">
+    <div
+      className="relative flex items-center h-9 mt-3 rounded-xl shadow-lg bg-white"
+      style={{
+        border: addressInputFocused ? "3px solid #60D6D9" : "1px solid #187BEC"
+      }}
+    >
       <div className="h-full flex items-center pl-2 text-lg">
         <FontAwesomeIcon icon={faMagnifyingGlass} />
       </div>
@@ -291,9 +303,7 @@ function MapComponent({ currLocationCoords, setIsModalVisible }) {
         <div
           className="h-full absolute right-0 flex items-center px-2 rounded-r-xl text-lg text-red-500 cursor-pointer bg-white"
           onClick={() => {
-            autocompleteInputRef.current.value = "";
-            autocompleteInputRef.current.focus();
-            setShowClearIcon(false);
+            setAddressInputText("");
             setSearchedLocationCoords(null);
           }}
         >
@@ -304,9 +314,17 @@ function MapComponent({ currLocationCoords, setIsModalVisible }) {
   );
 
   // Handling place selection via PlaceAutocomplete
-  const handlePlaceSelect = (coords) => {
-    setSearchedLocationCoords(coords);
+  const handlePlaceSelect = (map, selectedPlace) => {
+    const locationCoords = selectedPlace.geometry.location;
+    const locationAddress = selectedPlace.formatted_address;
+    const nextCoords = { lat: locationCoords.lat(), lng: locationCoords.lng() }
+
+    map.setCenter(nextCoords);
+    setAddressInputText(locationAddress);
+    setSearchedLocationCoords(nextCoords);
   }
+
+  useEffect(() => { console.log("searched location changed!!") }, [searchedLocationCoords])
 
   // For keeping track of Selected Locations via Marker Clicks
   const [selectedLocationId, setSelectedLocationId] = useState(null);
@@ -317,7 +335,19 @@ function MapComponent({ currLocationCoords, setIsModalVisible }) {
   const [markerCoordinates, setMarkerCoordinates] = useState({
     plantedCoordinates: [], barrenCoordinates: [], eventCoordinates: []
   });
+
   const dispatch = useDispatch();
+  const {
+    locationsByFilterPagination: locationList,
+    totalItems: totalLocationItems
+  } = useSelector((state) => state.location);
+  const {
+    eventsByFilterPagination: eventList,
+    totalItems: totalEventItems,
+  } = useSelector((state) => state.event);
+  const { user: userData } = useSelector((state) => state.user);
+
+  const userIsAdmin = userData?.role == "ADMIN";
 
   const setAllMarkers = (mapInstance) => {
     const mapCenter = mapInstance.getCenter();
@@ -326,68 +356,77 @@ function MapComponent({ currLocationCoords, setIsModalVisible }) {
     const mapNE = mapInstance.getBounds().getNorthEast();
     const radius = google.maps.geometry.spherical.computeDistanceBetween(mapCenter, mapNE);
 
-    const filterText =
-      centerCoords ?
-        `entityStatus=ACTIVE&latitudeCenter=${centerCoords.lat}&longitudeCenter=${centerCoords.lng}&radius=${radius}`
-        : "";
+    const filterByDistanceObj = {
+      entityStatus: "ACTIVE",
+      radius: radius,
+      latitudeCenter: centerCoords.lat,
+      longitudeCenter: centerCoords.lng,
+    }
 
-    // console.log(filterText);
-    dispatch(getLocationsUsingFilter(filterText)).unwrap()
-      .then((response) => {
-        const plantedCoords = [], barrenCoords = [];
+    const paramsObjLocation = {
+      page: 0,
+      size: Math.max(totalLocationItems, 5),
+      filterObj: filterByDistanceObj
+    }
 
-        response.forEach((locationObj) => {
-          const coordinateObj = {
-            id: locationObj.id,
-            lat: locationObj.position.locations.latitude,
-            lng: locationObj.position.locations.longitude,
-            type: locationObj.type.toLowerCase()
-          };
+    const paramsObjEvent = {
+      page: 0,
+      size: Math.max(totalEventItems, 5),
+      filterObj: {...filterByDistanceObj, approvalStatus: userIsAdmin? "": "APPROVED"}
+    }
 
-          switch (coordinateObj.type) {
-            case "planted":
-              plantedCoords.push(coordinateObj);
-              break;
-            case "barren":
-              barrenCoords.push(coordinateObj);
-              break;
-          }
-
-        });
-
-        setMarkerCoordinates((prevState) => {
-          const isSame =
-            JSON.stringify(prevState.plantedCoordinates) === JSON.stringify(plantedCoords) &&
-            JSON.stringify(prevState.barrenCoordinates) === JSON.stringify(barrenCoords);
-
-          if (isSame) return prevState; // Prevent unnecessary updates
-          return { ...prevState, plantedCoordinates: plantedCoords, barrenCoordinates: barrenCoords };
-        });
-
-      })
+    dispatch(getLocationsByFilterPagination(paramsObjLocation)).unwrap()
       .catch((error) => console.log(error));
 
-    dispatch(getEventsByFilter(filterText)).unwrap()
-      .then((response) => {
-        const eventCoords = [];
-
-        response.forEach((eventObj) => {
-          const coordinateObj = {
-            id: eventObj.id,
-            lat: eventObj.position.locations.latitude,
-            lng: eventObj.position.locations.longitude,
-            type: "event"
-          };
-
-          eventCoords.push(coordinateObj);
-        });
-
-        setMarkerCoordinates({
-          ...markerCoordinates,
-          eventCoordinates: eventCoords
-        })
-      })
+    dispatch(getEventsByFilterPagination(paramsObjEvent)).unwrap()
       .catch((error) => console.log(error));
+
+    const plantedCoords = [], barrenCoords = [], eventCoords = [];
+
+    locationList?.forEach((locationObj) => {
+      const coordinateObj = {
+        id: locationObj.id,
+        lat: locationObj.position.locations.latitude,
+        lng: locationObj.position.locations.longitude,
+        type: locationObj.type.toLowerCase()
+      };
+
+      switch (coordinateObj.type) {
+        case "planted":
+          plantedCoords.push(coordinateObj);
+          break;
+        case "barren":
+          barrenCoords.push(coordinateObj);
+          break;
+      }
+    });
+
+    eventList?.forEach((eventObj) => {
+      const coordinateObj = {
+        id: eventObj.id,
+        lat: eventObj.position.locations.latitude,
+        lng: eventObj.position.locations.longitude,
+        type: "event"
+      };
+
+      eventCoords.push(coordinateObj);
+    });
+
+    setMarkerCoordinates((prevState) => {
+      if(!locationList || !eventList) return prevState;
+      
+      const isSame =
+        JSON.stringify(prevState.plantedCoordinates) === JSON.stringify(plantedCoords) &&
+        JSON.stringify(prevState.barrenCoordinates) === JSON.stringify(barrenCoords) &&
+        JSON.stringify(prevState.eventCoordinates) === JSON.stringify(eventCoords)
+
+      if (isSame) return prevState; // Prevent unnecessary updates
+      return {
+        plantedCoordinates: plantedCoords,
+        barrenCoordinates: barrenCoords,
+        eventCoordinates: eventCoords
+      };
+    });
   }
 
   return (
@@ -416,8 +455,9 @@ function MapComponent({ currLocationCoords, setIsModalVisible }) {
           <Map
             defaultCenter={currLocationCoords}
             defaultZoom={17}
-            streetViewControlOptions={{position: ControlPosition.RIGHT_CENTER}}
-            cameraControlOptions={{position: ControlPosition.RIGHT_TOP}}
+            minZoom={3}
+            streetViewControlOptions={{ position: ControlPosition.RIGHT_CENTER }}
+            cameraControlOptions={{ position: ControlPosition.RIGHT_TOP }}
             mapId={import.meta.env.VITE_GMAP_MAP_STYLE_ID}
             draggableCursor={showPostInterface ? "default" : "grab"}
             onClick={(e) => {
@@ -446,7 +486,11 @@ function MapComponent({ currLocationCoords, setIsModalVisible }) {
 
           {!showPostInterface &&
             <MapControl position={ControlPosition.TOP_CENTER}>
-              <PlaceAutocomplete onPlaceSelect={handlePlaceSelect} customInputRef={autocompleteInputRef}>
+              <PlaceAutocomplete
+                onPlaceSelect={handlePlaceSelect}
+                customInputRef={addressInputRef}
+                usesMap
+              >
                 {searchControls}
               </PlaceAutocomplete>
             </MapControl>
@@ -460,10 +504,11 @@ function MapComponent({ currLocationCoords, setIsModalVisible }) {
             <LocationDetailComponent
               selectedLocationId={selectedLocationId}
               setSelectedLocationId={setSelectedLocationId}
-              selectedLocationCoords = {selectedLocationCoords}
-              setSelectedLocationCoords = {setSelectedLocationCoords}
+              selectedLocationCoords={selectedLocationCoords}
+              setSelectedLocationCoords={setSelectedLocationCoords}
               eventSelected={eventSelected}
               setEventSelected={setEventSelected}
+              currLocationCoords={currLocationCoords}
             />
           }
 
