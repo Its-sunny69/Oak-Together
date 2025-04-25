@@ -11,7 +11,7 @@ export default function AboutUs(){
     ]
 
     return(
-        <section className="flex flex-col my-24 lg:flex-row">
+        <section id="AboutUs" className="flex flex-col my-24 lg:flex-row">
             <div className="lg:w-[50%] flex items-center justify-center">
                 <img
                     src={People2}
