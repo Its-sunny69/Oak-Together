@@ -9,7 +9,7 @@ function Navbar() {
   const navList = ["Home", "About"];
 
   const handleHomeClick = () => {
-    const lowerCased = item.toLowerCase();
+    const lowerCased = "home";
     const pathEndPoint = (lowerCased === "home")? "home": lowerCased;
     navigate("/" + pathEndPoint)
     console.log("/" + pathEndPoint)

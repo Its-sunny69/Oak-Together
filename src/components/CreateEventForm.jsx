@@ -286,8 +286,8 @@ function LocationFormSection({ selectedLocationObj, setSelectedLocationObj, plac
       setFieldValue("latitude", "");
       setFieldValue("longitude", "");
 
-      if (!touched.latitude && touched.address) setFieldTouched("latitude", true);
-      if (!touched.latitude && touched.address) setFieldTouched("longitude", true);
+      setFieldTouched("latitude", true);
+      setFieldTouched("longitude", true);
 
       setTimeout(() => {
         validateField("latitude");
@@ -304,7 +304,7 @@ function LocationFormSection({ selectedLocationObj, setSelectedLocationObj, plac
     if (!selectedLocationObj && values.latitude && values.longitude) {
       getFormattedAddress(values.latitude, values.longitude, setFieldValue, "address");
       setPlaceSelected(true);
-      if (!touched.address) setFieldTouched("address", true);
+      setFieldTouched("address", true);
     }
   }, [debouncedLat, debouncedLng]);
 
@@ -678,6 +678,7 @@ function CreateEventForm({ setIsModalVisible }) {
 
     try {
       const response = await dispatch(postEvent(postEventObj)).unwrap();
+      console.log(response)
       const { id: eventId } = response;
 
       // If there are image files, upload them

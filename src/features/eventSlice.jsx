@@ -587,7 +587,8 @@ export const deleteEventById = createAsyncThunk(
 
 export const uploadImagesInEvent = createAsyncThunk(
   "events/uploadImagesInEvent",
-  async ({ eventId, imageFiles }, { rejectWithValue }) => {
+  async ({ eventId, imageFiles }, { rejectWithValue, getState }) => {
+    const userId = getState().user.user;
     try {
       const response = await fetch(`${apiUrl}/user-profiles/user-id/${userId}/events/event-id/${eventId}/images`, {
         method: "POST",
