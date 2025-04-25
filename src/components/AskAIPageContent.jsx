@@ -12,6 +12,7 @@ import { DotLottieReact } from "@lottiefiles/dotlottie-react";
 import {
   ArrowBackIosRounded,
   ArrowForwardIosRounded,
+  LogoDev,
 } from "@mui/icons-material";
 import {
   Navigation,
@@ -67,6 +68,8 @@ function AskAIPageContent() {
     const params = `address=${values.address}&space=${values.address}&waterAvailability=${values.waterAvailability}`;
 
     setLoading(true);
+    console.log(loading);
+
     dispatch(intelligenceApi(params))
       .unwrap()
       .then(() => {
@@ -80,6 +83,10 @@ function AskAIPageContent() {
       });
   };
 
+  const handleLoading = () => {
+    if (intelligence) setLoading(!loading);
+  };
+
   const [placeSelected, setPlaceSelected] = useState(false);
 
   const formatTitle = (str) => {
@@ -88,13 +95,12 @@ function AskAIPageContent() {
       .replace(/^./, (char) => char.toUpperCase()); // capitalize first letter
   };
 
-
   return (
     <APIProvider
       apiKey={import.meta.env.VITE_GMAP_API_KEY}
       libraries={["geometry"]}
     >
-      <div className="flex flex-col gap-8 pt-6 pr-4 w-full">
+      <div className="pt-6 pr-4 w-full overflow-hidden">
         <ProfileHeader2
           absolutePositionObj={{
             top: "8rem",
@@ -184,6 +190,7 @@ function AskAIPageContent() {
                     <button
                       className="px-6 py-2 rounded-lg bg-gradient-120 shadow-md from-[#60D6D9] from-50% to-[#1566E7] to-100% hover:from-[#1566E7] hover:to-[#60D6D9] text-white font-medium active:scale-95 transition-all "
                       type="submit"
+                      onClick={handleLoading}
                     >
                       Generate Insights
                     </button>
@@ -198,7 +205,7 @@ function AskAIPageContent() {
 
         {intelligence ? (
           loading ? (
-            <div className="min-h-64 flex items-center justify-center font-semibold">
+            <div className="bg-white min-h-64 flex items-center justify-center font-semibold">
               <DotLottieReact
                 src={LoadingAnimation}
                 loop
@@ -207,7 +214,7 @@ function AskAIPageContent() {
               />
             </div>
           ) : (
-            <div className="">
+            <div className="mt-16">
               <div className="bg-[#47B2FF] text-white p-6 rounded-2xl">
                 <p className="font-semibold text-lg">Tree to Plant!</p>
 

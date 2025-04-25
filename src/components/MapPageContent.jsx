@@ -2,10 +2,9 @@ import { useState } from "react";
 import { useInterval } from "../hooks";
 import { ProfileHeader, MapComponent } from "./";
 import MessageModal from "./MessageModal";
-
+import { Skeleton } from "@mui/material";
 
 function MapPageContent() {
-
   const [isModalVisible, setIsModalVisible] = useState(false);
   const [currLocationCoords, setCurrentLocationCoords] = useState(null);
 
@@ -17,10 +16,15 @@ function MapPageContent() {
           const lng = position.coords.longitude;
 
           // Below line ensures that the state does not change when current location hasn't changed, preventing meaningless re-render of MapComponent
-          if (currLocationCoords && currLocationCoords.lat == lat && currLocationCoords.lng == lng) return;
+          if (
+            currLocationCoords &&
+            currLocationCoords.lat == lat &&
+            currLocationCoords.lng == lng
+          )
+            return;
           setCurrentLocationCoords({ lat: lat, lng: lng });
-        }
-        , (error) => {
+        },
+        (error) => {
           switch (error.code) {
             case error.PERMISSION_DENIED:
               alert("User denied the request for Geolocation.");
@@ -35,26 +39,30 @@ function MapPageContent() {
               alert("An unknown error occurred.");
               break;
           }
-        });
-    }
-    else alert("Geolocation is not supported by this browser.");
-  }
+        }
+      );
+    } else alert("Geolocation is not supported by this browser.");
+  };
 
   useInterval(fetchLocation, 5000); // custom hook to make 'setInterval' behave well with React programming
 
   return (
-    <div
-      className="flex flex-col gap-8 py-6 pr-4 w-full"
-    >
+    <div className="flex flex-col gap-8 py-6 pr-4 w-full">
       <ProfileHeader />
       <div className="relative">
-
-        {currLocationCoords &&
+        {currLocationCoords ? (
           <MapComponent
             currLocationCoords={currLocationCoords}
             setIsModalVisible={setIsModalVisible}
           />
-        }
+        ) : (
+          <Skeleton
+            variant="rectangular"
+            animation="wave"
+            height={600}
+            className="rounded-lg"
+          />
+        )}
 
         {isModalVisible && (
           <div className=" absolute inset-0 backdrop-blur-[2px] bg-gray-600/50 z-10 flex justify-center items-center">
@@ -67,7 +75,6 @@ function MapPageContent() {
             />
           </div>
         )}
-
       </div>
     </div>
   );
