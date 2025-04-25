@@ -1,20 +1,22 @@
 import { useEffect } from "react";
 import { useDispatch, useSelector } from "react-redux";
-import { getLocationById, waterLocationWithId } from "../features/locationSlice";
+import { deactivateLocationWithId, getLocationById, waterLocationWithId } from "../features/locationSlice";
 import { getEventById } from "../features/eventSlice";
 import { HandWithPenPng, IrrigationPng, ConfettiPng, UserPng, Calendar1Png, MultiplyPng, SeasonPng, LocationInfoIcon } from "../assets";
 // import { getAQIByCoordinates } from "../features/airVisualAPISlice";
+import { useNavigate } from "react-router-dom";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faGlassWater, faMap, faWind } from "@fortawesome/free-solid-svg-icons";
 import toast from "react-hot-toast";
 
 
-function LocationDetailComponent({ selectedLocationId, setSelectedLocationId, selectedLocationCoords, setSelectedLocationCoords, eventSelected, currLocationCoords }) {
+function LocationDetailComponent({ selectedLocationId, setSelectedLocationId, selectedLocationCoords, setSelectedLocationCoords, eventSelected, currLocationCoords, isAdmin }) {
+
+    const dispatch = useDispatch();
+    const navigate = useNavigate();
 
     const { locationById } = useSelector((state) => state.location);
     const { currentEvent: eventById } = useSelector((state) => state.event);
-
-    const dispatch = useDispatch();
 
     useEffect(() => {
         // console.log("Event Selected: ", eventSelected);
@@ -90,7 +92,7 @@ function LocationDetailComponent({ selectedLocationId, setSelectedLocationId, se
 
     function colorCodedAQI(aqi) {
 
-        if(aqi == null) return null;
+        if (aqi == null) return null;
 
         const colors = ["green", "yellow", "orange", "red", "purple", "maroon"];
         const limits = [50, 100, 150, 200, 300]
@@ -159,7 +161,7 @@ function LocationDetailComponent({ selectedLocationId, setSelectedLocationId, se
         <div className="flex p-4 gap-3 overflow-x-scroll">
             {descriptiveDetailsList.map((detailObj) => {
 
-                if(!detailObj) return;
+                if (!detailObj) return;
 
                 const { imageSrc, title, content } = detailObj;
                 return (
@@ -174,7 +176,9 @@ function LocationDetailComponent({ selectedLocationId, setSelectedLocationId, se
         </div>
     )
 
-    const markLocationWatered = (locationId) => {
+    const markLocationWatered = () => {
+        const locationId = locationById?.id;
+
         dispatch(waterLocationWithId({ locationId, coordsString: `latitude=${currLocationCoords?.lat}&longitude=${currLocationCoords.lng}` })).unwrap()
             .then((response) => {
                 toast.success(`Location: ${response.name} watered successfully`);
@@ -187,10 +191,23 @@ function LocationDetailComponent({ selectedLocationId, setSelectedLocationId, se
 
     }
 
+    const handleLocationDeletion = () => {
+        const locationId = locationById?.id;
+
+        toast.promise(dispatch(deactivateLocationWithId(locationId)), {
+            loading: `Deleting Location...`,
+            success: `Location ${locationById?.name} deleted successfully`,
+            error: (err) => err?.payload?.message || "Failed to delete location."
+        })
+    }
+
+    const navigateToEventDetailPage = () => {
+        navigate(`/events/details/${eventById?.id}`);
+    }
 
     return (
         <div
-            className="absolute left-6 bottom-6 right-[33%] max-h-[70%] flex flex-col gap-6 py-8 px-6 rounded-xl shadow-lg bg-white"
+            className="absolute left-6 bottom-6 right-[33%] max-h-[74%] flex flex-col gap-6 py-8 px-6 rounded-xl shadow-lg bg-white"
         >
             <span className="text-lg font-medium">
                 {(eventSelected ? eventById?.name : locationById?.name) ?? "NA"}
@@ -202,9 +219,29 @@ function LocationDetailComponent({ selectedLocationId, setSelectedLocationId, se
                 <div className="flex w-full justify-end">
                     <button
                         className="px-6 py-2 rounded-lg bg-gradient-120 shadow-md from-[#60D6D9] from-50% to-[#1566E7] to-100% hover:from-[#1566E7] hover:to-[#60D6D9] text-white font-medium flex justify-center items-center active:scale-95 transition-all"
-                        onClick={() => markLocationWatered(locationById?.id)}
+                        onClick={markLocationWatered}
                     >
                         Watered
+                    </button>
+                </div>
+            }
+
+            {!eventSelected && isAdmin &&
+                <button
+                    className="ml-2 py-2 px-6 w-fit rounded-lg text-white font-medium bg-gradient-135 from-[#FF0000] to-[#654398] hover:from-[#654398] hover:to-[#FF0000]"
+                    onClick={handleLocationDeletion}
+                >
+                    Delete Location
+                </button>
+            }
+
+            {eventSelected &&
+                <div className="flex w-full justify-end">
+                    <button
+                        className="px-6 py-2 rounded-lg bg-gradient-120 shadow-md from-[#60D6D9] from-50% to-[#1566E7] to-100% hover:from-[#1566E7] hover:to-[#60D6D9] text-white font-medium flex justify-center items-center active:scale-95 transition-all"
+                        onClick={navigateToEventDetailPage}
+                    >
+                        View Details
                     </button>
                 </div>
             }

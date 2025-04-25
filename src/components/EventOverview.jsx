@@ -74,7 +74,7 @@ function EventOverview({ eventId }) {
 
   const handleEdit = () => {};
 
-  const handleEventDetele = () => {
+  const handleEventDelete = () => {
     toast.promise(dispatch(deleteEventById(detail.id)), {
       loading: "Deleting event...",
       success: "Event deleted successfully!",
@@ -116,7 +116,7 @@ function EventOverview({ eventId }) {
           className={
             "ml-4 py-2 px-10 w-fit rounded-lg shadow-md text-white font-medium bg-gradient-135 from-[#FF0000] to-[#654398] hover:from-[#654398] hover:to-[#FF0000]"
           }
-          onClick={handleEventDetele}
+          onClick={handleEventDelete}
         >
           Delete
         </button>
@@ -135,7 +135,7 @@ function EventOverview({ eventId }) {
             className={
               "ml-4 py-2 px-10 w-fit rounded-lg shadow-md text-white font-medium bg-gradient-135 from-[#FF0000] to-[#654398] hover:from-[#654398] hover:to-[#FF0000]"
             }
-            onClick={handleEventDetele}
+            onClick={handleEventDelete}
           >
             Delete
           </button>

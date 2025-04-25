@@ -1595,11 +1595,8 @@ function DeleteFormModal({ userName, setIsModalVisible, userId }) {
 function UserProfile() {
   const [activeView, setActiveView] = useState("Overview");
   const [isModalVisible, setIsModalVisible] = useState(false);
-  const [isDeleteFormModalVisible, setIsDeleteFormModalVisible] =
-    useState(false);
+  const [isDeleteFormModalVisible, setIsDeleteFormModalVisible] = useState(false);
 
-  const dispatch = useDispatch();
-  const navigate = useNavigate();
 
   const { userData } = useSelector((state) => state.user);
   const isSponsor = userData?.role == "ORGANIZATION"

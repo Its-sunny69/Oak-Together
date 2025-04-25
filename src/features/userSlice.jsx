@@ -241,7 +241,13 @@ const userSlice = createSlice({
     status: "idle",
     error: null,
   },
-  reducers: {},
+  reducers: {
+    logoutUser: (state) => {
+      state.user = null;
+      state.userData = null;
+      state.token = "";
+    }
+  },
   extraReducers: (builder) => {
     builder
       .addCase(fetchUsers.pending, (state) => {
@@ -293,4 +299,6 @@ const userSlice = createSlice({
   },
 });
 
+
+export const { logoutUser } = userSlice.actions;
 export default userSlice.reducer;
