@@ -44,7 +44,9 @@
 ## 👨‍💻 Team Members
 
 - **Sunny Yadav** – Frontend Developer (React, Redux, Google Maps)
-- *[Add other team members and their roles here]*
+- **Sufiyan Chougule** – Frontend Developer (React, Redux, Google Maps)
+- **Prathamesh Zingade** – Backend Developer (Java, SpringBoot)
+- **Salimmiya Saudagar** – Android Developer (Kotlin, Jetpack Compose) 
 
 ---
 
