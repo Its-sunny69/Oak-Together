@@ -33,6 +33,104 @@ import { useNavigate } from "react-router-dom";
 import toast from "react-hot-toast";
 import { DotLottieReact } from "@lottiefiles/dotlottie-react";
 
+
+const RenderButton = () => {
+
+  const navigate = useNavigate();
+  const dispatch = useDispatch();
+
+  const handleEdit = () => { };
+
+  const handleEventDelete = () => {
+    toast.promise(dispatch(deleteEventById(detail.id)), {
+      loading: "Deleting event...",
+      success: "Event deleted successfully!",
+      error: (err) => err?.payload?.message || "Failed to delete event.",
+    });
+
+    navigate("/events");
+  };
+
+  const handleRegister = () => {
+    toast.promise(dispatch(enrollInEventById(detail.id)), {
+      loading: "Enrolling in event...",
+      success: "Enrolled successfully!",
+      error: (err) => err?.payload?.message || "Failed to enroll in event.",
+    });
+
+    // dispatch(getParticipantsOfEventById(detail.id));
+  };
+
+  const handleWithdraw = () => {
+    toast.promise(dispatch(withdrawFromEventById(detail.id)), {
+      loading: "Withdrawing from event...",
+      success: "Withdrawn successfully!",
+      error: (err) => err?.payload?.message || "Failed to Withdraw from event.",
+    });
+
+    // dispatch(getParticipantsOfEventById(detail.id));
+  };
+
+  const userData = useSelector((state) => state.user.userData);
+  const detail = useSelector((state) => state.event.currentEvent);
+
+  console.log("");
+  if (userData.role === "ADMIN") {
+    return (
+      //show approve and delete button
+      <button
+        className={
+          "ml-4 py-2 px-10 w-fit rounded-lg shadow-md text-white font-medium bg-gradient-135 from-[#FF0000] to-[#654398] hover:from-[#654398] hover:to-[#FF0000]"
+        }
+        onClick={handleEventDelete}
+      >
+        Delete
+      </button>
+    );
+  } else if (userData.role === "ORGANIZATION") {
+    //show sponsor and sponsored button
+    return (
+      <button className="px-6 py-2 ml-4 rounded-lg bg-gradient-120 shadow-md from-[#60D6D9] from-50% to-[#1566E7] to-100% hover:from-[#1566E7] hover:to-[#60D6D9] text-white font-medium flex justify-center items-center active:scale-95 transition-all">
+        Sponsors
+      </button>
+    );
+  } else {
+    if (userData?.id == detail.eventCreator?.id) {
+      return (
+        <button
+          className={
+            "ml-4 py-2 px-10 w-fit rounded-lg shadow-md text-white font-medium bg-gradient-135 from-[#FF0000] to-[#654398] hover:from-[#654398] hover:to-[#FF0000]"
+          }
+          onClick={handleEventDelete}
+        >
+          Delete
+        </button>
+      );
+    } else {
+      console.log("here", detail);
+      if (!detail.isParticipated) {
+        return (
+          <button
+            className="px-6 py-2 ml-4 rounded-lg bg-gradient-120 shadow-md from-[#60D6D9] from-50% to-[#1566E7] to-100% hover:from-[#1566E7] hover:to-[#60D6D9] text-white font-medium flex justify-center items-center active:scale-95 transition-all"
+            onClick={handleRegister}
+          >
+            Participate
+          </button>
+        );
+      } else {
+        return (
+          <button
+            className="py-2 px-10 w-fit rounded-lg shadow-md text-white font-medium bg-gradient-135 from-[#FF0000] to-[#654398] hover:from-[#654398] hover:to-[#FF0000] active:scale-95 transition-all"
+            onClick={handleWithdraw}
+          >
+            Withdraw
+          </button>
+        );
+      }
+    }
+  }
+};
+
 function EventOverview({ eventId }) {
   const [readMore, setReadMore] = useState(false);
 
@@ -41,12 +139,11 @@ function EventOverview({ eventId }) {
   const detail = useSelector((state) => state.event.currentEvent);
 
   const dispatch = useDispatch();
-  const navigate = useNavigate();
 
   useEffect(() => {
     console.log("eventId", eventId);
     dispatch(getEventById(eventId));
-    dispatch(getParticipantsOfEventById(eventId));
+    // dispatch(getParticipantsOfEventById(eventId));
   }, []);
 
   const formateDate = (dateStr) => {
@@ -70,99 +167,6 @@ function EventOverview({ eventId }) {
     });
 
     return formated;
-  };
-
-  const handleEdit = () => {};
-
-  const handleEventDelete = () => {
-    toast.promise(dispatch(deleteEventById(detail.id)), {
-      loading: "Deleting event...",
-      success: "Event deleted successfully!",
-      error: (err) => err?.payload?.message || "Failed to delete event.",
-    });
-
-    navigate("/events");
-  };
-
-  const handleRegister = () => {
-    toast.promise(dispatch(enrollInEventById(detail.id)), {
-      loading: "Enrolling in event...",
-      success: "Enrolled successfully!",
-      error: (err) => err?.payload?.message || "Failed to enroll in event.",
-    });
-
-    dispatch(getParticipantsOfEventById(detail.id));
-  };
-
-  const handleWithdraw = () => {
-    toast.promise(dispatch(withdrawFromEventById(detail.id)), {
-      loading: "Withdrawing from event...",
-      success: "Withdrawn successfully!",
-      error: (err) => err?.payload?.message || "Failed to Withdraw from event.",
-    });
-
-    dispatch(getParticipantsOfEventById(detail.id));
-  };
-
-  const RenderButton = () => {
-    const userData = useSelector((state) => state.user.userData);
-    const detail = useSelector((state) => state.event.currentEvent);
-
-    console.log("first");
-    if (userData.role === "ADMIN") {
-      return (
-        //show approve and delete button
-        <button
-          className={
-            "ml-4 py-2 px-10 w-fit rounded-lg shadow-md text-white font-medium bg-gradient-135 from-[#FF0000] to-[#654398] hover:from-[#654398] hover:to-[#FF0000]"
-          }
-          onClick={handleEventDelete}
-        >
-          Delete
-        </button>
-      );
-    } else if (userData.role === "ORGANIZATION") {
-      //show sponsor and sponsored button
-      return (
-        <button className="px-6 py-2 ml-4 rounded-lg bg-gradient-120 shadow-md from-[#60D6D9] from-50% to-[#1566E7] to-100% hover:from-[#1566E7] hover:to-[#60D6D9] text-white font-medium flex justify-center items-center active:scale-95 transition-all">
-          Sponsors
-        </button>
-      );
-    } else {
-      if (userData?.id == detail.eventCreator?.id) {
-        return (
-          <button
-            className={
-              "ml-4 py-2 px-10 w-fit rounded-lg shadow-md text-white font-medium bg-gradient-135 from-[#FF0000] to-[#654398] hover:from-[#654398] hover:to-[#FF0000]"
-            }
-            onClick={handleEventDelete}
-          >
-            Delete
-          </button>
-        );
-      } else {
-        console.log("here", detail);
-        if (!detail.participants?.some((user) => user.id == userData.id)) {
-          return (
-            <button
-              className="px-6 py-2 ml-4 rounded-lg bg-gradient-120 shadow-md from-[#60D6D9] from-50% to-[#1566E7] to-100% hover:from-[#1566E7] hover:to-[#60D6D9] text-white font-medium flex justify-center items-center active:scale-95 transition-all"
-              onClick={handleRegister}
-            >
-              Participate
-            </button>
-          );
-        } else {
-          return (
-            <button
-              className="py-2 px-10 w-fit rounded-lg shadow-md text-white font-medium bg-gradient-135 from-[#FF0000] to-[#654398] hover:from-[#654398] hover:to-[#FF0000] active:scale-95 transition-all"
-              onClick={handleWithdraw}
-            >
-              Withdraw
-            </button>
-          );
-        }
-      }
-    }
   };
 
   return (

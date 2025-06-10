@@ -6,7 +6,7 @@ import { Swiper, SwiperSlide } from 'swiper/react';
 import { Navigation } from "swiper/modules";
 import postEventSchema from '../schemas/postEventSchema';
 import { useDispatch } from 'react-redux';
-import { postEvent, uploadImagesInEvent } from '../features/eventSlice';
+import { getAllEvents, postEvent, uploadImagesInEvent } from '../features/eventSlice';
 import toast from 'react-hot-toast';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faCircleCheck, faCircleXmark } from '@fortawesome/free-solid-svg-icons';
@@ -270,7 +270,7 @@ function LocationFormSection({ selectedLocationObj, setSelectedLocationObj, plac
       return;
     }
 
-    if (placeSelected) return; // if google's autocomplete was used, then do not clear fields even it no location is selected by custom marked location autocomplete
+    if (placeSelected) return; // if google's autocomplete was used, then do not clear fields even if no location is selected by custom marked location autocomplete
 
     // clear related fields as no location is selected using any autocomplete
     autofillFieldList.forEach((fieldName) => {
@@ -282,7 +282,7 @@ function LocationFormSection({ selectedLocationObj, setSelectedLocationObj, plac
   }, [selectedLocationObj]);
 
   useEffect(() => {
-    if (!placeSelected && !selectedLocationObj) {
+    if (!placeSelected && !selectedLocationObj && touched.address) {
       setFieldValue("latitude", "");
       setFieldValue("longitude", "");
 
@@ -422,7 +422,7 @@ function LocationFormSection({ selectedLocationObj, setSelectedLocationObj, plac
       </div>
 
       <FormTextComponent
-        label="Estimated Area"
+        label="Estimated Area (sq. mtr.)"
         id="estimatedArea"
         name="estimatedArea"
         type="number"
@@ -825,6 +825,7 @@ function CreateEventForm({ setIsModalVisible }) {
           className="px-8 py-2 rounded-lg bg-gradient-120 shadow-md from-[#60D6D9] from-50% to-[#1566E7] to-100% hover:from-[#1566E7] hover:to-[#60D6D9] text-white font-medium active:scale-95 transition-all "
           onClick={() => {
             if (!isLastSection) handleSectionChange(formik, activeSectionIndex, activeSectionIndex + 1);
+            else if(Object.keys(formik.errors).length) toast.error("Please correctly fill all required fields.");
             // console.log(formik);
           }}
           type={isLastSection ? "submit" : null} // for final form submission

@@ -709,7 +709,7 @@ const eventSlice = createSlice({
           };
         }
 
-        // state.currentEvent.participants = 
+        state.currentEvent.isParticipated = true;
       })
       .addCase(withdrawFromEventById.fulfilled, (state, action) => {
         const index = state.allEvents.findIndex(
@@ -722,6 +722,8 @@ const eventSlice = createSlice({
             eventParticipants: action.payload.eventParticipants,
           };
         }
+
+        state.currentEvent.isParticipated = false;
       })
       .addCase(sponsorEvent.fulfilled, (state, action) => {
         const index = state.allEvents.findIndex(

@@ -8,11 +8,19 @@ import {
   AboutUs, 
   Footer 
 } from "../components";
+import { useSelector } from "react-redux";
+import { useNavigate } from "react-router-dom";
 
 function Landing() {
+
+  const navigate = useNavigate();
+  const userID = useSelector((state) => state.user.user);
+
+  if(userID) navigate("/home");
+
   return (
     <>
-      <div className="mx-24 my-2">
+      {!userID && <div className="mx-24 my-2">
         <Navbar />
         <HeroSection />
         <Organizations />
@@ -20,7 +28,7 @@ function Landing() {
         <AboutUs />
         <ContactUs />
         <Footer />
-      </div>
+      </div>}
     </>
   );
 }
