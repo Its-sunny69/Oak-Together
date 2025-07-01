@@ -16,18 +16,30 @@ function LoginForm() {
 
   const handleFormSubmit = (values, { setSubmitting }) => {
     
-    dispatch(loginUser(values)).unwrap()
-    .then((response) => {
-      toast.success(`Welcome ${response.name} 🥳`, "success");
-        navigate("/home");
-    })
-    .catch((error) => {
-      toast.error(error.message, "error");
-    })
-    .finally(() => {
-      setSubmitting(false);
-    });
+    toast
+      .promise(dispatch(loginUser(values)).unwrap(), {
+        loading: "Logging in...",
+        success: (response) => {
+          navigate("/home");
+          return `Welcome ${response.name} 🥳`;
+        },
+        error: (error) => error.message || "Login failed",
+      })
+      .finally(() => {
+        setSubmitting(false);
+      });
 
+    // dispatch(loginUser(values)).unwrap()
+    // .then((response) => {
+    //   toast.success(`Welcome ${response.name} 🥳`, "success");
+    //     navigate("/home");
+    // })
+    // .catch((error) => {
+    //   toast.error(error.message, "error");
+    // })
+    // .finally(() => {
+    //   setSubmitting(false);
+    // });
   };
 
   return (

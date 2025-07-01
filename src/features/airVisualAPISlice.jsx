@@ -4,11 +4,11 @@ const apiUrl = import.meta.env.VITE_SERVER_API_URL;
 
 export const getAQIByCoordinates = createAsyncThunk(
   "airVisual/getAQIByCoordinates",
-  async (coords, { rejectWithValue, getState }) => {
+  async ({lat, lng}, { rejectWithValue, getState }) => {
     const userId = getState().user.user;
     try {
       const response = await fetch(
-        `${apiUrl}/user-profiles/user-id/${userId}/aqi/coordinates?${coords}`
+        `${apiUrl}/user-profiles/user-id/${userId}/aqi/coordinates?lat=${lat}&lng=${lng}`
       );
 
       if (!response.ok) {

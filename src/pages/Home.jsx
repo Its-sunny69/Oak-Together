@@ -1,5 +1,5 @@
 import React from 'react'
-import { SideNavBar, HomePageContent} from "../components"
+import { SideNavBar, HomePageContent } from "../components"
 
 function Home() {
 
