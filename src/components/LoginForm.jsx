@@ -46,8 +46,8 @@ function LoginForm() {
     <div className="flex items-center justify-center rounded-l-lg">
       <Formik
         initialValues={{
-          email: "jakemyboy@gmail.com",
-          password: "12345678", // use hashing for password??
+          email: "",
+          password: "", // use hashing for password??
         }}
         validationSchema={loginSchema}
         onSubmit={handleFormSubmit}

@@ -109,7 +109,7 @@ function EventPageContent() {
     console.log("sortBy", sortBy);
   }, [sortBy]);
 
-  const eventSearchDisplay = (
+  const EventSearchDisplay = () => (
     <>
       <Filter
         paramsObj={paramsObj}
@@ -221,7 +221,7 @@ function EventPageContent() {
     </>
   );
 
-  const eventFormDisplay = (
+  const EventFormDisplay = () => (
     <div className="relative flex flex-col items-start gap-1 w-full">
       
       <CreateEventForm setIsModalVisible={setIsModalVisible} />
@@ -234,6 +234,7 @@ function EventPageContent() {
             message="Now hang tight! Once the event is approved, interested users can see the
           event and participate anytime."
             suggestion="Inform your friends regarding this!"
+            customAction={() => setCurrentView("event-search")}
           />
         </div>
       )}
@@ -241,8 +242,8 @@ function EventPageContent() {
   );
 
   const viewMap = {
-    "event-search": eventSearchDisplay,
-    "create-event-form": eventFormDisplay,
+    "event-search": <EventSearchDisplay />,
+    "create-event-form": <EventFormDisplay />,
   };
 
   return (
